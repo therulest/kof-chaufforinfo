@@ -15,6 +15,8 @@
     justify-content:space-between;
     align-items:center;
     margin-bottom:12px;
+    flex-wrap:wrap;
+    gap:8px;
   }
   h1{margin:0}
   .grid{
@@ -37,7 +39,7 @@
     .grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
   }
 
-  /* --- Uppdatera-knapp --- */
+  /* --- Knappar och select --- */
   #refreshBtn {
     background:#007bff;
     color:white;
@@ -47,20 +49,30 @@
     font-size:14px;
     cursor:pointer;
     transition:all 0.2s;
-    margin-left:12px;
+    margin-left:8px;
   }
-  #refreshBtn:hover {
-    background:#005dc3;
+  #refreshBtn:hover { background:#005dc3; }
+  #refreshBtn:active { transform:scale(0.97); }
+
+  #bilSelect {
+    padding:8px 12px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    font-size:14px;
+    background:white;
+    cursor:pointer;
+    transition:border-color 0.2s;
   }
-  #refreshBtn:active {
-    transform:scale(0.97);
+  #bilSelect:hover {
+    border-color:#007bff;
   }
 </style>
 </head>
 <body>
   <header>
-    <div style="display:flex;align-items:center;gap:10px;">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <h1>Dagens turer</h1>
+      <select id="bilSelect"></select>
       <button id="refreshBtn">🔄 Uppdatera</button>
     </div>
     <div class="muted" id="stamp"></div>
@@ -69,6 +81,8 @@
   <div class="grid" id="grid"></div>
 
 <script>
+let allBlocks = []; // lagrar alla bilars info
+
 async function loadData(){
   const grid = document.getElementById('grid');
   grid.innerHTML = '<p>Laddar...</p>';
@@ -80,19 +94,27 @@ async function loadData(){
     document.getElementById('stamp').textContent =
       'Senast uppdaterad: ' + (new Date(data.updated_at)).toLocaleString();
 
-    const blocks = data.blocks || [];
-    if(!blocks.length){
+    allBlocks = data.blocks || [];
+    if(!allBlocks.length){
       grid.innerHTML = '<p>Inga turer tillgängliga.</p>';
       return;
     }
 
-    grid.innerHTML = '';
-    blocks.forEach(txt => {
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.textContent = txt;
-      grid.appendChild(div);
+    // Fyll dropdown
+    const sel = document.getElementById('bilSelect');
+    sel.innerHTML = "";
+    allBlocks.forEach((b, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      // Försök plocka ut "Bil X" från början av texten
+      const match = b.match(/Bil\s*\d+/i);
+      opt.textContent = match ? match[0] : `Bil ${i+1}`;
+      sel.appendChild(opt);
     });
+    sel.selectedIndex = 0;
+
+    // Visa Bil 1 som standard
+    showSelectedBil();
 
   }catch(e){
     grid.innerHTML = '<p style="color:#b00020;">Kunde inte läsa data.json</p>';
@@ -100,7 +122,23 @@ async function loadData(){
   }
 }
 
+function showSelectedBil(){
+  const grid = document.getElementById('grid');
+  const sel = document.getElementById('bilSelect');
+  const index = sel.value;
+  grid.innerHTML = '';
+
+  if(allBlocks[index]){
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.textContent = allBlocks[index];
+    grid.appendChild(div);
+  }
+}
+
+// Händelser
 document.getElementById('refreshBtn').addEventListener('click', loadData);
+document.getElementById('bilSelect').addEventListener('change', showSelectedBil);
 
 // Ladda automatiskt vid start
 loadData();
