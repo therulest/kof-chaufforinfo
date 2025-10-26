@@ -62,7 +62,7 @@
   }
   #bilSelect:hover { border-color: #007bff; }
 
-  /* Inloggning */
+  /* Inloggningsruta */
   .lock-overlay {
     position: fixed; inset: 0;
     background: rgba(250,250,250,.96);
@@ -122,7 +122,36 @@
   <div class="grid" id="grid"></div>
 
 <script>
-let cars = []; // {label, summary, details[]}
+/* ==========================================
+   🔒 Enkel lösenordsinloggning
+   ========================================== */
+const LOCK_PIN = 'kof123'; // <-- ändra till ditt eget lösenord
+const LOCK_KEY = 'chaufforinfo-unlocked';
+
+function isUnlocked() {
+  return localStorage.getItem(LOCK_KEY) === 'true';
+}
+function unlock() {
+  localStorage.setItem(LOCK_KEY, 'true');
+  document.getElementById('lock').style.display = 'none';
+  loadData();
+}
+document.getElementById('pinBtn').addEventListener('click', checkPin);
+document.getElementById('pin').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPin();
+});
+function checkPin() {
+  const val = document.getElementById('pin').value.trim();
+  const err = document.getElementById('lockErr');
+  if (val === LOCK_PIN) { unlock(); }
+  else { err.textContent = 'Fel lösenord. Försök igen.'; }
+}
+if (isUnlocked()) document.getElementById('lock').style.display = 'none';
+
+/* ==========================================
+   🚛 Hämta & visa data från data.json
+   ========================================== */
+let cars = [];
 
 async function loadData(){
   const grid = document.getElementById('grid');
@@ -135,20 +164,20 @@ async function loadData(){
     document.getElementById('stamp').textContent =
       'Senast uppdaterad: ' + (new Date(data.updated_at)).toLocaleString();
 
-    // Nytt format (cars) eller fallback (blocks)
+    // Ny struktur (cars) eller fallback
     if (Array.isArray(data.cars)) {
       cars = data.cars;
     } else if (Array.isArray(data.blocks)) {
       cars = data.blocks.map((b,i)=>({
         label: (b.split(/\n/)[5] || `Bil ${i+1}`),
-        summary: b,   // antas vara rad 1–6 i detta läge
-        details: []   // inga detaljer i legacy
+        summary: b,
+        details: []
       }));
     } else {
       cars = [];
     }
 
-    // Fyll dropdown (Visa alla + resurs/etikett)
+    // Dropdown
     const sel = document.getElementById('bilSelect');
     sel.innerHTML = '<option value="all">Visa alla</option>';
     cars.forEach((car,i)=>{
@@ -160,7 +189,7 @@ async function loadData(){
     });
     sel.value = 'all';
 
-    // STARTSIDA: visa bara summary för samtliga bilar
+    // Start: bara summary för alla
     renderAll();
 
   } catch(e) {
@@ -169,32 +198,32 @@ async function loadData(){
   }
 }
 
-// Rendera ALLA bilar – endast SUMMARY (rader 1–6)
+// 🔹 Visa ALLA bilar – ENDAST summary (r1–6)
 function renderAll() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-  cars.forEach(car => renderCard(car, /*showDetails=*/false));
+  cars.forEach(car => renderCard(car, false));
 }
 
-// Rendera EN bil – SUMMARY + DETALJER (7–36)
+// 🔹 Visa EN bil – summary + detaljer (r7–36)
 function renderOne(idx) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-  if (cars[idx]) renderCard(cars[idx], /*showDetails=*/true);
+  if (cars[idx]) renderCard(cars[idx], true);
 }
 
-// Gemensam kort-renderare
+// 🔹 Skapa kort för varje bil
 function renderCard(car, showDetails) {
   const div = document.createElement('div');
   div.className = 'card';
 
-  // Summary alltid överst
+  // Övre delen (summary)
   const pre = document.createElement('pre');
   pre.style.margin = '0 0 10px 0';
   pre.textContent = car.summary || '';
   div.appendChild(pre);
 
-  // Visa detaljer endast när showDetails = true
+  // Visa detaljer endast när användaren valt en bil
   if (showDetails && Array.isArray(car.details) && car.details.length) {
     const hr = document.createElement('hr');
     hr.style.border = 'none';
@@ -216,16 +245,19 @@ function renderCard(car, showDetails) {
   document.getElementById('grid').appendChild(div);
 }
 
-// Händelser
+/* ==========================================
+   🎛 Händelser
+   ========================================== */
 document.getElementById('refreshBtn').addEventListener('click', loadData);
 document.getElementById('bilSelect').addEventListener('change', e=>{
   if (e.target.value === 'all') renderAll();
   else renderOne(parseInt(e.target.value,10));
 });
 
-// Init
-loadData();
+/* ==========================================
+   🚀 Init
+   ========================================== */
+if (isUnlocked()) loadData();
 </script>
-
 </body>
 </html>
