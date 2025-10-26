@@ -15,7 +15,7 @@
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:#111827}
   a{color:inherit;text-decoration:none}
 
-  /* ----------- TOPPBAR ---------- */
+  /* ----------- TOPPBAR (meny under loggan på mobil) ---------- */
   .topbar{
     position:sticky;top:0;z-index:50;
     background:linear-gradient(180deg,#fff,rgba(255,255,255,.97));
@@ -28,23 +28,11 @@
     align-items:flex-start;gap:6px;
     padding:10px 16px;
   }
-  .brand{
-    font-weight:700;letter-spacing:.2px;
-    color:var(--brand);font-size:18px;
-  }
-  .nav{
-    display:flex;flex-wrap:wrap;gap:8px;
-    width:100%;
-  }
-  .nav a{
-    padding:8px 12px;border-radius:10px;
-    transition:background .15s ease,color .15s ease;
-    color:#111827;
-  }
+  .brand{font-weight:700;letter-spacing:.2px;color:var(--brand);font-size:18px}
+  .nav{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+  .nav a{padding:8px 12px;border-radius:10px;transition:background .15s ease,color .15s ease;color:#111827}
   .nav a:hover{background:#f3f4f6}
   .nav a.active{background:var(--brand);color:#fff}
-
-  /* När skärmen är bred nog: meny och brand på samma rad */
   @media(min-width:700px){
     .topbar .wrap{flex-direction:row;align-items:center;justify-content:space-between}
     .nav{width:auto}
@@ -79,6 +67,7 @@
   select.control{padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;transition:border-color .2s}
   select.control:hover{border-color:var(--blue)}
 
+  /* Login overlay (för Dagab om aktivt) */
   .lock-overlay{position:fixed;inset:0;background:rgba(250,250,250,.96);display:flex;align-items:center;justify-content:center;z-index:9999}
   .lock-card{width:min(420px,92vw);background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);padding:20px}
   .lock-title{margin:0 0 8px 0;font-size:20px}
@@ -118,15 +107,31 @@
     </div>
   </div>
 
-  <!-- Huvudinnehåll -->
+  <!-- SIDOR -->
   <main id="app" class="page">
+    <!-- Home -->
     <section id="page-home" data-page>
       <div class="hero">
         <h2>Välkommen!</h2>
         <p>Här samlar vi information för våra chaufförer. Använd menyn ovan.</p>
       </div>
     </section>
+
+    <!-- Dagab -->
     <section id="page-dagab" data-page hidden>
+      <!-- (valbar) PIN-låsning -->
+      <div class="lock-overlay" id="lock" style="display:none">
+        <div class="lock-card">
+          <h2 class="lock-title">Logga in</h2>
+          <p class="lock-sub">Ange lösenord för att visa Dagens turer.</p>
+          <div class="lock-row">
+            <input id="pin" class="lock-input" type="password" placeholder="Lösenord">
+            <button id="pinBtn" class="lock-btn">Öppna</button>
+          </div>
+          <div id="lockErr" class="lock-err"></div>
+        </div>
+      </div>
+
       <header class="pagehead">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <h1>Dagens turer</h1>
@@ -137,10 +142,14 @@
       </header>
       <div class="grid" id="grid"></div>
     </section>
+
+    <!-- Nyheter -->
     <section id="page-nyheter" data-page hidden>
       <header class="pagehead"><h1>Nyheter</h1></header>
       <div class="news" id="newsList"></div>
     </section>
+
+    <!-- Kontakter -->
     <section id="page-kontakter" data-page hidden>
       <header class="pagehead"><h1>Kontakter</h1></header>
       <div style="overflow:auto">
@@ -153,26 +162,161 @@
   </main>
 
 <script>
-/* Enkel router */
-function handleRoute(){
-  const h = location.hash || '#/home';
+/* -------- Router -------- */
+function setActiveLink(hash){
   document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
-  const active=document.querySelector(`.nav a[href="${h}"]`); if(active) active.classList.add('active');
+  const el=document.querySelector(`.nav a[href="${hash}"]`); if(el) el.classList.add('active');
+}
+function showPage(id){
   document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
-  const pageMap={'#/home':'page-home','#/dagab':'page-dagab','#/nyheter':'page-nyheter','#/kontakter':'page-kontakter'};
-  const id=pageMap[h]||'page-home';
   document.getElementById(id).hidden=false;
-  if(h==="#/nyheter") renderNews();
-  if(h==="#/kontakter") renderContacts();
+}
+function handleRoute(){
+  const h=location.hash||'#/home';
+  setActiveLink(h);
+  if(h==='#/dagab'){ showPage('page-dagab'); ensureDagabReady(); }
+  else if(h==='#/nyheter'){ showPage('page-nyheter'); renderNews(); }
+  else if(h==='#/kontakter'){ showPage('page-kontakter'); renderContacts(); }
+  else { showPage('page-home'); }
 }
 window.addEventListener('hashchange',handleRoute);
 
-/* Dummydata för test */
+/* -------- (valbar) PIN för Dagab -------- */
+const REQUIRE_LOGIN=false;  // ← true = kräver PIN
+const LOCK_PIN='kof123';
+const LOCK_KEY='chaufforinfo-unlocked';
+function isUnlocked(){ return localStorage.getItem(LOCK_KEY)==='true'; }
+function unlock(){ localStorage.setItem(LOCK_KEY,'true'); document.getElementById('lock').style.display='none'; loadData(); }
+function setupLock(){
+  if(!REQUIRE_LOGIN){ document.getElementById('lock').style.display='none'; loadData(); return; }
+  document.getElementById('pinBtn').addEventListener('click',checkPin);
+  document.getElementById('pin').addEventListener('keydown',e=>{ if(e.key==='Enter') checkPin(); });
+  if(isUnlocked()){ document.getElementById('lock').style.display='none'; loadData(); }
+  else document.getElementById('lock').style.display='flex';
+}
+function checkPin(){
+  if(document.getElementById('pin').value.trim()===LOCK_PIN) unlock();
+  else document.getElementById('lockErr').textContent='Fel lösenord. Försök igen.';
+}
+
+/* -------- Dagab: hämta & rendera data.json -------- */
+let cars=[]; // {label, summary, details[]}
+
+async function loadData(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='<p>Laddar...</p>';
+  try{
+    const res=await fetch('./data.json?v='+Date.now(),{cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+
+    document.getElementById('stamp').textContent=
+      'Senast uppdaterad: '+(new Date(data.updated_at)).toLocaleString();
+
+    if(Array.isArray(data.cars)){
+      cars=data.cars;
+    }else if(Array.isArray(data.blocks)){
+      // fallback (om du fortfarande använder blocks)
+      cars=data.blocks.map((b,i)=>({label:(b.split(/\n/)[5]||`Bil ${i+1}`),summary:b,details:[]}));
+    }else{
+      cars=[];
+    }
+
+    // fyll dropdown
+    const sel=document.getElementById('bilSelect');
+    sel.innerHTML='<option value="all">Visa alla</option>';
+    cars.forEach((car,i)=>{
+      const opt=document.createElement('option');
+      opt.value=i;
+      opt.textContent=(car.label&&car.label.trim())?car.label:`Bil ${i+1}`;
+      sel.appendChild(opt);
+    });
+    sel.value='all';
+
+    renderAll();
+  }catch(e){
+    grid.innerHTML='<p style="color:#b00020;">Kunde inte läsa data.json</p>';
+    console.error(e);
+  }
+}
+
+function buildCard(car,idx,expanded=false){
+  const card=document.createElement('div');
+  card.className='card'+(expanded?' expanded':'');
+  card.dataset.index=idx;
+
+  const header=document.createElement('div'); header.className='card-header';
+  const chev=document.createElement('span');  chev.className='chev'; chev.textContent='▶';
+  const pre=document.createElement('pre');    pre.className='summary'; pre.textContent=car.summary||'';
+  header.appendChild(chev); header.appendChild(pre); card.appendChild(header);
+
+  const hasDetails=Array.isArray(car.details)&&car.details.length>0;
+  const details=document.createElement('div'); details.className='details';
+
+  if(hasDetails){
+    const hr=document.createElement('hr'); hr.className='divider'; card.appendChild(hr);
+    const ul=document.createElement('ul');
+    car.details.forEach(line=>{
+      const li=document.createElement('li'); li.textContent=line;
+      const lower=line.toLowerCase();
+      if(/\b(frys|kyl|kol)\b/.test(lower)) li.classList.add('qty');
+      if(lower.startsWith('totalt')) li.classList.add('total');
+      if(lower.startsWith('glöm')||lower.startsWith('glom')) li.classList.add('note');
+      ul.appendChild(li);
+    });
+    details.appendChild(ul); card.appendChild(details);
+  }
+
+  // klick för att expandera/kollapsa
+  card.addEventListener('click',e=>{
+    if(e.target.closest('button')||e.target.closest('select')) return;
+    if(!hasDetails) return;
+    card.classList.toggle('expanded');
+  });
+
+  return card;
+}
+
+function renderAll(){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  cars.forEach((car,i)=>grid.appendChild(buildCard(car,i,false)));
+}
+
+function renderOne(idx){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  if(cars[idx]) grid.appendChild(buildCard(cars[idx],idx,true));
+}
+
+function bindDagabControls(){
+  const btn=document.getElementById('refreshBtn');
+  const sel=document.getElementById('bilSelect');
+  if(btn && !btn._bound){ btn.addEventListener('click',loadData); btn._bound=true; }
+  if(sel && !sel._bound){
+    sel.addEventListener('change',e=>{
+      if(e.target.value==='all') renderAll();
+      else renderOne(parseInt(e.target.value,10));
+    });
+    sel._bound=true;
+  }
+}
+
+let dagabInitialized=false;
+function ensureDagabReady(){
+  if(dagabInitialized) return;
+  dagabInitialized=true;
+  bindDagabControls();
+  setupLock(); // laddar data direkt om PIN ej krävs
+}
+
+/* -------- Nyheter & Kontakter (dummy) -------- */
 const NEWS=[{title:"Ny rutin",date:"2025-10-25",body:"Från måndag gäller nya lossningstider i Bålsta."}];
 const CONTACTS=[{name:"Transportledningen",role:"Planering",phone:"+46 90 123456",email:"plan@kof.se"}];
 
 function renderNews(){
-  const box=document.getElementById('newsList'); box.innerHTML='';
+  const box=document.getElementById('newsList'); if(!box) return;
+  box.innerHTML='';
   NEWS.forEach(n=>{
     const div=document.createElement('div');
     div.className='item';
@@ -181,13 +325,16 @@ function renderNews(){
   });
 }
 function renderContacts(){
-  const tb=document.querySelector('#contactsTable tbody'); tb.innerHTML='';
+  const tb=document.querySelector('#contactsTable tbody'); if(!tb) return;
+  tb.innerHTML='';
   CONTACTS.forEach(c=>{
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${c.name}</td><td>${c.role}</td><td><a href="tel:${c.phone.replace(/\s+/g,'')}">${c.phone}</a></td><td><a href="mailto:${c.email}">${c.email}</a></td>`;
     tb.appendChild(tr);
   });
 }
+
+/* -------- Start router -------- */
 handleRoute();
 </script>
 </body>
