@@ -72,7 +72,9 @@
   <header>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <h1>Dagens turer</h1>
-      <select id="bilSelect"></select>
+      <select id="bilSelect">
+        <option value="all">Visa alla</option>
+      </select>
       <button id="refreshBtn">🔄 Uppdatera</button>
     </div>
     <div class="muted" id="stamp"></div>
@@ -102,18 +104,17 @@ async function loadData(){
 
     // Fyll dropdown
     const sel = document.getElementById('bilSelect');
-    sel.innerHTML = "";
+    sel.innerHTML = '<option value="all">Visa alla</option>';
     allBlocks.forEach((b, i) => {
       const opt = document.createElement('option');
       opt.value = i;
-      // Försök plocka ut "Bil X" från början av texten
       const match = b.match(/Bil\s*\d+/i);
       opt.textContent = match ? match[0] : `Bil ${i+1}`;
       sel.appendChild(opt);
     });
-    sel.selectedIndex = 0;
+    sel.value = "all";
 
-    // Visa Bil 1 som standard
+    // Visa alla bilar vid start
     showSelectedBil();
 
   }catch(e){
@@ -125,14 +126,26 @@ async function loadData(){
 function showSelectedBil(){
   const grid = document.getElementById('grid');
   const sel = document.getElementById('bilSelect');
-  const index = sel.value;
+  const val = sel.value;
   grid.innerHTML = '';
 
-  if(allBlocks[index]){
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.textContent = allBlocks[index];
-    grid.appendChild(div);
+  if(val === "all"){
+    // Visa alla
+    allBlocks.forEach(txt => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.textContent = txt;
+      grid.appendChild(div);
+    });
+  } else {
+    // Visa endast vald bil
+    const idx = parseInt(val);
+    if(allBlocks[idx]){
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.textContent = allBlocks[idx];
+      grid.appendChild(div);
+    }
   }
 }
 
