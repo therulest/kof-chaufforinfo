@@ -1,1 +1,10 @@
+{
+  "items": [
+    {
+      "title": "Första nyheten",
+      "date": "2025-10-26",
+      "body": "Detta är en testnyhet skapad för att verifiera adminpanelen."
+    }
+  ]
+}
 
