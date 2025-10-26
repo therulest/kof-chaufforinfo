@@ -123,11 +123,15 @@
 
 <script>
 /* ==========================================
-   🔒 Enkel lösenordsinloggning
+   🔧 Inställning: aktivera/inaktivera lösenord
    ========================================== */
-const LOCK_PIN = 'kof123'; // <-- ändra till ditt eget lösenord
+const REQUIRE_LOGIN = false;   // ← ändra till true om du vill ha inloggning
+const LOCK_PIN = 'kof123';     // ← byt lösenord här om aktiverat
 const LOCK_KEY = 'chaufforinfo-unlocked';
 
+/* ==========================================
+   🔒 Enkel lösenordsinloggning (aktiveras bara om REQUIRE_LOGIN = true)
+   ========================================== */
 function isUnlocked() {
   return localStorage.getItem(LOCK_KEY) === 'true';
 }
@@ -136,17 +140,28 @@ function unlock() {
   document.getElementById('lock').style.display = 'none';
   loadData();
 }
-document.getElementById('pinBtn').addEventListener('click', checkPin);
-document.getElementById('pin').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkPin();
-});
+function setupLock() {
+  if (!REQUIRE_LOGIN) {
+    document.getElementById('lock').style.display = 'none';
+    loadData();
+    return;
+  }
+  const btn = document.getElementById('pinBtn');
+  btn.addEventListener('click', checkPin);
+  document.getElementById('pin').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPin();
+  });
+  if (isUnlocked()) {
+    document.getElementById('lock').style.display = 'none';
+    loadData();
+  }
+}
 function checkPin() {
   const val = document.getElementById('pin').value.trim();
   const err = document.getElementById('lockErr');
   if (val === LOCK_PIN) { unlock(); }
   else { err.textContent = 'Fel lösenord. Försök igen.'; }
 }
-if (isUnlocked()) document.getElementById('lock').style.display = 'none';
 
 /* ==========================================
    🚛 Hämta & visa data från data.json
@@ -164,7 +179,6 @@ async function loadData(){
     document.getElementById('stamp').textContent =
       'Senast uppdaterad: ' + (new Date(data.updated_at)).toLocaleString();
 
-    // Ny struktur (cars) eller fallback
     if (Array.isArray(data.cars)) {
       cars = data.cars;
     } else if (Array.isArray(data.blocks)) {
@@ -177,7 +191,6 @@ async function loadData(){
       cars = [];
     }
 
-    // Dropdown
     const sel = document.getElementById('bilSelect');
     sel.innerHTML = '<option value="all">Visa alla</option>';
     cars.forEach((car,i)=>{
@@ -189,7 +202,6 @@ async function loadData(){
     });
     sel.value = 'all';
 
-    // Start: bara summary för alla
     renderAll();
 
   } catch(e) {
@@ -198,32 +210,30 @@ async function loadData(){
   }
 }
 
-// 🔹 Visa ALLA bilar – ENDAST summary (r1–6)
+// Visa alla bilar – bara summary
 function renderAll() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
   cars.forEach(car => renderCard(car, false));
 }
 
-// 🔹 Visa EN bil – summary + detaljer (r7–36)
+// Visa en bil – summary + detaljer
 function renderOne(idx) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
   if (cars[idx]) renderCard(cars[idx], true);
 }
 
-// 🔹 Skapa kort för varje bil
+// Bygg upp kort
 function renderCard(car, showDetails) {
   const div = document.createElement('div');
   div.className = 'card';
 
-  // Övre delen (summary)
   const pre = document.createElement('pre');
   pre.style.margin = '0 0 10px 0';
   pre.textContent = car.summary || '';
   div.appendChild(pre);
 
-  // Visa detaljer endast när användaren valt en bil
   if (showDetails && Array.isArray(car.details) && car.details.length) {
     const hr = document.createElement('hr');
     hr.style.border = 'none';
@@ -255,9 +265,9 @@ document.getElementById('bilSelect').addEventListener('change', e=>{
 });
 
 /* ==========================================
-   🚀 Init
+   🚀 Initiering
    ========================================== */
-if (isUnlocked()) loadData();
+setupLock();
 </script>
 </body>
 </html>
