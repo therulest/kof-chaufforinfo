@@ -38,7 +38,6 @@
   @media(min-width:700px){
     .grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
   }
-
   /* --- Knappar och select --- */
   #refreshBtn {
     background:#007bff;
@@ -63,9 +62,7 @@
     cursor:pointer;
     transition:border-color 0.2s;
   }
-  #bilSelect:hover {
-    border-color:#007bff;
-  }
+  #bilSelect:hover { border-color:#007bff; }
 </style>
 </head>
 <body>
@@ -102,19 +99,32 @@ async function loadData(){
       return;
     }
 
-    // Fyll dropdown
+    // --- fyll dropdown med resursnummer ---
     const sel = document.getElementById('bilSelect');
     sel.innerHTML = '<option value="all">Visa alla</option>';
     allBlocks.forEach((b, i) => {
       const opt = document.createElement('option');
       opt.value = i;
-      const match = b.match(/Bil\s*\d+/i);
-      opt.textContent = match ? match[0] : `Bil ${i+1}`;
+
+      // hämta rad 6 (resursraden)
+      const lines = b.split(/\n/);
+      const resursLine = lines[5] ? lines[5].trim() : "";
+      let label = resursLine;
+
+      // Om inget hittas, försök hitta "Resurs: xxxx" med regex
+      if (!label) {
+        const match = b.match(/Resurs[:\- ]*([0-9A-Za-z]+)/i);
+        if (match) label = "Resurs " + match[1];
+      }
+      // Fallback om inget alls
+      if (!label) label = `Bil ${i+1}`;
+
+      opt.textContent = label;
       sel.appendChild(opt);
     });
     sel.value = "all";
 
-    // Visa alla bilar vid start
+    // visa alla vid start
     showSelectedBil();
 
   }catch(e){
@@ -130,7 +140,6 @@ function showSelectedBil(){
   grid.innerHTML = '';
 
   if(val === "all"){
-    // Visa alla
     allBlocks.forEach(txt => {
       const div = document.createElement('div');
       div.className = 'card';
@@ -138,7 +147,6 @@ function showSelectedBil(){
       grid.appendChild(div);
     });
   } else {
-    // Visa endast vald bil
     const idx = parseInt(val);
     if(allBlocks[idx]){
       const div = document.createElement('div');
