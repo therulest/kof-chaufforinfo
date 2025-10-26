@@ -1,6 +1,18 @@
 <!doctype html>
 <html lang="sv">
 <head>
+  <script>
+(function () {
+  var h = location.hash || "";
+  if (/(invite_token|confirmation_token|recovery_token)=/i.test(h)) {
+    try { sessionStorage.setItem('_nl_hash', h); } catch(e) {}
+    // bygg en säker absolut URL till /admin/ på samma origin
+    var adminUrl = new URL('/admin/', window.location.origin).toString();
+    location.replace(adminUrl);
+  }
+})();
+</script>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KOF – Chaufförportal</title>
