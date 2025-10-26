@@ -1,2 +1,46 @@
-<h1>KOF Chaufförinfo</h1>
-<p>Sidan laddas – data kommer inom kort…</p>
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chaufförinfo</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:16px}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .grid{display:grid;grid-gap:12px}
+  .card{border:1px solid #e3e3e3;border-radius:12px;padding:12px;white-space:pre-wrap}
+  .muted{color:#6b7280;font-size:12px}
+  @media(min-width:700px){ .grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));} }
+</style>
+</head>
+<body>
+  <header>
+    <h1 style="margin:0">Dagens turer</h1>
+    <div class="muted" id="stamp"></div>
+  </header>
+  <div class="grid" id="grid"></div>
+
+<script>
+(async function(){
+  try{
+    const res = await fetch('./data.json?v=' + Date.now());
+    const data = await res.json();           // { updated_at, blocks:[ "Bil 1\n...", ... ] }
+    document.getElementById('stamp').textContent =
+      'Senast uppdaterad: ' + (new Date(data.updated_at)).toLocaleString();
+    const blocks = data.blocks || [];
+    // lägg max 5 rader per kolumn genom att låta korten flöda i grid
+    const grid = document.getElementById('grid');
+    blocks.forEach(txt => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.textContent = txt; // \n blir radbrytning tack vare pre-wrap
+      grid.appendChild(div);
+    });
+  }catch(e){
+    document.getElementById('grid').innerHTML = '<p>Kunde inte läsa data.json</p>';
+    console.error(e);
+  }
+})();
+</script>
+</body>
+</html>
