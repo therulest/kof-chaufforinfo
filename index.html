@@ -15,30 +15,44 @@
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:#111827}
   a{color:inherit;text-decoration:none}
 
-  /* ----------- TOPPBAR (meny under loggan på mobil) ---------- */
-  .topbar{
-    position:sticky;top:0;z-index:50;
-    background:linear-gradient(180deg,#fff,rgba(255,255,255,.97));
-    border-bottom:1px solid var(--border);
-    backdrop-filter:saturate(180%) blur(6px);
-  }
-  .topbar .wrap{
-    max-width:1200px;margin:0 auto;
-    display:flex;flex-direction:column;
-    align-items:flex-start;gap:6px;
-    padding:10px 16px;
-  }
+  /* -------- TOPPBAR (desktop) -------- */
+  .topbar{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#fff,rgba(255,255,255,.97));border-bottom:1px solid var(--border);backdrop-filter:saturate(180%) blur(6px)}
+  .topbar .wrap{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 16px}
   .brand{font-weight:700;letter-spacing:.2px;color:var(--brand);font-size:18px}
-  .nav{display:flex;flex-wrap:wrap;gap:8px;width:100%}
-  .nav a{padding:8px 12px;border-radius:10px;transition:background .15s ease,color .15s ease;color:#111827}
+  .nav{display:flex;gap:8px;align-items:center}
+  .nav a{padding:8px 12px;border-radius:10px;transition:background .15s ease,color .15s ease}
   .nav a:hover{background:#f3f4f6}
   .nav a.active{background:var(--brand);color:#fff}
-  @media(min-width:700px){
-    .topbar .wrap{flex-direction:row;align-items:center;justify-content:space-between}
-    .nav{width:auto}
+
+  /* -------- MOBILMENY (launcher-stil) -------- */
+  .mobile-launcher{
+    display:none; /* syns bara i mobil */
+    max-width:1200px;margin:12px auto 0;padding:0 16px;
+  }
+  .ml-wrap{
+    background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;
+    padding:14px; display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+  }
+  .ml-item{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:6px; padding:8px 4px; border-radius:12px; transition:transform .08s ease, background .15s ease;
+  }
+  .ml-item:active{ transform:scale(0.98); }
+  .ml-item.active{ background:#e9f6fe; }
+  .micon{
+    width:48px; height:48px; border-radius:50%;
+    background:#fff; display:grid; place-items:center; box-shadow:0 1px 3px rgba(0,0,0,.08);
+    font-size:24px; user-select:none;
+  }
+  .ml-label{ font-size:13px; color:#111827; }
+
+  /* visa mobilmenyn & göm toppmeny på <=700px */
+  @media(max-width:700px){
+    .topbar .nav{display:none}
+    .mobile-launcher{display:block}
   }
 
-  /* ----------- SIDLAYOUT ---------- */
+  /* -------- SIDLAYOUT -------- */
   .page{max-width:1200px;margin:16px auto;padding:0 16px 24px}
   header.pagehead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
   h1{margin:0}
@@ -94,7 +108,7 @@
 </head>
 <body>
 
-  <!-- TOPPMENY -->
+  <!-- TOPPBAR (desktop) -->
   <div class="topbar">
     <div class="wrap">
       <div class="brand">KOF – Chaufförportal</div>
@@ -104,6 +118,24 @@
         <a href="#/nyheter" id="link-nyheter">Nyheter</a>
         <a href="#/kontakter" id="link-kontakter">Kontakter</a>
       </nav>
+    </div>
+  </div>
+
+  <!-- MOBILMENY (launcher) -->
+  <div class="mobile-launcher">
+    <div class="ml-wrap">
+      <a class="ml-item" href="#/home" id="ml-home">
+        <span class="micon">🏠</span><span class="ml-label">Home</span>
+      </a>
+      <a class="ml-item" href="#/dagab" id="ml-dagab">
+        <span class="micon">🚚</span><span class="ml-label">Dagab</span>
+      </a>
+      <a class="ml-item" href="#/nyheter" id="ml-nyheter">
+        <span class="micon">📰</span><span class="ml-label">Nyheter</span>
+      </a>
+      <a class="ml-item" href="#/kontakter" id="ml-kontakter">
+        <span class="micon">👥</span><span class="ml-label">Kontakter</span>
+      </a>
     </div>
   </div>
 
@@ -162,10 +194,14 @@
   </main>
 
 <script>
-/* -------- Router -------- */
-function setActiveLink(hash){
+/* ---------------- Router ---------------- */
+function setActive(hash){
+  // desktop-nav
   document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
-  const el=document.querySelector(`.nav a[href="${hash}"]`); if(el) el.classList.add('active');
+  const d=document.querySelector(`.nav a[href="${hash}"]`); if(d) d.classList.add('active');
+  // mobile launcher
+  document.querySelectorAll('.ml-item').forEach(a=>a.classList.remove('active'));
+  const m=document.querySelector(`.ml-item[href="${hash}"]`); if(m) m.classList.add('active');
 }
 function showPage(id){
   document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
@@ -173,7 +209,7 @@ function showPage(id){
 }
 function handleRoute(){
   const h=location.hash||'#/home';
-  setActiveLink(h);
+  setActive(h);
   if(h==='#/dagab'){ showPage('page-dagab'); ensureDagabReady(); }
   else if(h==='#/nyheter'){ showPage('page-nyheter'); renderNews(); }
   else if(h==='#/kontakter'){ showPage('page-kontakter'); renderContacts(); }
@@ -181,8 +217,8 @@ function handleRoute(){
 }
 window.addEventListener('hashchange',handleRoute);
 
-/* -------- (valbar) PIN för Dagab -------- */
-const REQUIRE_LOGIN=false;  // ← true = kräver PIN
+/* -------- PIN (endast om aktiverat) -------- */
+const REQUIRE_LOGIN=false;  // true = kräver PIN för Dagab
 const LOCK_PIN='kof123';
 const LOCK_KEY='chaufforinfo-unlocked';
 function isUnlocked(){ return localStorage.getItem(LOCK_KEY)==='true'; }
@@ -200,7 +236,7 @@ function checkPin(){
 }
 
 /* -------- Dagab: hämta & rendera data.json -------- */
-let cars=[]; // {label, summary, details[]}
+let cars=[];
 
 async function loadData(){
   const grid=document.getElementById('grid');
@@ -216,13 +252,9 @@ async function loadData(){
     if(Array.isArray(data.cars)){
       cars=data.cars;
     }else if(Array.isArray(data.blocks)){
-      // fallback (om du fortfarande använder blocks)
       cars=data.blocks.map((b,i)=>({label:(b.split(/\n/)[5]||`Bil ${i+1}`),summary:b,details:[]}));
-    }else{
-      cars=[];
-    }
+    }else{ cars=[]; }
 
-    // fyll dropdown
     const sel=document.getElementById('bilSelect');
     sel.innerHTML='<option value="all">Visa alla</option>';
     cars.forEach((car,i)=>{
@@ -267,7 +299,6 @@ function buildCard(car,idx,expanded=false){
     details.appendChild(ul); card.appendChild(details);
   }
 
-  // klick för att expandera/kollapsa
   card.addEventListener('click',e=>{
     if(e.target.closest('button')||e.target.closest('select')) return;
     if(!hasDetails) return;
@@ -334,7 +365,7 @@ function renderContacts(){
   });
 }
 
-/* -------- Start router -------- */
+/* -------- Start -------- */
 handleRoute();
 </script>
 </body>
