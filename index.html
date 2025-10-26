@@ -5,42 +5,105 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Chaufförinfo</title>
 <style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:16px}
-  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-  .grid{display:grid;grid-gap:12px}
-  .card{border:1px solid #e3e3e3;border-radius:12px;padding:12px;white-space:pre-wrap}
-  .muted{color:#6b7280;font-size:12px}
-  @media(min-width:700px){ .grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));} }
+  body{
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    margin:16px;
+    background:#fafafa;
+  }
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+  }
+  h1{margin:0}
+  .grid{
+    display:grid;
+    grid-gap:12px;
+  }
+  .card{
+    border:1px solid #e3e3e3;
+    border-radius:12px;
+    padding:12px;
+    background:white;
+    box-shadow:0 1px 3px rgba(0,0,0,0.05);
+    white-space:pre-wrap;
+  }
+  .muted{
+    color:#6b7280;
+    font-size:12px;
+  }
+  @media(min-width:700px){
+    .grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+  }
+
+  /* --- Uppdatera-knapp --- */
+  #refreshBtn {
+    background:#007bff;
+    color:white;
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:14px;
+    cursor:pointer;
+    transition:all 0.2s;
+    margin-left:12px;
+  }
+  #refreshBtn:hover {
+    background:#005dc3;
+  }
+  #refreshBtn:active {
+    transform:scale(0.97);
+  }
 </style>
 </head>
 <body>
   <header>
-    <h1 style="margin:0">Dagens turer</h1>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <h1>Dagens turer</h1>
+      <button id="refreshBtn">🔄 Uppdatera</button>
+    </div>
     <div class="muted" id="stamp"></div>
   </header>
+
   <div class="grid" id="grid"></div>
 
 <script>
-(async function(){
+async function loadData(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<p>Laddar...</p>';
   try{
-    const res = await fetch('./data.json?v=' + Date.now());
-    const data = await res.json();           // { updated_at, blocks:[ "Bil 1\n...", ... ] }
+    const res = await fetch('./data.json?v=' + Date.now(), {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json(); // { updated_at, blocks:[ "Bil 1\n...", ... ] }
+
     document.getElementById('stamp').textContent =
       'Senast uppdaterad: ' + (new Date(data.updated_at)).toLocaleString();
+
     const blocks = data.blocks || [];
-    // lägg max 5 rader per kolumn genom att låta korten flöda i grid
-    const grid = document.getElementById('grid');
+    if(!blocks.length){
+      grid.innerHTML = '<p>Inga turer tillgängliga.</p>';
+      return;
+    }
+
+    grid.innerHTML = '';
     blocks.forEach(txt => {
       const div = document.createElement('div');
       div.className = 'card';
-      div.textContent = txt; // \n blir radbrytning tack vare pre-wrap
+      div.textContent = txt;
       grid.appendChild(div);
     });
+
   }catch(e){
-    document.getElementById('grid').innerHTML = '<p>Kunde inte läsa data.json</p>';
+    grid.innerHTML = '<p style="color:#b00020;">Kunde inte läsa data.json</p>';
     console.error(e);
   }
-})();
+}
+
+document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+// Ladda automatiskt vid start
+loadData();
 </script>
 </body>
 </html>
