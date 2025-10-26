@@ -25,32 +25,14 @@
   .nav a.active{background:var(--brand);color:#fff}
 
   /* -------- MOBILMENY (launcher-stil) -------- */
-  .mobile-launcher{
-    display:none; /* syns bara i mobil */
-    max-width:1200px;margin:12px auto 0;padding:0 16px;
-  }
-  .ml-wrap{
-    background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;
-    padding:14px; display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
-  }
-  .ml-item{
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:6px; padding:8px 4px; border-radius:12px; transition:transform .08s ease, background .15s ease;
-  }
-  .ml-item:active{ transform:scale(0.98); }
-  .ml-item.active{ background:#e9f6fe; }
-  .micon{
-    width:48px; height:48px; border-radius:50%;
-    background:#fff; display:grid; place-items:center; box-shadow:0 1px 3px rgba(0,0,0,.08);
-    font-size:24px; user-select:none;
-  }
-  .ml-label{ font-size:13px; color:#111827; }
-
-  /* visa mobilmenyn & göm toppmeny på <=700px */
-  @media(max-width:700px){
-    .topbar .nav{display:none}
-    .mobile-launcher{display:block}
-  }
+  .mobile-launcher{display:none;max-width:1200px;margin:12px auto 0;padding:0 16px}
+  .ml-wrap{background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .ml-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border-radius:12px;transition:transform .08s ease, background .15s ease}
+  .ml-item:active{transform:scale(0.98)}
+  .ml-item.active{background:#e9f6fe}
+  .micon{width:48px;height:48px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px;user-select:none}
+  .ml-label{font-size:13px;color:#111827}
+  @media(max-width:700px){ .topbar .nav{display:none} .mobile-launcher{display:block} }
 
   /* -------- SIDLAYOUT -------- */
   .page{max-width:1200px;margin:16px auto;padding:0 16px 24px}
@@ -66,12 +48,15 @@
   .chev{transition:transform .18s ease;user-select:none;font-size:16px}
   .card.expanded .chev{transform:rotate(90deg)}
   .summary{white-space:pre-wrap;margin:0;flex:1}
+
   .divider{border:none;border-top:1px solid #eee;margin:0}
   .details{display:none;padding:10px 14px 12px}
   .card.expanded .details{display:block}
   .details ul{margin:8px 0 0 0;padding-left:20px;line-height:1.4}
   .details li{margin-bottom:6px}
-  .details li.qty{margin-bottom:10px}
+  /* tajtare par: butik (store) + efterföljande qty-rad */
+  .details li.store{margin-bottom:2px}
+  .details li.qty{margin-bottom:12px}  /* luft efter paret */
   .details li.total{margin-bottom:10px}
   .details li.note{margin-top:6px}
 
@@ -81,7 +66,7 @@
   select.control{padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;transition:border-color .2s}
   select.control:hover{border-color:var(--blue)}
 
-  /* Login overlay (för Dagab om aktivt) */
+  /* PIN-lås (Dagab) */
   .lock-overlay{position:fixed;inset:0;background:rgba(250,250,250,.96);display:flex;align-items:center;justify-content:center;z-index:9999}
   .lock-card{width:min(420px,92vw);background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);padding:20px}
   .lock-title{margin:0 0 8px 0;font-size:20px}
@@ -124,18 +109,10 @@
   <!-- MOBILMENY (launcher) -->
   <div class="mobile-launcher">
     <div class="ml-wrap">
-      <a class="ml-item" href="#/home" id="ml-home">
-        <span class="micon">🏠</span><span class="ml-label">Home</span>
-      </a>
-      <a class="ml-item" href="#/dagab" id="ml-dagab">
-        <span class="micon">🚚</span><span class="ml-label">Dagab</span>
-      </a>
-      <a class="ml-item" href="#/nyheter" id="ml-nyheter">
-        <span class="micon">📰</span><span class="ml-label">Nyheter</span>
-      </a>
-      <a class="ml-item" href="#/kontakter" id="ml-kontakter">
-        <span class="micon">👥</span><span class="ml-label">Kontakter</span>
-      </a>
+      <a class="ml-item" href="#/home" id="ml-home"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
+      <a class="ml-item" href="#/dagab" id="ml-dagab"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
+      <a class="ml-item" href="#/nyheter" id="ml-nyheter"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
+      <a class="ml-item" href="#/kontakter" id="ml-kontakter"><span class="micon">👥</span><span class="ml-label">Kontakter</span></a>
     </div>
   </div>
 
@@ -196,10 +173,10 @@
 <script>
 /* ---------------- Router ---------------- */
 function setActive(hash){
-  // desktop-nav
+  // desktop
   document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
   const d=document.querySelector(`.nav a[href="${hash}"]`); if(d) d.classList.add('active');
-  // mobile launcher
+  // mobile
   document.querySelectorAll('.ml-item').forEach(a=>a.classList.remove('active'));
   const m=document.querySelector(`.ml-item[href="${hash}"]`); if(m) m.classList.add('active');
 }
@@ -255,6 +232,7 @@ async function loadData(){
       cars=data.blocks.map((b,i)=>({label:(b.split(/\n/)[5]||`Bil ${i+1}`),summary:b,details:[]}));
     }else{ cars=[]; }
 
+    // fyll dropdown
     const sel=document.getElementById('bilSelect');
     sel.innerHTML='<option value="all">Visa alla</option>';
     cars.forEach((car,i)=>{
@@ -288,17 +266,38 @@ function buildCard(car,idx,expanded=false){
   if(hasDetails){
     const hr=document.createElement('hr'); hr.className='divider'; card.appendChild(hr);
     const ul=document.createElement('ul');
-    car.details.forEach(line=>{
+
+    // Märk "butik + qty" som ett par: store → minimal margin, qty → mer luft efter
+    for(let i=0;i<car.details.length;i++){
+      const line=car.details[i];
       const li=document.createElement('li'); li.textContent=line;
+
       const lower=line.toLowerCase();
-      if(/\b(frys|kyl|kol)\b/.test(lower)) li.classList.add('qty');
-      if(lower.startsWith('totalt')) li.classList.add('total');
-      if(lower.startsWith('glöm')||lower.startsWith('glom')) li.classList.add('note');
+      const isQty=/\b(frys|kyl|kol)\b/.test(lower);
+      const isTotal=lower.startsWith('totalt');
+      const isNote=lower.startsWith('glöm')||lower.startsWith('glom');
+
+      if(isQty) li.classList.add('qty');
+      if(isTotal) li.classList.add('total');
+      if(isNote) li.classList.add('note');
+
+      // Om nästa rad är qty, markera denna (butiksraden) som store
+      const next=car.details[i+1];
+      if(next){
+        const nextIsQty=/\b(frys|kyl|kol)\b/.test(String(next).toLowerCase());
+        if(!isQty && !isTotal && !isNote && nextIsQty){
+          li.classList.add('store');
+        }
+      }
+
       ul.appendChild(li);
-    });
-    details.appendChild(ul); card.appendChild(details);
+    }
+
+    details.appendChild(ul);
+    card.appendChild(details);
   }
 
+  // klick för att expandera/kollapsa
   card.addEventListener('click',e=>{
     if(e.target.closest('button')||e.target.closest('select')) return;
     if(!hasDetails) return;
