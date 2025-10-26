@@ -122,32 +122,7 @@
   <div class="grid" id="grid"></div>
 
 <script>
-/* ============================
-   Enkel lösenordsinloggning
-   ============================ */
-const LOCK_PIN = 'kof123'; // <-- ändra till ditt eget lösenord
-const LOCK_KEY = 'chaufforinfo-unlocked';
-function isUnlocked() {
-  return localStorage.getItem(LOCK_KEY) === 'true';
-}
-function unlock() {
-  localStorage.setItem(LOCK_KEY, 'true');
-  document.getElementById('lock').style.display = 'none';
-  loadData();
-}
-document.getElementById('pinBtn').addEventListener('click', checkPin);
-document.getElementById('pin').addEventListener('keydown', e => { if (e.key === 'Enter') checkPin(); });
-function checkPin() {
-  const val = document.getElementById('pin').value.trim();
-  const err = document.getElementById('lockErr');
-  if (val === LOCK_PIN) { unlock(); } else { err.textContent = 'Fel lösenord. Försök igen.'; }
-}
-if (isUnlocked()) document.getElementById('lock').style.display = 'none';
-
-/* ============================
-   Datahantering & visning
-   ============================ */
-let cars = [];
+let cars = []; // {label, summary, details[]}
 
 async function loadData(){
   const grid = document.getElementById('grid');
@@ -160,56 +135,67 @@ async function loadData(){
     document.getElementById('stamp').textContent =
       'Senast uppdaterad: ' + (new Date(data.updated_at)).toLocaleString();
 
+    // Nytt format (cars) eller fallback (blocks)
     if (Array.isArray(data.cars)) {
       cars = data.cars;
     } else if (Array.isArray(data.blocks)) {
       cars = data.blocks.map((b,i)=>({
         label: (b.split(/\n/)[5] || `Bil ${i+1}`),
-        summary: b,
-        details: []
+        summary: b,   // antas vara rad 1–6 i detta läge
+        details: []   // inga detaljer i legacy
       }));
     } else {
       cars = [];
     }
 
+    // Fyll dropdown (Visa alla + resurs/etikett)
     const sel = document.getElementById('bilSelect');
     sel.innerHTML = '<option value="all">Visa alla</option>';
     cars.forEach((car,i)=>{
       const opt = document.createElement('option');
       opt.value = i;
-      const label = car.label?.trim() || `Bil ${i+1}`;
-      opt.textContent = label;
+      const lbl = (car.label && car.label.trim()) ? car.label : `Bil ${i+1}`;
+      opt.textContent = lbl;
       sel.appendChild(opt);
     });
     sel.value = 'all';
+
+    // STARTSIDA: visa bara summary för samtliga bilar
     renderAll();
+
   } catch(e) {
     grid.innerHTML = '<p style="color:#b00020;">Kunde inte läsa data.json</p>';
     console.error(e);
   }
 }
 
+// Rendera ALLA bilar – endast SUMMARY (rader 1–6)
 function renderAll() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-  cars.forEach(renderCard);
+  cars.forEach(car => renderCard(car, /*showDetails=*/false));
 }
+
+// Rendera EN bil – SUMMARY + DETALJER (7–36)
 function renderOne(idx) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-  if (cars[idx]) renderCard(cars[idx]);
+  if (cars[idx]) renderCard(cars[idx], /*showDetails=*/true);
 }
 
-function renderCard(car) {
+// Gemensam kort-renderare
+function renderCard(car, showDetails) {
   const div = document.createElement('div');
   div.className = 'card';
 
+  // Summary alltid överst
   const pre = document.createElement('pre');
   pre.style.margin = '0 0 10px 0';
   pre.textContent = car.summary || '';
   div.appendChild(pre);
 
-  if (Array.isArray(car.details) && car.details.length) {
+  // Visa detaljer endast när showDetails = true
+  if (showDetails && Array.isArray(car.details) && car.details.length) {
     const hr = document.createElement('hr');
     hr.style.border = 'none';
     hr.style.borderTop = '1px solid #eee';
@@ -230,19 +216,16 @@ function renderCard(car) {
   document.getElementById('grid').appendChild(div);
 }
 
-/* ============================
-   Händelser
-   ============================ */
+// Händelser
 document.getElementById('refreshBtn').addEventListener('click', loadData);
 document.getElementById('bilSelect').addEventListener('change', e=>{
   if (e.target.value === 'all') renderAll();
   else renderOne(parseInt(e.target.value,10));
 });
 
-/* ============================
-   Init
-   ============================ */
-if (isUnlocked()) loadData();
+// Init
+loadData();
 </script>
+
 </body>
 </html>
