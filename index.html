@@ -378,18 +378,34 @@ const CONTACTS=[
   {name:"IT-support",role:"PDA/Åtkomst",phone:"+46 90 765432",email:"it@kof.se"}
 ];
 
-function renderNews(){
-  const box=document.getElementById('newsList'); if(!box) return;
-  box.innerHTML='';
-  NEWS.forEach(n=>{
-    const div=document.createElement('div');
-    div.className='item';
-    div.innerHTML=`<h3>${n.title}</h3>
-      <div class="meta">${new Date(n.date).toLocaleDateString()}</div>
-      <p>${n.body}</p>`;
-    box.appendChild(div);
-  });
+async function renderNews(){
+  const box = document.getElementById('newsList'); if(!box) return;
+  box.innerHTML = '<p class="muted">Laddar nyheter…</p>';
+  try{
+    const res = await fetch('./data/news.json?v=' + Date.now(), { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json(); // { items: [ {title,date,body}, ... ] }
+    const items = Array.isArray(data.items) ? data.items : [];
+    if(!items.length){ box.innerHTML = '<p class="muted">Inga nyheter ännu.</p>'; return; }
+
+    box.innerHTML = '';
+    items
+      .sort((a,b)=> new Date(b.date) - new Date(a.date))
+      .forEach(n => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        const d = n.date ? new Date(n.date).toLocaleDateString() : '';
+        div.innerHTML = `<h3>${n.title || ''}</h3>
+          <div class="meta">${d}</div>
+          <p>${(n.body || '').replace(/\n/g,'<br>')}</p>`;
+        box.appendChild(div);
+      });
+  }catch(err){
+    console.error(err);
+    box.innerHTML = '<p style="color:#b00020;">Kunde inte läsa nyheter.</p>';
+  }
 }
+
 function renderContacts(){
   const tb=document.querySelector('#contactsTable tbody'); if(!tb) return;
   tb.innerHTML='';
