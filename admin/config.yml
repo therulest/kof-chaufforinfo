@@ -1,25 +1,28 @@
-backend:
-  name: git-gateway
-  branch: main
+CMS.init({
+  config: {
+    backend: { name: "git-gateway", branch: "main" },
+    media_folder: "static/uploads",
+    public_folder: "/static/uploads",
 
-media_folder: "static/uploads"
-public_folder: "/static/uploads"
-
-collections:
-  - name: "site"
-    label: "Webbplats"
-    files:
-      - name: "news"
-        label: "Nyheter"
-        file: "data/news.json"
-        description: "Lista med nyheter till sidan /#/nyheter"
-        fields:
-          - label: "Nyheter"
-            name: "items"
-            widget: "list"
-            summary: "{{fields.title}} ({{fields.date}})"
-            fields:
-              - { label: "Titel", name: "title", widget: "string" }
-              - { label: "Datum", name: "date", widget: "datetime", format: "YYYY-MM-DD", time_format: false }
-              - { label: "Text", name: "body", widget: "text" }
-
+    collections: [
+      {
+        name: "news",          // unikt namn
+        label: "Nyheter",
+        file: "data/news.json",
+        fields: [
+          {
+            label: "Nyheter",
+            name: "items",
+            widget: "list",
+            summary: "{{fields.title}} ({{fields.date}})",
+            fields: [
+              { label: "Titel", name: "title", widget: "string" },
+              { label: "Datum", name: "date", widget: "datetime", format: "YYYY-MM-DD" },
+              { label: "Text", name: "body", widget: "text" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+});
