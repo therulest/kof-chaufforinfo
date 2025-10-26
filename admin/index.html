@@ -1,49 +1,65 @@
 <!doctype html>
-<html>
+<html lang="sv">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Admin</title>
+  <title>Admin – KOF Chaufförportal</title>
+
+  <!-- Viktigt: Säg åt Decap att inte läsa config.yml -->
+  <script>
+    window.CMS_MANUAL_INIT = true;
+  </script>
+
+  <!-- Decap CSS -->
   <link rel="stylesheet" href="https://unpkg.com/decap-cms@^3/dist/decap-cms.css">
 </head>
 <body>
+  <!-- Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3/dist/decap-cms.js"></script>
+
+  <!-- Netlify Identity (för inloggning) -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
   <script>
-    window.CMS_MANUAL_INIT = true;
-    CMS.init({
-      config: {
-        backend: { name: "git-gateway", branch: "main" },
-        media_folder: "static/uploads",
-        public_folder: "/static/uploads",
-        collections: [
-          {
-            name: "site",
-            label: "Webbplats",
-            files: [
-              {
-                name: "news",
-                label: "Nyheter",
-                file: "data/news.json",
-                fields: [
-                  {
-                    label: "Nyheter",
-                    name: "items",
-                    widget: "list",
-                    summary: "{{fields.title}} ({{fields.date}})",
-                    fields: [
-                      { label: "Titel", name: "title", widget: "string" },
-                      { label: "Datum", name: "date", widget: "datetime" },
-                      { label: "Text", name: "body", widget: "text" }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
+    document.addEventListener("DOMContentLoaded", function() {
+      CMS.init({
+        config: {
+          backend: { name: "git-gateway", branch: "main" },
+          media_folder: "static/uploads",
+          public_folder: "/static/uploads",
+          collections: [
+            {
+              name: "news",
+              label: "Nyheter",
+              file: "data/news.json",
+              fields: [
+                {
+                  label: "Nyheter",
+                  name: "items",
+                  widget: "list",
+                  summary: "{{fields.title}} ({{fields.date}})",
+                  fields: [
+                    { label: "Titel", name: "title", widget: "string" },
+                    { label: "Datum", name: "date", widget: "datetime", format: "YYYY-MM-DD" },
+                    { label: "Text", name: "body", widget: "text" }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      });
     });
+
+    // Netlify Identity inloggning
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", user => {
+        if (!user) window.netlifyIdentity.open("login");
+      });
+      window.netlifyIdentity.on("login", () => {
+        document.location.href = "/admin/";
+      });
+    }
   </script>
 </body>
 </html>
-
