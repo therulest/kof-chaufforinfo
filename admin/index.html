@@ -1,46 +1,51 @@
 <!doctype html>
 <html>
 <head>
+  <!-- Flytta ev. Netlify-hash från startsidan hit (om vi kom via invite/reset) -->
   <script>
-(function () {
-  try {
-    var saved = sessionStorage.getItem('_nl_hash');
-    if (saved && !/(invite_token|confirmation_token|recovery_token)=/i.test(location.hash)) {
-      sessionStorage.removeItem('_nl_hash');
-      // behåll /admin/ pathen men lägg tillbaka token i hash
-      var here = location.pathname.replace(/\/index\.html?$/,'/') + saved;
-      location.replace(here);
-    }
-  } catch(e) {}
-})();
-</script>
+    (function () {
+      try {
+        var saved = sessionStorage.getItem('_nl_hash');
+        if (saved && !/(invite_token|confirmation_token|recovery_token)=/i.test(location.hash)) {
+          sessionStorage.removeItem('_nl_hash');
+          var here = location.pathname.replace(/\/index\.html?$/,'/') + saved;
+          location.replace(here);
+        }
+      } catch(e) {}
+    })();
+  </script>
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Admin – Nyheter</title>
-  <link rel="stylesheet" href="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.css">
+  <link rel="stylesheet" href="https://unpkg.com/decap-cms@^3/dist/decap-cms.css">
 </head>
 <body>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-<script>
-  if (window.netlifyIdentity) {
-    window.netlifyIdentity.on('init', user => {
-      if (!user) window.netlifyIdentity.open('login');
-    });
-  }
-</script>
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-<script>
-if (window.netlifyIdentity) {
-  window.netlifyIdentity.on('init', function (user) {
-    if (!user) window.netlifyIdentity.open('login'); // visar också "Send login link"
-  });
-  window.netlifyIdentity.on('login', function () {
-    location.replace('/admin/'); // stanna på admin efter login
-  });
-}
-</script>
+  <!-- Decap CMS (läser /admin/config.yml automatiskt) -->
+  <script src="https://unpkg.com/decap-cms@^3/dist/decap-cms.js"></script>
 
+  <!-- Netlify Identity (för inloggning / invite / magic links) -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    if (window.netlifyIdentity) {
+      // Öppna login direkt om ingen är inloggad
+      window.netlifyIdentity.on('init', function (user) {
+        if (!user) {
+          // om vi kom via invite/reset: öppna login så flödet slutförs
+          if (/(invite_token|confirmation_token|recovery_token)=/i.test(location.hash || "")) {
+            window.netlifyIdentity.open('login');
+          }
+        }
+      });
+      // Efter login, stanna på admin (fräscha session)
+      window.netlifyIdentity.on('login', function () {
+        location.replace('/admin/');
+      });
+      // Vid logout, ladda om
+      window.netlifyIdentity.on('logout', function () {
+        location.reload();
+      });
+    }
+  </script>
 </body>
 </html>
