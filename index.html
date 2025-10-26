@@ -5,114 +5,239 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Chaufförinfo</title>
 <style>
-  body {
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    margin: 16px;
-    background: #fafafa;
+  :root{
+    --brand:#0ea5e9;         /* toppbar/accent */
+    --brand-600:#0284c7;
+    --blue:#007bff;          /* knappar */
+    --blue-700:#005dc3;
+    --muted:#6b7280;
+    --card:#ffffff;
+    --bg:#fafafa;
+    --border:#e5e7eb;
+    --shadow:0 1px 3px rgba(0,0,0,.05);
+    --shadow-lg:0 8px 24px rgba(0,0,0,.10);
   }
-  header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+
+  /* Reset */
+  *{box-sizing:border-box}
+  body{
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    margin:0; background:var(--bg); color:#111827;
   }
-  h1 { margin: 0; }
-  .grid { display: grid; grid-gap: 12px; }
-  @media(min-width:700px){ .grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));} }
+  a{color:inherit;text-decoration:none}
 
-  .card {
-    border: 1px solid #e3e3e3; border-radius: 12px; background: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,.05); overflow: hidden;
-    cursor: pointer; transition: box-shadow .15s ease;
+  /* Top navigation */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:linear-gradient(180deg,#fff,rgba(255,255,255,.97));
+    border-bottom:1px solid var(--border);
+    backdrop-filter:saturate(180%) blur(6px);
   }
-  .card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.08); }
-  .card-header { display:flex; align-items:center; gap:10px; padding:12px; }
-  .chev { transition: transform .18s ease; user-select:none; font-size:16px; }
-  .card.expanded .chev { transform: rotate(90deg); }
-  .summary { white-space: pre-wrap; margin:0; flex:1; }
-
-  .divider { border: none; border-top: 1px solid #eee; margin: 0; }
-  .details { display: none; padding: 10px 14px 12px; }
-  .card.expanded .details { display: block; }
-  .details ul { margin: 8px 0 0 0; padding-left: 20px; line-height: 1.4; }
-  .details li { margin-bottom: 6px; }
-  /* extra luft vid kvantitetsrader, totalsumma och notiser */
-  .details li.qty { margin-bottom: 10px; }
-  .details li.total { margin-bottom: 10px; }
-  .details li.note  { margin-top: 6px; }
-
-  .muted { color:#6b7280; font-size:12px; }
-
-  #refreshBtn {
-    background:#007bff;color:#fff;border:none;padding:8px 14px;border-radius:8px;
-    font-size:14px;cursor:pointer;transition:all .2s;margin-left:8px;
+  .topbar .wrap{
+    max-width:1200px; margin:0 auto;
+    display:flex; align-items:center; gap:16px;
+    padding:10px 16px;
   }
-  #refreshBtn:hover{ background:#005dc3; }
-  #bilSelect {
-    padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;
-    background:#fff;cursor:pointer;transition:border-color .2s;
+  .brand{
+    font-weight:700; letter-spacing:.2px;
+    color:var(--brand); font-size:18px; white-space:nowrap;
   }
-  #bilSelect:hover{ border-color:#007bff; }
+  .nav{
+    display:flex; gap:8px; align-items:center;
+  }
+  .nav a{
+    padding:8px 12px; border-radius:10px; color:#111827;
+    transition:background .15s ease, color .15s ease;
+  }
+  .nav a:hover{ background:#f3f4f6; }
+  .nav a.active{
+    background:var(--brand); color:white;
+  }
 
-  /* Inloggning */
-  .lock-overlay { position:fixed; inset:0; background:rgba(250,250,250,.96);
-    display:flex; align-items:center; justify-content:center; z-index:9999; }
-  .lock-card { width:min(420px,92vw); background:#fff; border:1px solid #e5e7eb;
-    border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:20px; }
+  /* Page wrap */
+  .page{
+    max-width:1200px; margin:16px auto; padding:0 16px 24px;
+  }
+
+  /* Header area inside pages */
+  header.pagehead{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:10px; flex-wrap:wrap; margin-bottom:12px;
+  }
+  h1{margin:0}
+
+  /* Cards grid (Dagab) */
+  .grid{ display:grid; grid-gap:12px; }
+  @media(min-width:700px){ .grid{ grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); } }
+
+  .card{
+    border:1px solid var(--border); border-radius:12px; background:var(--card);
+    box-shadow:var(--shadow); overflow:hidden; cursor:pointer; transition:box-shadow .15s ease;
+  }
+  .card:hover{ box-shadow:0 3px 10px rgba(0,0,0,.08); }
+  .card-header{ display:flex; align-items:center; gap:10px; padding:12px; }
+  .chev{ transition:transform .18s ease; user-select:none; font-size:16px; }
+  .card.expanded .chev{ transform:rotate(90deg); }
+  .summary{ white-space:pre-wrap; margin:0; flex:1; }
+  .divider{ border:none; border-top:1px solid #eee; margin:0; }
+  .details{ display:none; padding:10px 14px 12px; }
+  .card.expanded .details{ display:block; }
+  .details ul{ margin:8px 0 0 0; padding-left:20px; line-height:1.4; }
+  .details li{ margin-bottom:6px; }
+  .details li.qty{ margin-bottom:10px; }
+  .details li.total{ margin-bottom:10px; }
+  .details li.note{ margin-top:6px; }
+
+  .muted{ color:var(--muted); font-size:12px; }
+
+  /* Controls */
+  .btn{
+    background:var(--blue); color:#fff; border:none; padding:8px 14px;
+    border-radius:8px; font-size:14px; cursor:pointer; transition:all .2s;
+  }
+  .btn:hover{ background:var(--blue-700); }
+  select.control{
+    padding:8px 12px; border:1px solid #d1d5db; border-radius:8px;
+    font-size:14px; background:#fff; cursor:pointer; transition:border-color .2s;
+  }
+  select.control:hover{ border-color:var(--blue); }
+
+  /* Login overlay (used only on Dagab if enabled) */
+  .lock-overlay{
+    position:fixed; inset:0; background:rgba(250,250,250,.96);
+    display:flex; align-items:center; justify-content:center; z-index:9999;
+  }
+  .lock-card{
+    width:min(420px,92vw); background:#fff; border:1px solid var(--border);
+    border-radius:14px; box-shadow:var(--shadow-lg); padding:20px;
+  }
   .lock-title{ margin:0 0 8px 0; font-size:20px; }
-  .lock-sub{ margin:0 0 16px 0; font-size:13px; color:#6b7280; }
+  .lock-sub{ margin:0 0 16px 0; font-size:13px; color:var(--muted); }
   .lock-row{ display:flex; gap:8px; }
-  .lock-input{ flex:1; border:1px solid #d1d5db; border-radius:10px; padding:10px 12px; font-size:16px; }
-  .lock-btn{ background:#0ea5e9; color:#fff; border:none; border-radius:10px; padding:10px 14px; font-size:15px; cursor:pointer; transition:all .2s; white-space:nowrap; }
-  .lock-btn:hover{ background:#0284c7; }
+  .lock-input{
+    flex:1; border:1px solid #d1d5db; border-radius:10px; padding:10px 12px; font-size:16px;
+  }
+  .lock-btn{
+    background:var(--brand); color:#fff; border:none; border-radius:10px;
+    padding:10px 14px; font-size:15px; cursor:pointer; transition:all .2s; white-space:nowrap;
+  }
+  .lock-btn:hover{ background:var(--brand-600); }
   .lock-err{ margin-top:10px; color:#b00020; font-size:13px; min-height:1.2em; }
+
+  /* Home hero */
+  .hero{
+    background:linear-gradient(180deg,#fff,#f8fafc);
+    border:1px solid var(--border); border-radius:16px; padding:24px;
+    box-shadow:var(--shadow);
+  }
+  .hero h2{ margin:0 0 8px; }
+  .hero p{ margin:6px 0; color:#374151; }
 </style>
 </head>
 <body>
 
-  <!-- Inloggning -->
-  <div class="lock-overlay" id="lock">
-    <div class="lock-card">
-      <h2 class="lock-title">Logga in</h2>
-      <p class="lock-sub">Ange lösenord för att visa Dagens turer.</p>
-      <div class="lock-row">
-        <input id="pin" class="lock-input" type="password" placeholder="Lösenord">
-        <button id="pinBtn" class="lock-btn">Öppna</button>
-      </div>
-      <div id="lockErr" class="lock-err"></div>
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="wrap">
+      <div class="brand">KOF – Chaufförportal</div>
+      <nav class="nav">
+        <a href="#/home" id="link-home" class="active">Home</a>
+        <a href="#/dagab" id="link-dagab">Dagab</a>
+        <!-- plats för fler sidor framåt -->
+      </nav>
     </div>
   </div>
 
-  <header>
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <h1>Dagens turer</h1>
-      <select id="bilSelect"><option value="all">Visa alla</option></select>
-      <button id="refreshBtn">🔄 Uppdatera</button>
-    </div>
-    <div class="muted" id="stamp"></div>
-  </header>
+  <!-- Pages -->
+  <main id="app" class="page">
+    <!-- Home (default) -->
+    <section id="page-home" data-page>
+      <div class="hero">
+        <h2>Välkommen!</h2>
+        <p>Här samlar vi information för våra chaufförer. Använd menyn ovan för att navigera.</p>
+        <p><strong>Dagab</strong>-sidan visar dagens turer och uppdateras från Excel automatiskt.</p>
+        <p>Tips: Lägg sidan som favorit i telefonen för snabb åtkomst.</p>
+      </div>
+    </section>
 
-  <div class="grid" id="grid"></div>
+    <!-- Dagab (dashboard) -->
+    <section id="page-dagab" data-page hidden>
+      <!-- Login overlay (visas bara om aktiverat) -->
+      <div class="lock-overlay" id="lock" style="display:none">
+        <div class="lock-card">
+          <h2 class="lock-title">Logga in</h2>
+          <p class="lock-sub">Ange lösenord för att visa Dagens turer.</p>
+          <div class="lock-row">
+            <input id="pin" class="lock-input" type="password" placeholder="Lösenord">
+            <button id="pinBtn" class="lock-btn">Öppna</button>
+          </div>
+          <div id="lockErr" class="lock-err"></div>
+        </div>
+      </div>
+
+      <header class="pagehead">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <h1>Dagens turer</h1>
+          <select id="bilSelect" class="control"><option value="all">Visa alla</option></select>
+          <button id="refreshBtn" class="btn">🔄 Uppdatera</button>
+        </div>
+        <div class="muted" id="stamp"></div>
+      </header>
+
+      <div class="grid" id="grid"></div>
+    </section>
+  </main>
 
 <script>
-/* ======= Växla inloggning enkelt ======= */
-const REQUIRE_LOGIN = false;   // ← sätt true om du vill ha PIN
+/* ------------------------------
+   Enkel hash-router (Home/Dagab)
+--------------------------------*/
+const routes = ['#/home', '#/dagab'];
+function setActiveLink(hash){
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
+  const el = document.querySelector(`.nav a[href="${hash}"]`);
+  if(el) el.classList.add('active');
+}
+function showPage(id){
+  document.querySelectorAll('[data-page]').forEach(s=>s.hidden = true);
+  document.getElementById(id).hidden = false;
+}
+function handleRoute(){
+  const h = location.hash || '#/home';
+  setActiveLink(h);
+  if(h === '#/dagab'){
+    showPage('page-dagab');
+    ensureDagabReady();
+  }else{
+    showPage('page-home');
+  }
+}
+window.addEventListener('hashchange', handleRoute);
+
+/* ------------------------------
+   Lösenord (endast Dagab)
+--------------------------------*/
+const REQUIRE_LOGIN = false;     // ← true = kräver PIN till Dagab
 const LOCK_PIN = 'kof123';
 const LOCK_KEY = 'chaufforinfo-unlocked';
 
-/* ======= Lösenordsinloggning (om aktiv) ======= */
-function isUnlocked(){ return localStorage.getItem(LOCK_KEY) === 'true'; }
+function isUnlocked(){ return localStorage.getItem(LOCK_KEY)==='true'; }
 function unlock(){ localStorage.setItem(LOCK_KEY,'true'); document.getElementById('lock').style.display='none'; loadData(); }
 function setupLock(){
   if(!REQUIRE_LOGIN){ document.getElementById('lock').style.display='none'; loadData(); return; }
   document.getElementById('pinBtn').addEventListener('click', checkPin);
   document.getElementById('pin').addEventListener('keydown', e=>{ if(e.key==='Enter') checkPin(); });
   if(isUnlocked()){ document.getElementById('lock').style.display='none'; loadData(); }
+  else document.getElementById('lock').style.display='flex';
 }
 function checkPin(){
   const ok = document.getElementById('pin').value.trim() === LOCK_PIN;
-  if(ok) unlock(); else document.getElementById('lockErr').textContent = 'Fel lösenord. Försök igen.';
+  if(ok) unlock(); else document.getElementById('lockErr').textContent='Fel lösenord. Försök igen.';
 }
 
-/* ======= Datahantering ======= */
+/* ------------------------------
+   Dagab-data & rendering
+--------------------------------*/
 let cars = []; // {label, summary, details[]}
 
 async function loadData(){
@@ -130,11 +255,8 @@ async function loadData(){
       cars = data.cars;
     }else if(Array.isArray(data.blocks)){
       cars = data.blocks.map((b,i)=>({ label:(b.split(/\n/)[5]||`Bil ${i+1}`), summary:b, details:[] }));
-    }else{
-      cars = [];
-    }
+    }else{ cars = []; }
 
-    // fyll dropdown (resurs/label)
     const sel = document.getElementById('bilSelect');
     sel.innerHTML = '<option value="all">Visa alla</option>';
     cars.forEach((car,i)=>{
@@ -145,97 +267,85 @@ async function loadData(){
     });
     sel.value = 'all';
 
-    // startsida: rendera alla kort, detaljer dolda (expandera via klick)
     renderAll();
-
   }catch(e){
-    grid.innerHTML = '<p style="color:#b00020;">Kunde inte läsa data.json</p>';
+    document.getElementById('grid').innerHTML = '<p style="color:#b00020;">Kunde inte läsa data.json</p>';
     console.error(e);
   }
 }
-
-/* ======= Rendering ======= */
-// Bygger ett kort och kopplar toggle på klick
 function buildCard(car, idx, expanded=false){
   const card = document.createElement('div');
-  card.className = 'card' + (expanded ? ' expanded' : '');
+  card.className = 'card' + (expanded?' expanded':'');
   card.dataset.index = idx;
 
-  const header = document.createElement('div');
-  header.className = 'card-header';
-
-  const chev = document.createElement('span');
-  chev.className = 'chev';
-  chev.textContent = '▶';
-
-  const pre = document.createElement('pre');
-  pre.className = 'summary';
-  pre.textContent = car.summary || '';
-
-  header.appendChild(chev);
-  header.appendChild(pre);
-  card.appendChild(header);
+  const header = document.createElement('div'); header.className='card-header';
+  const chev = document.createElement('span');  chev.className='chev'; chev.textContent='▶';
+  const pre = document.createElement('pre');    pre.className='summary'; pre.textContent = car.summary || '';
+  header.appendChild(chev); header.appendChild(pre); card.appendChild(header);
 
   const hasDetails = Array.isArray(car.details) && car.details.length > 0;
-  const details = document.createElement('div');
-  details.className = 'details';
+  const details = document.createElement('div'); details.className='details';
 
   if(hasDetails){
-    const hr = document.createElement('hr');
-    hr.className = 'divider';
-    card.appendChild(hr);
-
+    const hr = document.createElement('hr'); hr.className='divider'; card.appendChild(hr);
     const ul = document.createElement('ul');
-    // Lägg till rader + klass för spacing
     car.details.forEach(line=>{
-      const li = document.createElement('li');
-      li.textContent = line;
-
+      const li = document.createElement('li'); li.textContent = line;
       const lower = line.toLowerCase();
-      if (/\b(frys|kyl|kol)\b/.test(lower)) li.classList.add('qty');   // kvantitet → extra luft efter
-      if (lower.startsWith('totalt'))            li.classList.add('total'); // totalsumma
-      if (lower.startsWith('glöm') || lower.startsWith('glom')) li.classList.add('note');  // notiser
-
+      if (/\b(frys|kyl|kol)\b/.test(lower)) li.classList.add('qty');
+      if (lower.startsWith('totalt'))       li.classList.add('total');
+      if (lower.startsWith('glöm') || lower.startsWith('glom')) li.classList.add('note');
       ul.appendChild(li);
     });
-    details.appendChild(ul);
-    card.appendChild(details);
+    details.appendChild(ul); card.appendChild(details);
   }
 
-  // toggle: expand/collapse vid klick
   card.addEventListener('click', (e)=>{
-    // ignorera klick på dropdown/knappar
     if(e.target.closest('button') || e.target.closest('select')) return;
-    if(!hasDetails) return; // inget att expandera
+    if(!hasDetails) return;
     card.classList.toggle('expanded');
   });
 
   return card;
 }
-
-// Visa alla – detaljer dolda initialt
 function renderAll(){
   const grid = document.getElementById('grid');
+  if(!grid) return;
   grid.innerHTML = '';
   cars.forEach((car,i)=> grid.appendChild(buildCard(car,i,false)));
 }
-
-// Visa en – detaljer öppna
 function renderOne(idx){
   const grid = document.getElementById('grid');
+  if(!grid) return;
   grid.innerHTML = '';
   if(cars[idx]) grid.appendChild(buildCard(cars[idx], idx, true));
 }
 
-/* ======= Händelser ======= */
-document.getElementById('refreshBtn').addEventListener('click', loadData);
-document.getElementById('bilSelect').addEventListener('change', e=>{
-  if(e.target.value === 'all') renderAll();
-  else renderOne(parseInt(e.target.value,10));
-});
+/* bind controls (Dagab) */
+function bindDagabControls(){
+  const btn = document.getElementById('refreshBtn');
+  const sel = document.getElementById('bilSelect');
+  if(btn && !btn._bound){ btn.addEventListener('click', loadData); btn._bound=true; }
+  if(sel && !sel._bound){
+    sel.addEventListener('change', e=>{
+      if(e.target.value==='all') renderAll();
+      else renderOne(parseInt(e.target.value,10));
+    });
+    sel._bound=true;
+  }
+}
 
-/* ======= Init ======= */
-setupLock();
+/* Första gången man går till Dagab */
+let dagabInitialized = false;
+function ensureDagabReady(){
+  if(dagabInitialized) return;
+  dagabInitialized = true;
+  bindDagabControls();
+  setupLock(); // detta laddar data om login ej krävs/är avklarat
+}
+
+/* Starta router */
+handleRoute();
 </script>
 </body>
 </html>
