@@ -11,86 +11,60 @@
     background: #fafafa;
   }
   header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-    gap: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
   }
   h1 { margin: 0; }
-  .grid {
-    display: grid;
-    grid-gap: 12px;
-  }
-  .card {
-    border: 1px solid #e3e3e3;
-    border-radius: 12px;
-    padding: 12px;
-    background: white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    white-space: pre-wrap;
-  }
-  .muted {
-    color: #6b7280;
-    font-size: 12px;
-  }
-  @media(min-width:700px) {
-    .grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-  }
-  #refreshBtn {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-left: 8px;
-  }
-  #refreshBtn:hover { background: #005dc3; }
-  #refreshBtn:active { transform: scale(0.97); }
-  #bilSelect {
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
-    cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  #bilSelect:hover { border-color: #007bff; }
+  .grid { display: grid; grid-gap: 12px; }
+  @media(min-width:700px){ .grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));} }
 
-  /* Inloggningsruta */
-  .lock-overlay {
-    position: fixed; inset: 0;
-    background: rgba(250,250,250,.96);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 9999;
+  .card {
+    border: 1px solid #e3e3e3; border-radius: 12px; background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05); overflow: hidden;
+    cursor: pointer; transition: box-shadow .15s ease;
   }
-  .lock-card {
-    width: min(420px,92vw);
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.08);
-    padding: 20px;
+  .card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.08); }
+  .card-header {
+    display:flex; align-items:center; gap:10px; padding:12px;
   }
-  .lock-title { margin: 0 0 8px 0; font-size: 20px; }
-  .lock-sub { margin: 0 0 16px 0; font-size: 13px; color: #6b7280; }
-  .lock-row { display: flex; gap: 8px; }
-  .lock-input {
-    flex: 1; border: 1px solid #d1d5db; border-radius: 10px;
-    padding: 10px 12px; font-size: 16px;
+  .chev {
+    transition: transform .18s ease; user-select:none; font-size:16px;
   }
-  .lock-btn {
-    background: #0ea5e9; color: white; border: none; border-radius: 10px;
-    padding: 10px 14px; font-size: 15px; cursor: pointer;
-    transition: all 0.2s; white-space: nowrap;
+  .card.expanded .chev { transform: rotate(90deg); }
+  .summary { white-space: pre-wrap; margin:0; flex:1; }
+  .divider {
+    border: none; border-top: 1px solid #eee; margin: 0;
   }
-  .lock-btn:hover { background: #0284c7; }
-  .lock-err { margin-top: 10px; color: #b00020; font-size: 13px; min-height: 1.2em; }
+  .details {
+    display: none; padding: 10px 14px 12px;
+  }
+  .card.expanded .details { display: block; }
+  .details ul { margin: 8px 0 0 0; padding-left: 20px; }
+  .muted { color:#6b7280; font-size:12px; }
+
+  #refreshBtn {
+    background:#007bff;color:#fff;border:none;padding:8px 14px;border-radius:8px;
+    font-size:14px;cursor:pointer;transition:all .2s;margin-left:8px;
+  }
+  #refreshBtn:hover{ background:#005dc3; }
+  #bilSelect {
+    padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;
+    background:#fff;cursor:pointer;transition:border-color .2s;
+  }
+  #bilSelect:hover{ border-color:#007bff; }
+
+  /* Inloggning */
+  .lock-overlay { position:fixed; inset:0; background:rgba(250,250,250,.96);
+    display:flex; align-items:center; justify-content:center; z-index:9999; }
+  .lock-card { width:min(420px,92vw); background:#fff; border:1px solid #e5e7eb;
+    border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:20px; }
+  .lock-title{ margin:0 0 8px 0; font-size:20px; }
+  .lock-sub{ margin:0 0 16px 0; font-size:13px; color:#6b7280; }
+  .lock-row{ display:flex; gap:8px; }
+  .lock-input{ flex:1; border:1px solid #d1d5db; border-radius:10px; padding:10px 12px; font-size:16px; }
+  .lock-btn{ background:#0ea5e9; color:#fff; border:none; border-radius:10px; padding:10px 14px; font-size:15px; cursor:pointer; transition:all .2s; white-space:nowrap; }
+  .lock-btn:hover{ background:#0284c7; }
+  .lock-err{ margin-top:10px; color:#b00020; font-size:13px; min-height:1.2em; }
 </style>
 </head>
 <body>
@@ -122,152 +96,143 @@
   <div class="grid" id="grid"></div>
 
 <script>
-/* ==========================================
-   🔧 Inställning: aktivera/inaktivera lösenord
-   ========================================== */
-const REQUIRE_LOGIN = false;   // ← ändra till true om du vill ha inloggning
-const LOCK_PIN = 'kof123';     // ← byt lösenord här om aktiverat
+/* ======= Växla inloggning enkelt ======= */
+const REQUIRE_LOGIN = false;   // ← sätt true om du vill ha PIN
+const LOCK_PIN = 'kof123';
 const LOCK_KEY = 'chaufforinfo-unlocked';
 
-/* ==========================================
-   🔒 Enkel lösenordsinloggning (aktiveras bara om REQUIRE_LOGIN = true)
-   ========================================== */
-function isUnlocked() {
-  return localStorage.getItem(LOCK_KEY) === 'true';
+/* ======= Lösenordsinloggning (om aktiv) ======= */
+function isUnlocked(){ return localStorage.getItem(LOCK_KEY) === 'true'; }
+function unlock(){ localStorage.setItem(LOCK_KEY,'true'); document.getElementById('lock').style.display='none'; loadData(); }
+function setupLock(){
+  if(!REQUIRE_LOGIN){ document.getElementById('lock').style.display='none'; loadData(); return; }
+  document.getElementById('pinBtn').addEventListener('click', checkPin);
+  document.getElementById('pin').addEventListener('keydown', e=>{ if(e.key==='Enter') checkPin(); });
+  if(isUnlocked()){ document.getElementById('lock').style.display='none'; loadData(); }
 }
-function unlock() {
-  localStorage.setItem(LOCK_KEY, 'true');
-  document.getElementById('lock').style.display = 'none';
-  loadData();
-}
-function setupLock() {
-  if (!REQUIRE_LOGIN) {
-    document.getElementById('lock').style.display = 'none';
-    loadData();
-    return;
-  }
-  const btn = document.getElementById('pinBtn');
-  btn.addEventListener('click', checkPin);
-  document.getElementById('pin').addEventListener('keydown', e => {
-    if (e.key === 'Enter') checkPin();
-  });
-  if (isUnlocked()) {
-    document.getElementById('lock').style.display = 'none';
-    loadData();
-  }
-}
-function checkPin() {
-  const val = document.getElementById('pin').value.trim();
-  const err = document.getElementById('lockErr');
-  if (val === LOCK_PIN) { unlock(); }
-  else { err.textContent = 'Fel lösenord. Försök igen.'; }
+function checkPin(){
+  const ok = document.getElementById('pin').value.trim() === LOCK_PIN;
+  if(ok) unlock(); else document.getElementById('lockErr').textContent = 'Fel lösenord. Försök igen.';
 }
 
-/* ==========================================
-   🚛 Hämta & visa data från data.json
-   ========================================== */
-let cars = [];
+/* ======= Datahantering ======= */
+let cars = []; // {label, summary, details[]}
 
 async function loadData(){
   const grid = document.getElementById('grid');
   grid.innerHTML = '<p>Laddar...</p>';
-  try {
-    const res = await fetch('./data.json?v=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+  try{
+    const res = await fetch('./data.json?v=' + Date.now(), {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
     document.getElementById('stamp').textContent =
       'Senast uppdaterad: ' + (new Date(data.updated_at)).toLocaleString();
 
-    if (Array.isArray(data.cars)) {
+    if(Array.isArray(data.cars)){
       cars = data.cars;
-    } else if (Array.isArray(data.blocks)) {
-      cars = data.blocks.map((b,i)=>({
-        label: (b.split(/\n/)[5] || `Bil ${i+1}`),
-        summary: b,
-        details: []
-      }));
-    } else {
+    }else if(Array.isArray(data.blocks)){
+      cars = data.blocks.map((b,i)=>({ label:(b.split(/\n/)[5]||`Bil ${i+1}`), summary:b, details:[] }));
+    }else{
       cars = [];
     }
 
+    // fyll dropdown (resurs/label)
     const sel = document.getElementById('bilSelect');
     sel.innerHTML = '<option value="all">Visa alla</option>';
     cars.forEach((car,i)=>{
       const opt = document.createElement('option');
       opt.value = i;
-      const lbl = (car.label && car.label.trim()) ? car.label : `Bil ${i+1}`;
-      opt.textContent = lbl;
+      opt.textContent = (car.label && car.label.trim()) ? car.label : `Bil ${i+1}`;
       sel.appendChild(opt);
     });
     sel.value = 'all';
 
+    // startsida: rendera alla kort, detaljer dolda (expandera via klick)
     renderAll();
 
-  } catch(e) {
+  }catch(e){
     grid.innerHTML = '<p style="color:#b00020;">Kunde inte läsa data.json</p>';
     console.error(e);
   }
 }
 
-// Visa alla bilar – bara summary
-function renderAll() {
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-  cars.forEach(car => renderCard(car, false));
-}
+/* ======= Rendering ======= */
+// Bygger ett kort och kopplar toggle på klick
+function buildCard(car, idx, expanded=false){
+  const card = document.createElement('div');
+  card.className = 'card' + (expanded ? ' expanded' : '');
+  card.dataset.index = idx;
 
-// Visa en bil – summary + detaljer
-function renderOne(idx) {
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-  if (cars[idx]) renderCard(cars[idx], true);
-}
+  const header = document.createElement('div');
+  header.className = 'card-header';
 
-// Bygg upp kort
-function renderCard(car, showDetails) {
-  const div = document.createElement('div');
-  div.className = 'card';
+  const chev = document.createElement('span');
+  chev.className = 'chev';
+  chev.textContent = '▶';
 
   const pre = document.createElement('pre');
-  pre.style.margin = '0 0 10px 0';
+  pre.className = 'summary';
   pre.textContent = car.summary || '';
-  div.appendChild(pre);
 
-  if (showDetails && Array.isArray(car.details) && car.details.length) {
+  header.appendChild(chev);
+  header.appendChild(pre);
+  card.appendChild(header);
+
+  const hasDetails = Array.isArray(car.details) && car.details.length > 0;
+  const details = document.createElement('div');
+  details.className = 'details';
+
+  if(hasDetails){
     const hr = document.createElement('hr');
-    hr.style.border = 'none';
-    hr.style.borderTop = '1px solid #eee';
-    hr.style.margin = '8px 0';
-    div.appendChild(hr);
+    hr.className = 'divider';
+    card.appendChild(hr);
 
     const ul = document.createElement('ul');
-    ul.style.margin = '0';
-    ul.style.paddingLeft = '20px';
     car.details.forEach(line=>{
       const li = document.createElement('li');
       li.textContent = line;
       ul.appendChild(li);
     });
-    div.appendChild(ul);
+    details.appendChild(ul);
+    card.appendChild(details);
   }
 
-  document.getElementById('grid').appendChild(div);
+  // toggle: expand/collapse vid klick
+  card.addEventListener('click', (e)=>{
+    // ignorera klick på dropdown/knappar
+    if(e.target.closest('button') || e.target.closest('select')) return;
+    if(!hasDetails) return; // inget att expandera
+    card.classList.toggle('expanded');
+  });
+
+  return card;
 }
 
-/* ==========================================
-   🎛 Händelser
-   ========================================== */
+// Visa alla – detaljer dolda initialt
+function renderAll(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  cars.forEach((car,i)=> grid.appendChild(buildCard(car,i,false)));
+}
+
+// Visa en – detaljer öppna
+function renderOne(idx){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  if(cars[idx]) grid.appendChild(buildCard(cars[idx], idx, true));
+}
+
+/* ======= Händelser ======= */
 document.getElementById('refreshBtn').addEventListener('click', loadData);
 document.getElementById('bilSelect').addEventListener('change', e=>{
-  if (e.target.value === 'all') renderAll();
+  if(e.target.value === 'all') renderAll();
   else renderOne(parseInt(e.target.value,10));
 });
 
-/* ==========================================
-   🚀 Initiering
-   ========================================== */
+/* ======= Init ======= */
 setupLock();
 </script>
 </body>
 </html>
+
