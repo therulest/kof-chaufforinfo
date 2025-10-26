@@ -15,17 +15,46 @@
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:#111827}
   a{color:inherit;text-decoration:none}
 
-  .topbar{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#fff,rgba(255,255,255,.97));border-bottom:1px solid var(--border);backdrop-filter:saturate(180%) blur(6px)}
-  .topbar .wrap{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 16px}
-  .brand{font-weight:700;letter-spacing:.2px;color:var(--brand);font-size:18px;white-space:nowrap}
-  .nav{display:flex;gap:8px;align-items:center}
-  .nav a{padding:8px 12px;border-radius:10px;transition:background .15s ease,color .15s ease}
+  /* ----------- TOPPBAR ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    background:linear-gradient(180deg,#fff,rgba(255,255,255,.97));
+    border-bottom:1px solid var(--border);
+    backdrop-filter:saturate(180%) blur(6px);
+  }
+  .topbar .wrap{
+    max-width:1200px;margin:0 auto;
+    display:flex;flex-direction:column;
+    align-items:flex-start;gap:6px;
+    padding:10px 16px;
+  }
+  .brand{
+    font-weight:700;letter-spacing:.2px;
+    color:var(--brand);font-size:18px;
+  }
+  .nav{
+    display:flex;flex-wrap:wrap;gap:8px;
+    width:100%;
+  }
+  .nav a{
+    padding:8px 12px;border-radius:10px;
+    transition:background .15s ease,color .15s ease;
+    color:#111827;
+  }
   .nav a:hover{background:#f3f4f6}
   .nav a.active{background:var(--brand);color:#fff}
 
+  /* När skärmen är bred nog: meny och brand på samma rad */
+  @media(min-width:700px){
+    .topbar .wrap{flex-direction:row;align-items:center;justify-content:space-between}
+    .nav{width:auto}
+  }
+
+  /* ----------- SIDLAYOUT ---------- */
   .page{max-width:1200px;margin:16px auto;padding:0 16px 24px}
   header.pagehead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
   h1{margin:0}
+
   .grid{display:grid;grid-gap:12px}
   @media(min-width:700px){.grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
 
@@ -64,20 +93,19 @@
   .hero h2{margin:0 0 8px}
   .hero p{margin:6px 0;color:#374151}
 
-  /* Nyheter & Kontakter */
   .news{display:grid;grid-gap:12px}
   @media(min-width:700px){.news{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}}
   .news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:14px}
   .news .item h3{margin:0 0 6px}
   .news .meta{font-size:12px;color:var(--muted);margin-bottom:8px}
   table.contacts{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
-  table.contacts th, table.contacts td{padding:10px;border-bottom:1px solid #eee;text-align:left}
+  table.contacts th,table.contacts td{padding:10px;border-bottom:1px solid #eee;text-align:left}
   table.contacts th{background:#f9fafb;font-weight:600;font-size:14px}
 </style>
 </head>
 <body>
 
-  <!-- Topbar -->
+  <!-- TOPPMENY -->
   <div class="topbar">
     <div class="wrap">
       <div class="brand">KOF – Chaufförportal</div>
@@ -90,31 +118,15 @@
     </div>
   </div>
 
-  <!-- Pages -->
+  <!-- Huvudinnehåll -->
   <main id="app" class="page">
-    <!-- Home -->
     <section id="page-home" data-page>
       <div class="hero">
         <h2>Välkommen!</h2>
         <p>Här samlar vi information för våra chaufförer. Använd menyn ovan.</p>
-        <p><strong>Dagab</strong> visar dagens turer (uppdateras från Excel). <strong>Nyheter</strong> är interna notiser. <strong>Kontakter</strong> listar viktiga nummer.</p>
       </div>
     </section>
-
-    <!-- Dagab -->
     <section id="page-dagab" data-page hidden>
-      <div class="lock-overlay" id="lock" style="display:none">
-        <div class="lock-card">
-          <h2 class="lock-title">Logga in</h2>
-          <p class="lock-sub">Ange lösenord för att visa Dagens turer.</p>
-          <div class="lock-row">
-            <input id="pin" class="lock-input" type="password" placeholder="Lösenord">
-            <button id="pinBtn" class="lock-btn">Öppna</button>
-          </div>
-          <div id="lockErr" class="lock-err"></div>
-        </div>
-      </div>
-
       <header class="pagehead">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <h1>Dagens turer</h1>
@@ -125,21 +137,15 @@
       </header>
       <div class="grid" id="grid"></div>
     </section>
-
-    <!-- Nyheter -->
     <section id="page-nyheter" data-page hidden>
       <header class="pagehead"><h1>Nyheter</h1></header>
       <div class="news" id="newsList"></div>
     </section>
-
-    <!-- Kontakter -->
     <section id="page-kontakter" data-page hidden>
       <header class="pagehead"><h1>Kontakter</h1></header>
       <div style="overflow:auto">
         <table class="contacts" id="contactsTable">
-          <thead>
-            <tr><th>Namn</th><th>Roll</th><th>Telefon</th><th>E-post</th></tr>
-          </thead>
+          <thead><tr><th>Namn</th><th>Roll</th><th>Telefon</th><th>E-post</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -147,184 +153,42 @@
   </main>
 
 <script>
-/* ------------ Router (Home/Dagab/Nyheter/Kontakter) ------------ */
-const routes = ['#/home', '#/dagab', '#/nyheter', '#/kontakter'];
-function setActiveLink(hash){
-  document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
-  const el = document.querySelector(`.nav a[href="${hash}"]`);
-  if(el) el.classList.add('active');
-}
-function showPage(id){
-  document.querySelectorAll('[data-page]').forEach(s=>s.hidden = true);
-  document.getElementById(id).hidden = false;
-}
+/* Enkel router */
 function handleRoute(){
   const h = location.hash || '#/home';
-  setActiveLink(h);
-  switch(h){
-    case '#/dagab': showPage('page-dagab'); ensureDagabReady(); break;
-    case '#/nyheter': showPage('page-nyheter'); renderNews(); break;
-    case '#/kontakter': showPage('page-kontakter'); renderContacts(); break;
-    default: showPage('page-home'); break;
-  }
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
+  const active=document.querySelector(`.nav a[href="${h}"]`); if(active) active.classList.add('active');
+  document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
+  const pageMap={'#/home':'page-home','#/dagab':'page-dagab','#/nyheter':'page-nyheter','#/kontakter':'page-kontakter'};
+  const id=pageMap[h]||'page-home';
+  document.getElementById(id).hidden=false;
+  if(h==="#/nyheter") renderNews();
+  if(h==="#/kontakter") renderContacts();
 }
-window.addEventListener('hashchange', handleRoute);
+window.addEventListener('hashchange',handleRoute);
 
-/* ------------------- Lösenord (endast Dagab) ------------------- */
-const REQUIRE_LOGIN = false;     // true = kräver PIN till Dagab
-const LOCK_PIN = 'kof123';
-const LOCK_KEY = 'chaufforinfo-unlocked';
-function isUnlocked(){ return localStorage.getItem(LOCK_KEY)==='true'; }
-function unlock(){ localStorage.setItem(LOCK_KEY,'true'); document.getElementById('lock').style.display='none'; loadData(); }
-function setupLock(){
-  if(!REQUIRE_LOGIN){ document.getElementById('lock').style.display='none'; loadData(); return; }
-  document.getElementById('pinBtn').addEventListener('click', checkPin);
-  document.getElementById('pin').addEventListener('keydown', e=>{ if(e.key==='Enter') checkPin(); });
-  if(isUnlocked()){ document.getElementById('lock').style.display='none'; loadData(); }
-  else document.getElementById('lock').style.display='flex';
-}
-function checkPin(){
-  const ok = document.getElementById('pin').value.trim() === LOCK_PIN;
-  if(ok) unlock(); else document.getElementById('lockErr').textContent='Fel lösenord. Försök igen.';
-}
-
-/* --------------------- Dagab: data & rendering ------------------ */
-let cars = []; // {label, summary, details[]}
-
-async function loadData(){
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '<p>Laddar...</p>';
-  try{
-    const res = await fetch('./data.json?v=' + Date.now(), {cache:'no-store'});
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-
-    document.getElementById('stamp').textContent =
-      'Senast uppdaterad: ' + (new Date(data.updated_at)).toLocaleString();
-
-    if(Array.isArray(data.cars)){
-      cars = data.cars;
-    }else if(Array.isArray(data.blocks)){
-      cars = data.blocks.map((b,i)=>({ label:(b.split(/\n/)[5]||`Bil ${i+1}`), summary:b, details:[] }));
-    }else{ cars = []; }
-
-    const sel = document.getElementById('bilSelect');
-    sel.innerHTML = '<option value="all">Visa alla</option>';
-    cars.forEach((car,i)=>{
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = (car.label && car.label.trim()) ? car.label : `Bil ${i+1}`;
-      sel.appendChild(opt);
-    });
-    sel.value = 'all';
-
-    renderAll();
-  }catch(e){
-    document.getElementById('grid').innerHTML = '<p style="color:#b00020;">Kunde inte läsa data.json</p>';
-    console.error(e);
-  }
-}
-function buildCard(car, idx, expanded=false){
-  const card = document.createElement('div');
-  card.className = 'card' + (expanded?' expanded':'');
-  card.dataset.index = idx;
-
-  const header = document.createElement('div'); header.className='card-header';
-  const chev = document.createElement('span');  chev.className='chev'; chev.textContent='▶';
-  const pre = document.createElement('pre');    pre.className='summary'; pre.textContent = car.summary || '';
-  header.appendChild(chev); header.appendChild(pre); card.appendChild(header);
-
-  const hasDetails = Array.isArray(car.details) && car.details.length > 0;
-  const details = document.createElement('div'); details.className='details';
-
-  if(hasDetails){
-    const hr = document.createElement('hr'); hr.className='divider'; card.appendChild(hr);
-    const ul = document.createElement('ul');
-    car.details.forEach(line=>{
-      const li = document.createElement('li'); li.textContent = line;
-      const lower = line.toLowerCase();
-      if (/\b(frys|kyl|kol)\b/.test(lower)) li.classList.add('qty');
-      if (lower.startsWith('totalt'))       li.classList.add('total');
-      if (lower.startsWith('glöm') || lower.startsWith('glom')) li.classList.add('note');
-      ul.appendChild(li);
-    });
-    details.appendChild(ul); card.appendChild(details);
-  }
-
-  card.addEventListener('click', (e)=>{
-    if(e.target.closest('button') || e.target.closest('select')) return;
-    if(!hasDetails) return;
-    card.classList.toggle('expanded');
-  });
-
-  return card;
-}
-function renderAll(){
-  const grid = document.getElementById('grid');
-  if(!grid) return;
-  grid.innerHTML = '';
-  cars.forEach((car,i)=> grid.appendChild(buildCard(car,i,false)));
-}
-function renderOne(idx){
-  const grid = document.getElementById('grid');
-  if(!grid) return;
-  grid.innerHTML = '';
-  if(cars[idx]) grid.appendChild(buildCard(cars[idx], idx, true));
-}
-function bindDagabControls(){
-  const btn = document.getElementById('refreshBtn');
-  const sel = document.getElementById('bilSelect');
-  if(btn && !btn._bound){ btn.addEventListener('click', loadData); btn._bound=true; }
-  if(sel && !sel._bound){
-    sel.addEventListener('change', e=>{
-      if(e.target.value==='all') renderAll();
-      else renderOne(parseInt(e.target.value,10));
-    });
-    sel._bound=true;
-  }
-}
-let dagabInitialized = false;
-function ensureDagabReady(){
-  if(dagabInitialized) return;
-  dagabInitialized = true;
-  bindDagabControls();
-  setupLock(); // laddar data om login ej krävs/är klar
-}
-
-/* --------------------- Nyheter & Kontakter (dummy-data) ---------- */
-const NEWS = [
-  { title: "Nya rutiner för LotsPDA", date: "2025-03-10", body: "Kom ihåg att kontrollera ordrar före körstart." },
-  { title: "Depå Umeå – port 3 avstängd", date: "2025-03-08", body: "Använd port 4 tills vidare. Skyltning finns på plats." }
-];
-const CONTACTS = [
-  { name:"Transportledningen", role:"Planering", phone:"+46 90 123 45 67", email:"plan@kof.se" },
-  { name:"IT-support", role:"PDA/Åtkomst", phone:"+46 90 765 43 21", email:"it@kof.se" },
-  { name:"Dagab gods", role:"Terminal", phone:"+46 90 555 11 22", email:"terminal@kof.se" }
-];
+/* Dummydata för test */
+const NEWS=[{title:"Ny rutin",date:"2025-10-25",body:"Från måndag gäller nya lossningstider i Bålsta."}];
+const CONTACTS=[{name:"Transportledningen",role:"Planering",phone:"+46 90 123456",email:"plan@kof.se"}];
 
 function renderNews(){
-  const box = document.getElementById('newsList');
-  box.innerHTML = '';
+  const box=document.getElementById('newsList'); box.innerHTML='';
   NEWS.forEach(n=>{
-    const item = document.createElement('div');
-    item.className = 'item';
-    item.innerHTML = `<h3>${n.title}</h3><div class="meta">${new Date(n.date).toLocaleDateString()}</div><p>${n.body}</p>`;
-    box.appendChild(item);
+    const div=document.createElement('div');
+    div.className='item';
+    div.innerHTML=`<h3>${n.title}</h3><div class="meta">${new Date(n.date).toLocaleDateString()}</div><p>${n.body}</p>`;
+    box.appendChild(div);
   });
 }
 function renderContacts(){
-  const tb = document.querySelector('#contactsTable tbody');
-  tb.innerHTML = '';
+  const tb=document.querySelector('#contactsTable tbody'); tb.innerHTML='';
   CONTACTS.forEach(c=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${c.name}</td><td>${c.role}</td><td><a href="tel:${c.phone.replace(/\s+/g,'')}">${c.phone}</a></td><td><a href="mailto:${c.email}">${c.email}</a></td>`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${c.name}</td><td>${c.role}</td><td><a href="tel:${c.phone.replace(/\s+/g,'')}">${c.phone}</a></td><td><a href="mailto:${c.email}">${c.email}</a></td>`;
     tb.appendChild(tr);
   });
 }
-
-/* Start router */
 handleRoute();
 </script>
 </body>
 </html>
-
