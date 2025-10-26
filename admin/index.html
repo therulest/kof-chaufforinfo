@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-  <!-- Flytta ev. Netlify-hash från startsidan hit (om vi kom via invite/reset) -->
+  <!-- Om vi kom via invite/reset: flytta med token till hash -->
   <script>
     (function () {
       try {
@@ -21,27 +21,60 @@
   <link rel="stylesheet" href="https://unpkg.com/decap-cms@^3/dist/decap-cms.css">
 </head>
 <body>
-  <!-- Decap CMS (läser /admin/config.yml automatiskt) -->
+  <!-- Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3/dist/decap-cms.js"></script>
-
-  <!-- Netlify Identity (för inloggning / invite / magic links) -->
+  <!-- Netlify Identity -->
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
   <script>
-    if (window.netlifyIdentity) {
-      // Öppna login direkt om ingen är inloggad
-      window.netlifyIdentity.on('init', function (user) {
-        if (!user) {
-          // om vi kom via invite/reset: öppna login så flödet slutförs
-          if (/(invite_token|confirmation_token|recovery_token)=/i.test(location.hash || "")) {
-            window.netlifyIdentity.open('login');
-          }
+    // Säg åt Decap att vi initierar konfig själv (ingen fetch av /admin/config.yml)
+    window.CMS_MANUAL_INIT = true;
+
+    // Starta CMS med samma config som vi annars haft i config.yml
+    document.addEventListener('DOMContentLoaded', function () {
+      CMS.init({
+        config: {
+          backend: { name: 'git-gateway', branch: 'main' },
+          media_folder: 'static/uploads',
+          public_folder: '/static/uploads',
+          collections: [
+            {
+              name: 'site',
+              label: 'Webbplats',
+              files: [
+                {
+                  name: 'news',
+                  label: 'Nyheter',
+                  file: 'data/news.json',
+                  fields: [
+                    {
+                      label: 'Nyheter',
+                      name: 'items',
+                      widget: 'list',
+                      summary: '{{fields.title}} ({{fields.date}})',
+                      fields: [
+                        { label: 'Titel', name: 'title', widget: 'string' },
+                        { label: 'Datum', name: 'date', widget: 'datetime', format: 'YYYY-MM-DD', time_format: false },
+                        { label: 'Text', name: 'body', widget: 'text' }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       });
-      // Efter login, stanna på admin (fräscha session)
+    });
+
+    // Identity: öppna login vid behov, stanna på /admin efter login
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on('init', function (user) {
+        if (!user) window.netlifyIdentity.open('login');
+      });
       window.netlifyIdentity.on('login', function () {
         location.replace('/admin/');
       });
-      // Vid logout, ladda om
       window.netlifyIdentity.on('logout', function () {
         location.reload();
       });
