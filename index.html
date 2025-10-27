@@ -6,34 +6,33 @@
 <title>KOF – Chaufförportal</title>
 
 <style>
-:root{
-  --border:#e5e7eb;
-  --shadow:0 1px 3px rgba(0,0,0,.05);
-}
+:root{ --border:#e5e7eb; --shadow:0 1px 3px rgba(0,0,0,.05); }
+*{box-sizing:border-box}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:#111}
-main{max-width:1200px;margin:0 auto;padding:16px}
 
-.topbar{display:flex;align-items:center;justify-content:space-between;
-  background:#fff;border-bottom:1px solid #e5e7eb;padding:10px 16px;position:sticky;top:0;z-index:10}
-.topbar h1{margin:0;font-size:17px;color:#0284c7}
-.topbar .nav{display:flex;gap:20px}
-.topbar a{text-decoration:none;color:#333}
-.topbar a.active{color:#0284c7;font-weight:600}
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;background:#fff;
+  border-bottom:1px solid #e5e7eb;padding:10px 16px;position:sticky;top:0;z-index:10}
+.brand{margin:0;font-size:17px;color:#0284c7}
+.nav{display:flex;gap:18px}
+.nav a{text-decoration:none;color:#333}
+.nav a.active{color:#0284c7;font-weight:600}
 
-/* Mobilmeny */
+/* Mobil-ikon-meny */
 .mobile-launcher{display:none;max-width:1200px;margin:12px auto 0;padding:0 16px}
 .ml-wrap{background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;
-         display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .ml-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:12px}
 .micon{width:48px;height:48px;border-radius:50%;background:#fff;display:grid;place-items:center;
-       box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
+  box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
 .ml-label{font-size:13px;color:#111827}
-@media(max-width:700px){
-  .topbar .nav{display:none}
-  .mobile-launcher{display:block}
-}
+@media(max-width:700px){ .nav{display:none} .mobile-launcher{display:block} }
 
-/* Kortlayout */
+/* Sidlayout */
+.page{max-width:1200px;margin:16px auto;padding:0 16px 24px}
+.page h2{margin-top:0}
+
+/* Kortlayout (Dagab) */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-top:10px}
 .card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);
   overflow:hidden;cursor:pointer;transition:box-shadow .15s ease}
@@ -54,154 +53,186 @@ main{max-width:1200px;margin:0 auto;padding:16px}
 .details li.total{font-weight:600}
 .details li.note{margin-top:6px;color:#991b1b}
 
-/* Övrigt */
-footer{margin-top:30px;color:#6b7280;font-size:13px;text-align:right}
+.muted{color:#6b7280;font-size:13px}
 </style>
 </head>
 <body>
 
+<!-- TOPPMENY -->
 <header class="topbar">
-  <h1>KOF – Chaufförportal</h1>
+  <h1 class="brand">KOF – Chaufförportal</h1>
   <nav class="nav">
-    <a href="#" class="active">Home</a>
-    <a href="#">Dagab</a>
-    <a href="#">Nyheter</a>
-    <a href="#">Kontakter</a>
+    <a href="#/home" id="link-home">Home</a>
+    <a href="#/dagab" id="link-dagab">Dagab</a>
+    <a href="#/nyheter" id="link-nyheter">Nyheter</a>
+    <a href="#/kontakter" id="link-kontakter">Kontakter</a>
   </nav>
 </header>
 
-<!-- MOBILMENY -->
+<!-- MOBILMENY (ikoner) -->
 <div class="mobile-launcher">
   <div class="ml-wrap">
-    <a class="ml-item" href="#"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
-    <a class="ml-item" href="#"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
-    <a class="ml-item" href="#"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
-    <a class="ml-item" href="#"><span class="micon">👥</span><span class="ml-label">Kontakter</span></a>
+    <a class="ml-item" href="#/home" id="ml-home"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
+    <a class="ml-item" href="#/dagab" id="ml-dagab"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
+    <a class="ml-item" href="#/nyheter" id="ml-nyheter"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
+    <a class="ml-item" href="#/kontakter" id="ml-kontakter"><span class="micon">👥</span><span class="ml-label">Kontakter</span></a>
   </div>
 </div>
 
+<!-- SIDOR -->
 <main>
-  <h2>Dagens turer</h2>
-  <div id="grid" class="grid"></div>
-  <footer id="status"></footer>
+  <!-- HOME -->
+  <section id="page-home" class="page" data-page>
+    <h2>Välkommen!</h2>
+    <p>Välj en sida i menyn ovan. Dagliga turer finns under <strong>Dagab</strong>.</p>
+  </section>
+
+  <!-- DAGAB -->
+  <section id="page-dagab" class="page" data-page hidden>
+    <h2>Dagens turer</h2>
+    <div id="grid" class="grid"></div>
+    <p id="status" class="muted" style="text-align:right;margin-top:10px"></p>
+  </section>
+
+  <!-- NYHETER -->
+  <section id="page-nyheter" class="page" data-page hidden>
+    <h2>Nyheter</h2>
+    <p class="muted">(Plats för nyheter.)</p>
+  </section>
+
+  <!-- KONTAKTER -->
+  <section id="page-kontakter" class="page" data-page hidden>
+    <h2>Kontakter</h2>
+    <p class="muted">(Plats för kontakter.)</p>
+  </section>
 </main>
 
 <script>
-const dataUrl = "https://therulest.github.io/kof-chaufforinfo/data.json";
+/* ---------------- Router ---------------- */
+function setActive(hash){
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
+  document.querySelectorAll('.mobile-launcher .ml-item').forEach(a=>a.classList.remove('active'));
+  const d = document.querySelector(`.nav a[href="${hash}"]`); if(d) d.classList.add('active');
+  const m = document.querySelector(`.mobile-launcher .ml-item[href="${hash}"]`); if(m) m.classList.add('active');
+}
+function showPage(id){
+  document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
+  document.getElementById(id).hidden=false;
+}
+function handleRoute(){
+  const h = location.hash || '#/home';
+  setActive(h);
+  if(h === '#/dagab'){ showPage('page-dagab'); ensureDagabReady(); }
+  else if(h === '#/nyheter'){ showPage('page-nyheter'); }
+  else if(h === '#/kontakter'){ showPage('page-kontakter'); }
+  else { showPage('page-home'); }
+}
+window.addEventListener('hashchange', handleRoute);
 
-async function loadData(){
-  try {
-    const res = await fetch(dataUrl + "?v=" + Date.now());
-    if(!res.ok) throw new Error(res.status);
-    const json = await res.json();
-    buildAll(json);
-  } catch(err){
-    document.getElementById('status').textContent = "Kunde inte läsa data: " + err;
+/* --------------- Dagab --------------- */
+const DATA_URL = "https://therulest.github.io/kof-chaufforinfo/data.json";
+let dagabInitialized = false;
+
+function ensureDagabReady(){
+  if(dagabInitialized) return;
+  dagabInitialized = true;
+  loadDagab();
+}
+
+async function loadDagab(){
+  const grid = document.getElementById('grid');
+  const status = document.getElementById('status');
+  grid.innerHTML = '<p>Laddar…</p>'; status.textContent = '';
+  try{
+    const res = await fetch(DATA_URL + '?v=' + Date.now(), {cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    buildCards(data);
+    const t = new Date(data.updated_at || Date.now());
+    status.textContent = 'Senast uppdaterad: ' + t.toLocaleString('sv-SE');
+  }catch(err){
+    grid.innerHTML = '<p style="color:#b00020">Kunde inte läsa data.</p>';
+    status.textContent = String(err);
   }
 }
 
-function buildAll(json){
+function buildCards(data){
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-  const cars = json.cars || [];
-  cars.forEach((car,i)=>grid.append(buildCard(car,i)));
-  const t = new Date(json.updated_at || Date.now());
-  document.getElementById('status').textContent =
-    "Senast uppdaterad: " + t.toLocaleString('sv-SE');
+  const cars = data.cars || [];
+  cars.forEach((car,i)=>grid.append(buildCard(car,i,false)));
 }
 
 function buildCard(car, idx, expanded=false){
   const card = document.createElement('div');
   card.className = 'card' + (expanded ? ' expanded' : '');
 
-  // --- säkra data ---
+  // Säkra data
   const summaryText = String(car.summary || '');
-  const allLines = summaryText.split(/\r?\n/);
-  const headLines = allLines.slice(0, 6);             // rad 1–6 i headern
-  let detailsLines = Array.isArray(car.details) && car.details.length
-    ? car.details.map(String)
-    : allLines.slice(6);                               // annars rad 7–… ur summary
+  const lines = summaryText.split(/\r?\n/);
+  const head = lines.slice(0,6);
+  const details = Array.isArray(car.details) && car.details.length ? car.details.map(String) : lines.slice(6);
 
-  // --- header ---
-  const header = document.createElement('div');
-  header.className = 'card-header';
-  const chev = document.createElement('span');
-  chev.className = 'chev';
-  chev.textContent = '▶';
-  const pre = document.createElement('pre');
-  pre.className = 'summary';
-  pre.textContent = headLines.join('\n');
-  header.append(chev, pre);
-  card.append(header);
+  // Header
+  const header = document.createElement('div'); header.className='card-header';
+  const chev = document.createElement('span'); chev.className='chev'; chev.textContent='▶';
+  const pre = document.createElement('pre'); pre.className='summary'; pre.textContent=head.join('\n');
+  header.append(chev, pre); card.append(header);
 
-  // --- details (dold) ---
-  if (detailsLines.length) {
-    card.append(Object.assign(document.createElement('hr'), {className:'divider'}));
-    const details = document.createElement('div');
-    details.className = 'details';
+  // Details
+  if(details.length){
+    card.append(Object.assign(document.createElement('hr'),{className:'divider'}));
+    const d = document.createElement('div'); d.className='details';
     const ul = document.createElement('ul');
 
-    for (let i = 0; i < detailsLines.length; i++) {
-      const line = detailsLines[i];
+    for(let i=0;i<details.length;i++){
+      const line = String(details[i]);
       const lower = line.toLowerCase().trim();
 
-      // Grupp Frys/Kyl/Kol i ett block
-      if (/^frys\s*:/.test(lower)) {
-        const group = [line];
-        const n1 = detailsLines[i+1] || '', n2 = detailsLines[i+2] || '';
-        if (/^\s*kyl\s*:/.test(String(n1).toLowerCase())) { group.push(n1); i++; }
-        if (/^\s*kol\s*:/.test(String(n2).toLowerCase())) { group.push(n2); i++; }
-        const li = document.createElement('li');
-        li.className = 'qtyblock';
-        li.innerHTML = group.map(t => `<div>${escapeHtml(t)}</div>`).join('');
-        ul.append(li);
-        continue;
+      // Frys/Kyl/Kol i block
+      if(/^frys\s*:/.test(lower)){
+        const group=[line];
+        const n1=details[i+1]||'', n2=details[i+2]||'';
+        if(/^\s*kyl\s*:/.test(String(n1).toLowerCase())){ group.push(n1); i++; }
+        if(/^\s*kol\s*:/.test(String(n2).toLowerCase())){ group.push(n2); i++; }
+        const li=document.createElement('li'); li.className='qtyblock';
+        li.innerHTML=group.map(t=>`<div>${escapeHtml(t)}</div>`).join('');
+        ul.append(li); continue;
       }
 
-      // Vanlig rad
-      const li = document.createElement('li');
-      li.textContent = line;
+      const li=document.createElement('li'); li.textContent=line;
+      const isQty=/\b(frys|kyl|kol)\b/.test(lower);
+      const isTotal=lower.startsWith('totalt');
+      const isNote=lower.startsWith('glöm')||lower.startsWith('glom');
+      if(isQty) li.classList.add('qty');
+      if(isTotal) li.classList.add('total');
+      if(isNote) li.classList.add('note');
 
-      const isQty   = /\b(frys|kyl|kol)\b/.test(lower);
-      const isTotal = lower.startsWith('totalt');
-      const isNote  = lower.startsWith('glöm') || lower.startsWith('glom');
-
-      if (isQty)   li.classList.add('qty');
-      if (isTotal) li.classList.add('total');
-      if (isNote)  li.classList.add('note');
-
-      // Butiksrad = nästa rad är qty
-      const next = detailsLines[i+1];
-      if (next) {
-        const nextIsQty = /\b(frys|kyl|kol)\b/.test(String(next).toLowerCase());
-        if (!isQty && !isTotal && !isNote && nextIsQty) li.classList.add('store');
+      const next=details[i+1];
+      if(next){
+        const nextIsQty=/\b(frys|kyl|kol)\b/.test(String(next).toLowerCase());
+        if(!isQty && !isTotal && !isNote && nextIsQty) li.classList.add('store');
       }
-
       ul.append(li);
     }
-
-    details.append(ul);
-    card.append(details);
+    d.append(ul); card.append(d);
   }
 
-  // --- expand/collapse på klick ---
-  card.addEventListener('click', (e) => {
-    if (e.target.closest('button,select,a')) return; // ignorerar klick på kontroller
-    if (!card.querySelector('.details')) return;
+  // Expand/collapse
+  card.addEventListener('click', e=>{
+    if(e.target.closest('button,select,a')) return;
+    if(!card.querySelector('.details')) return;
     card.classList.toggle('expanded');
   });
 
   return card;
 }
 
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-loadData();
+/* Start */
+handleRoute();           // visa rätt sida vid laddning
 </script>
-
 </body>
 </html>
-
 
