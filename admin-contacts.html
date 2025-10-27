@@ -3,206 +3,359 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin – Kontakter</title>
+<title>KOF – Chaufförportal</title>
+
 <style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:16px;background:#fafafa;color:#111}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:16px;max-width:1000px;margin:0 auto}
-  h1{margin:0 0 12px}
-  .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
-  input,button{font:inherit}
-  input{border:1px solid #d1d5db;border-radius:8px;padding:10px;min-width:240px}
-  button{background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:10px 14px;cursor:pointer}
-  button.secondary{background:#6b7280}
-  table{width:100%;border-collapse:collapse;margin-top:16px}
-  th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:top}
-  .muted{color:#6b7280}
+:root{
+  --border:#e5e7eb; --shadow:0 1px 3px rgba(0,0,0,.05);
+  --wrap:1000px;
+}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:#111}
+
+/* Topbar */
+.topbar{background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:10}
+.topbar .wrap{max-width:var(--wrap);margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{margin:0;font-size:17px;color:#0284c7}
+.nav{display:flex;gap:18px}
+.nav a{text-decoration:none;color:#333}
+.nav a.active{color:#0284c7;font-weight:600}
+
+/* Mobil-ikon-meny */
+.mobile-launcher{display:none}
+@media(max-width:700px){
+  .nav{display:none}
+  .mobile-launcher{display:block}
+}
+.mobile-launcher .wrap{max-width:var(--wrap);margin:12px auto 0;padding:0 16px}
+.ml-grid{background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ml-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:12px}
+.micon{width:48px;height:48px;border-radius:50%;background:#fff;display:grid;place-items:center;
+  box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
+.ml-label{font-size:13px;color:#111827}
+
+/* Sidlayout */
+.page{max-width:var(--wrap);margin:16px auto;padding:0 16px 24px}
+.page h2{margin-top:0}
+
+/* Kortlayout (Dagab) */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-top:10px}
+.card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);
+  overflow:hidden;cursor:pointer;transition:box-shadow .15s ease}
+.card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.card-header{display:flex;align-items:center;gap:10px;padding:12px}
+.chev{transition:transform .18s ease;user-select:none;font-size:16px}
+.card.expanded .chev{transform:rotate(90deg)}
+.summary{white-space:pre-wrap;margin:0;flex:1;font-size:14px;line-height:1.3}
+.divider{border:none;border-top:1px solid #eee;margin:0}
+.details{display:none;padding:10px 14px 12px}
+.card.expanded .details{display:block}
+.details ul{margin:8px 0 0 0;padding-left:20px;line-height:1.4}
+.details li{margin-bottom:6px}
+.details li.store{font-weight:600;color:#111827}
+.details li.qty{color:#4b5563}
+.details li.qtyblock>div{line-height:1.3}
+.details li.total{font-weight:600}
+.details li.note{margin-top:6px;color:#991b1b}
+.muted{color:#6b7280;font-size:13px}
+
+/* Nyheter */
+.news{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:14px}
+.news .item h3{margin:0 0 6px}
+.news .meta{font-size:12px;color:#6b7280;margin-bottom:8px}
+
+/* Nyhetslänkar på Home */
+.news-links{list-style:none;padding:0;margin:12px 0 0}
+.news-links li{margin:0 0 10px}
+.news-links a{display:block;background:#fff;border:1px solid var(--border);border-radius:12px;
+  padding:12px 14px;box-shadow:var(--shadow);text-decoration:none;color:#111;transition:box-shadow .15s}
+.news-links a:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.news-links .title{font-weight:600}
+.news-links .meta{font-size:12px;color:#6b7280;margin-top:4px}
+
+/* Highlight nyhet */
+.highlight{animation:flash 1.3s ease-out 1}
+@keyframes flash{
+  0%{box-shadow:0 0 0 0 rgba(2,132,199,.45)}
+  40%{box-shadow:0 0 0 6px rgba(2,132,199,.15)}
+  100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}
+}
+
+/* Kontakter: mobilvänlig accordion */
+.contacts-acc{display:grid;gap:10px}
+.contact-card{
+  border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);
+  overflow:hidden
+}
+.contact-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 14px;cursor:pointer
+}
+.contact-head .name{font-weight:600}
+.contact-head .chev{transition:transform .18s ease;font-size:16px}
+.contact-card.open .contact-head .chev{transform:rotate(90deg)}
+.contact-body{display:none;padding:0 14px 12px 14px}
+.contact-card.open .contact-body{display:block}
+.contact-body .row{margin:8px 0;color:#374151}
+.contact-body a{color:#0ea5e9;text-decoration:none}
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>Admin – Kontakter</h1>
 
-  <!-- Auth -->
-  <div id="auth">
-    <div class="row">
-      <input id="email" type="email" placeholder="E-post">
-      <input id="password" type="password" placeholder="Lösenord">
-      <button id="loginBtn">Logga in</button>
-      <button id="logoutBtn" class="secondary" style="display:none">Logga ut</button>
-      <span id="who" class="muted"></span>
+<!-- TOPPMENY -->
+<header class="topbar">
+  <div class="wrap">
+    <h1 class="brand">KOF – Chaufförportal</h1>
+    <nav class="nav">
+      <a href="#/home" id="link-home">Home</a>
+      <a href="#/dagab" id="link-dagab">Dagab</a>
+      <a href="#/nyheter" id="link-nyheter">Nyheter</a>
+      <a href="#/kontakter" id="link-kontakter">Kontakter</a>
+    </nav>
+  </div>
+</header>
+
+<!-- MOBILMENY -->
+<div class="mobile-launcher">
+  <div class="wrap">
+    <div class="ml-grid">
+      <a class="ml-item" href="#/home"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
+      <a class="ml-item" href="#/dagab"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
+      <a class="ml-item" href="#/nyheter"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
+      <a class="ml-item" href="#/kontakter"><span class="micon">👥</span><span class="ml-label">Kontakter</span></a>
     </div>
   </div>
-
-  <!-- Form -->
-  <div id="form" style="display:none">
-    <h3 id="formTitle">Skapa kontakt</h3>
-    <div class="row">
-      <input id="name" placeholder="Namn">
-      <input id="role" placeholder="Roll">
-      <input id="phone" placeholder="Telefon">
-      <input id="emailField" placeholder="E-post">
-      <input id="sort" type="number" placeholder="Sort (t.ex. 10)">
-    </div>
-    <div class="row">
-      <button id="saveBtn">Spara</button>
-      <button id="cancelBtn" class="secondary" style="display:none">Avbryt</button>
-    </div>
-  </div>
-
-  <!-- Lista -->
-  <h3 style="margin-top:20px">Kontaktlista</h3>
-  <table>
-    <thead><tr><th>Namn</th><th>Roll</th><th>Telefon</th><th>E-post</th><th>Sort</th><th></th></tr></thead>
-    <tbody id="tbody"></tbody>
-  </table>
-  <p class="muted">Sortering sker på “sort” (lägst först), därefter namn.</p>
 </div>
 
+<!-- SIDOR -->
+<main>
+  <!-- HOME -->
+  <section id="page-home" class="page" data-page>
+    <h2>Välkommen till KOF-Nords Chaufförsportal</h2>
+    <p>Här ser du de senaste uppdateringarna. Klicka för att läsa hela nyheten under <em>Nyheter</em>.</p>
+    <h3 style="margin-top:18px">📰 Senaste nytt</h3>
+    <ul id="latestNewsLinks" class="news-links"></ul>
+  </section>
+
+  <!-- DAGAB -->
+  <section id="page-dagab" class="page" data-page hidden>
+    <h2>Dagens turer</h2>
+    <div id="grid" class="grid"></div>
+    <p id="status" class="muted" style="text-align:right;margin-top:10px"></p>
+  </section>
+
+  <!-- NYHETER -->
+  <section id="page-nyheter" class="page" data-page hidden>
+    <h2>Nyheter</h2>
+    <div id="newsList" class="news"></div>
+  </section>
+
+  <!-- KONTAKTER -->
+  <section id="page-kontakter" class="page" data-page hidden>
+    <h2>Kontakter</h2>
+    <div id="contactsList" class="contacts-acc"></div>
+  </section>
+</main>
+
+<!-- APP SCRIPT -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+/* ---------- Router ---------- */
+function setActive(hash){
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
+  const clean = hash.split('/').slice(0,2).join('/');
+  const link = document.querySelector(`.nav a[href="${clean}"]`);
+  if(link) link.classList.add('active');
+}
+function showPage(id){
+  document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
+  document.getElementById(id).hidden=false;
+}
+function handleRoute(){
+  const h = location.hash || '#/home';
+  setActive(h);
+  const parts = h.split('/');
+  const route = parts[1] || 'home';
+  const param = parts[2] || null;
 
-// Din Firebase-konfig
-const firebaseConfig = {
-  apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
-  authDomain: "kofnord-1e371.firebaseapp.com",
-  projectId: "kofnord-1e371",
-  storageBucket: "kofnord-1e371.appspot.com",
-  messagingSenderId: "559491880457",
-  appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
-};
+  if(route==='dagab'){ showPage('page-dagab'); ensureDagabReady(); }
+  else if(route==='nyheter'){ showPage('page-nyheter'); renderNewsAll(param); }
+  else if(route==='kontakter'){ showPage('page-kontakter'); renderContacts(); }
+  else { showPage('page-home'); renderLatestNewsLinks(); }
+}
+window.addEventListener('hashchange', handleRoute);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
+/* ---------- Dagab (from GitHub JSON) ---------- */
+const DATA_URL="https://therulest.github.io/kof-chaufforinfo/data.json";
+let dagabInitialized=false;
+function ensureDagabReady(){ if(!dagabInitialized){ dagabInitialized=true; loadDagab(); } }
 
-// UI refs
-const emailEl = document.getElementById('email');
-const passEl  = document.getElementById('password');
-const loginBtn = document.getElementById('loginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const who = document.getElementById('who');
-
-const form = document.getElementById('form');
-const formTitle = document.getElementById('formTitle');
-const nameEl  = document.getElementById('name');
-const roleEl  = document.getElementById('role');
-const phoneEl = document.getElementById('phone');
-const mailEl  = document.getElementById('emailField');
-const sortEl  = document.getElementById('sort');
-const saveBtn = document.getElementById('saveBtn');
-const cancelBtn = document.getElementById('cancelBtn');
-
-const tbody = document.getElementById('tbody');
-
-let editId = null;
-
-// Auth state
-onAuthStateChanged(auth, user => {
-  const isIn = !!user;
-  emailEl.style.display = passEl.style.display = isIn ? 'none' : '';
-  loginBtn.style.display = isIn ? 'none' : '';
-  logoutBtn.style.display = isIn ? '' : 'none';
-  who.textContent = isIn ? `Inloggad som ${user.email}` : '';
-  form.style.display = isIn ? '' : 'none';
-  tbody.innerHTML = isIn ? '' : '<tr><td colspan="6" class="muted">Logga in för att se och redigera kontakter.</td></tr>';
-  if (isIn) loadContacts();
-});
-
-loginBtn.addEventListener('click', async () => {
-  const email = emailEl.value.trim();
-  const pwd   = passEl.value.trim();
-  if (!email || !pwd) { alert('Fyll i e-post och lösenord.'); return; }
-  try {
-    await signInWithEmailAndPassword(auth, email, pwd);
-  } catch (e) {
-    console.error(e); alert('Inloggning misslyckades.');
+async function loadDagab(){
+  const grid=document.getElementById('grid');
+  const status=document.getElementById('status');
+  grid.innerHTML='<p>Laddar…</p>'; status.textContent='';
+  try{
+    const res=await fetch(DATA_URL+'?v='+Date.now(),{cache:'no-store'});
+    const data=await res.json();
+    buildCards(data);
+    const t=new Date(data.updated_at||Date.now());
+    status.textContent='Senast uppdaterad: '+t.toLocaleString('sv-SE');
+  }catch(e){
+    grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>';
   }
-});
-
-logoutBtn.addEventListener('click', () => signOut(auth));
-
-// CRUD
-async function loadContacts() {
-  const q = query(collection(db,'contacts'), orderBy('sort'), orderBy('name'), limit(500));
-  const snap = await getDocs(q);
-  tbody.innerHTML = '';
-  snap.forEach(d => {
-    const c = d.data();
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${c.name || ''}</td>
-      <td>${c.role || ''}</td>
-      <td>${c.phone || ''}</td>
-      <td>${c.email || ''}</td>
-      <td>${c.sort ?? ''}</td>
-      <td>
-        <button data-edit="${d.id}">Redigera</button>
-        <button data-del="${d.id}" class="secondary">Ta bort</button>
-      </td>`;
-    tbody.appendChild(tr);
-  });
 }
 
-tbody.addEventListener('click', async (e) => {
-  const id = e.target.dataset.edit || e.target.dataset.del;
-  if (!id) return;
+function buildCards(data){
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  (data.cars||[]).forEach((car,i)=>grid.append(buildCard(car,i,false)));
+}
 
-  if (e.target.dataset.edit) {
-    // fyll formulär
-    editId = id;
-    formTitle.textContent = 'Redigera kontakt';
-    const rows = await getDocs(query(collection(db,'contacts'), orderBy('sort')));
-    rows.forEach(r => {
-      if (r.id === id) {
-        const c = r.data();
-        nameEl.value  = c.name  || '';
-        roleEl.value  = c.role  || '';
-        phoneEl.value = c.phone || '';
-        mailEl.value  = c.email || '';
-        sortEl.value  = (c.sort ?? '');
+function buildCard(car,idx,expanded){
+  const card=document.createElement('div');
+  card.className='card'+(expanded?' expanded':'');
+  const summaryText=String(car.summary||'');
+  const lines=summaryText.split(/\r?\n/);
+  const head=lines.slice(0,6);
+  const details=Array.isArray(car.details)&&car.details.length?car.details.map(String):lines.slice(6);
+  const header=document.createElement('div');header.className='card-header';
+  const chev=document.createElement('span');chev.className='chev';chev.textContent='▶';
+  const pre=document.createElement('pre');pre.className='summary';pre.textContent=head.join('\n');
+  header.append(chev,pre);card.append(header);
+  if(details.length){
+    card.append(Object.assign(document.createElement('hr'),{className:'divider'}));
+    const d=document.createElement('div');d.className='details';
+    const ul=document.createElement('ul');
+    for(let i=0;i<details.length;i++){
+      const line=String(details[i]);const lower=line.toLowerCase().trim();
+      if(/^frys\s*:/.test(lower)){
+        const group=[line];const n1=details[i+1]||'',n2=details[i+2]||'';
+        if(/^\s*kyl\s*:/.test(String(n1).toLowerCase())){group.push(n1);i++;}
+        if(/^\s*kol\s*:/.test(String(n2).toLowerCase())){group.push(n2);i++;}
+        const li=document.createElement('li');li.className='qtyblock';
+        li.innerHTML=group.map(t=>`<div>${escapeHtml(t)}</div>`).join('');
+        ul.append(li);continue;
       }
-    });
-    cancelBtn.style.display = '';
-  } else if (e.target.dataset.del) {
-    if (confirm('Ta bort kontakten?')) {
-      await deleteDoc(doc(db,'contacts',id));
-      await loadContacts();
+      const li=document.createElement('li');li.textContent=line;
+      const isQty=/\b(frys|kyl|kol)\b/.test(lower);
+      const isTotal=lower.startsWith('totalt');
+      const isNote=lower.startsWith('glöm')||lower.startsWith('glom');
+      if(isQty)li.classList.add('qty');
+      if(isTotal)li.classList.add('total');
+      if(isNote)li.classList.add('note');
+      const next=details[i+1];
+      if(next){
+        const nextIsQty=/\b(frys|kyl|kol)\b/.test(String(next).toLowerCase());
+        if(!isQty&&!isTotal&&!isNote&&nextIsQty)li.classList.add('store');
+      }
+      ul.append(li);
     }
+    d.append(ul);card.append(d);
   }
-});
+  card.addEventListener('click',()=>card.classList.toggle('expanded'));
+  return card;
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
-saveBtn.addEventListener('click', async () => {
-  const payload = {
-    name:  nameEl.value.trim(),
-    role:  roleEl.value.trim(),
-    phone: phoneEl.value.trim(),
-    email: mailEl.value.trim(),
-    sort:  sortEl.value === '' ? 9999 : Number(sortEl.value)
-  };
-  if (!payload.name || !payload.role) { alert('Namn och roll krävs.'); return; }
+/* ---------- Firebase (news + contacts) ---------- */
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,collection,getDocs,orderBy,limit,query} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig={
+  apiKey:"AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
+  authDomain:"kofnord-1e371.firebaseapp.com",
+  projectId:"kofnord-1e371",
+  storageBucket:"kofnord-1e371.appspot.com",
+  messagingSenderId:"559491880457",
+  appId:"1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
+};
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
-  if (editId) {
-    await updateDoc(doc(db,'contacts',editId), payload);
-  } else {
-    await addDoc(collection(db,'contacts'), payload);
-  }
+/* Home – 3 senaste nyheterna som länkar */
+let latestRendered=false;
+async function renderLatestNewsLinks(){
+  if(latestRendered)return;
+  const list=document.getElementById('latestNewsLinks');
+  list.innerHTML='<li class="muted">Laddar nyheter…</li>';
+  try{
+    const qy=query(collection(db,'news'),orderBy('date','desc'),limit(3));
+    const snap=await getDocs(qy);
+    list.innerHTML='';
+    snap.forEach(d=>{
+      const n=d.data();
+      const dstr=n.date?new Date(n.date).toLocaleDateString('sv-SE'):'';
+      const preview=(n.body||'').split('\n')[0];
+      const li=document.createElement('li');
+      li.innerHTML=`<a href="#/nyheter/${d.id}"><div class="title">${escapeHtml(n.title||'')}</div><div class="meta">${dstr}${preview?' • '+escapeHtml(preview):''}</div></a>`;
+      list.appendChild(li);
+    });
+    latestRendered=true;
+  }catch(e){list.innerHTML='<li style="color:#b00020">Kunde inte läsa nyheter.</li>';}
+}
 
-  // reset
-  editId = null;
-  formTitle.textContent = 'Skapa kontakt';
-  cancelBtn.style.display = 'none';
-  nameEl.value = roleEl.value = phoneEl.value = mailEl.value = ''; sortEl.value = '';
-  await loadContacts();
-});
+/* Nyheter – hela listan, med highlight när man kom från Home */
+let newsLoaded=false;
+async function renderNewsAll(targetId=null){
+  const box=document.getElementById('newsList');
+  if(!newsLoaded){box.innerHTML='<p class="muted">Laddar nyheter…</p>';}
+  try{
+    if(!newsLoaded){
+      const qy=query(collection(db,'news'),orderBy('date','desc'));
+      const snap=await getDocs(qy);
+      box.innerHTML='';
+      snap.forEach(d=>{
+        const n=d.data();
+        const div=document.createElement('div');
+        div.className='item';
+        div.id='news-'+d.id;
+        div.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3><div class="meta">${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div><p>${escapeHtml(n.body||'').replace(/\n/g,'<br>')}</p>`;
+        box.append(div);
+      });
+      newsLoaded=true;
+    }
+    if(targetId){
+      const el=document.getElementById('news-'+targetId);
+      if(el){el.classList.add('highlight');setTimeout(()=>el.classList.remove('highlight'),1500);el.scrollIntoView({behavior:'smooth',block:'start'});}
+    }
+  }catch(e){box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>';}
+}
 
-cancelBtn.addEventListener('click', () => {
-  editId = null;
-  formTitle.textContent = 'Skapa kontakt';
-  cancelBtn.style.display = 'none';
-  nameEl.value = roleEl.value = phoneEl.value = mailEl.value = ''; sortEl.value = '';
-});
+/* Kontakter – accordion */
+let contactsLoaded=false;
+async function renderContacts(){
+  const box=document.getElementById('contactsList');
+  if(contactsLoaded && box.dataset.filled==='1') return;
+  box.innerHTML='<div class="muted">Laddar kontakter…</div>';
+  try{
+    const qy=query(collection(db,'contacts'),orderBy('sort','asc'));
+    const snap=await getDocs(qy);
+    box.innerHTML='';
+    snap.forEach(d=>{
+      const c=d.data();
+      const card=document.createElement('div');
+      card.className='contact-card';
+      card.innerHTML=`
+        <div class="contact-head">
+          <span class="name">${escapeHtml(c.name||'')}</span>
+          <span class="chev">▶</span>
+        </div>
+        <div class="contact-body">
+          ${c.role?`<div class="row"><strong>Roll:</strong> ${escapeHtml(c.role)}</div>`:''}
+          ${c.phone?`<div class="row"><strong>Telefon:</strong> <a href="tel:${escapeHtml(String(c.phone).replace(/\s+/g,''))}">${escapeHtml(c.phone)}</a></div>`:''}
+          ${c.email?`<div class="row"><strong>E-post:</strong> <a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a></div>`:''}
+        </div>`;
+      card.querySelector('.contact-head').addEventListener('click',()=>card.classList.toggle('open'));
+      box.append(card);
+    });
+    box.dataset.filled='1';
+    contactsLoaded=true;
+  }catch(e){box.innerHTML='<div style="color:#b00020">Kunde inte läsa kontakter.</div>';}
+}
+
+/* Start */
+handleRoute();
 </script>
 </body>
 </html>
+
