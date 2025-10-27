@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin – Nyheter</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:16px;background:#fafafa;color:#111}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:16px;max-width:900px;margin:0 auto}
+  h1{margin:0 0 12px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  input,textarea,button{font:inherit}
+  input,textarea{border:1px solid #d1d5db;border-radius:8px;padding:10px;min-width:260px}
+  textarea{min-height:120px;width:100%}
+  button{background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:10px 14px;cursor:pointer}
+  button.secondary{background:#6b7280}
+  table{width:100%;border-collapse:collapse;margin-top:16px}
+  th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:top}
+  .muted{color:#6b7280}
+  .right{float:right}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Admin – Nyheter</h1>
+  <div id="auth">
+    <button id="loginBtn">Logga in</button>
+    <button id="logoutBtn" class="secondary" style="display:none">Logga ut</button>
+    <span id="who" class="muted"></span>
+  </div>
+
+  <div id="form" style="display:none;margin-top:16px">
+    <h3 id="formTitle">Skapa nyhet</h3>
+    <div class="row">
+      <input id="title" placeholder="Titel">
+      <input id="date" type="date">
+    </div>
+    <div class="row">
+      <textarea id="body" placeholder="Text …"></textarea>
+    </div>
+    <div class="row">
+      <button id="saveBtn">Spara</button>
+      <button id="cancelBtn" class="secondary" style="display:none">Avbryt</button>
+    </div>
+  </div>
+
+  <h3 style="margin-top:20px">Nyhetslista</h3>
+  <table id="tbl">
+    <thead><tr><th>Titel</th><th>Datum</th><th>Text</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <p class="muted">Visar de senaste 100 posterna, sorterat på datum.</p>
+</div>
+
+<!-- Firebase SDK v9 (modulscript) -->
+<script type="module">
+  // ======= Fyll i din Firebase-konfig här =======
+  const firebaseConfig = {
+    apiKey: "API_KEY",
+    authDomain: "PROJECT_ID.firebaseapp.com",
+    projectId: "PROJECT_ID",
+    appId: "APP_ID",
+  };
+  // ==============================================
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, signInWithEmailLink, isSignInWithEmailLink,
+    sendSignInLinkToEmail, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, updateDoc, deleteDoc,
+    doc, getDocs, query, orderBy, limit
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  const loginBtn  = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const who       = document.getElementById('who');
+  const form      = document.getElementById('form');
+  const formTitle = document.getElementById('formTitle');
+  const titleEl   = document.getElementById('title');
+  const dateEl    = document.getElementById('date');
+  const bodyEl    = document.getElementById('body');
+  const saveBtn   = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const tbody     = document.querySelector('#tbl tbody');
+
+  let editId = null; // doc id om vi redigerar
+
+  // --- Auth state ---
+  onAuthStateChanged(auth, user => {
+    const isIn = !!user;
+    loginBtn.style.display  = isIn ? 'none' : '';
+    logoutBtn.style.display = isIn ? '' : 'none';
+    who.textContent = isIn ? `Inloggad som ${user.email}` : '';
+    form.style.display = isIn ? '' : 'none';
+    if(isIn) loadNews();
+    else tbody.innerHTML = '';
+  });
+
+  // --- Magic link-inloggning ---
+  loginBtn.addEventListener('click', async () => {
+    const email = prompt('Ange din e-post för inloggning:');
+    if(!email) return;
+    await sendSignInLinkToEmail(auth, email, {
+      url: window.location.href, handleCodeInApp: true
+    });
+    alert('En inloggningslänk har skickats. Kolla din e-post och öppna länken på denna enhet.');
+    window.localStorage.setItem('emailForSignIn', email);
+  });
+
+  // Slutför inlogg om vi öppnats via e-postlänk
+  if (isSignInWithEmailLink(auth, window.location.href)) {
+    let email = window.localStorage.getItem('emailForSignIn');
+    if (!email) email = prompt('Bekräfta din e-post för att logga in');
+    await signInWithEmailLink(auth, email, window.location.href);
+    window.localStorage.removeItem('emailForSignIn');
+  }
+
+  logoutBtn.addEventListener('click', () => signOut(auth));
+
+  // --- CRUD ---
+  async function loadNews(){
+    const q = query(collection(db,'news'), orderBy('date','desc'), limit(100));
+    const snap = await getDocs(q);
+    tbody.innerHTML = '';
+    snap.forEach(d => {
+      const item = d.data();
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(item.title || '')}</td>
+        <td>${item.date || ''}</td>
+        <td class="muted">${(item.body || '').substring(0,120)}${(item.body||'').length>120?'…':''}</td>
+        <td>
+          <button data-edit="${d.id}">Redigera</button>
+          <button data-del="${d.id}" class="secondary">Ta bort</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+  tbody.addEventListener('click', async (e)=>{
+    const id = e.target.dataset.edit || e.target.dataset.del;
+    if(!id) return;
+    if(e.target.dataset.edit){
+      // hämta raden i UI direkt
+      editId = id;
+      formTitle.textContent = 'Redigera nyhet';
+      const tr = e.target.closest('tr');
+      titleEl.value = tr.children[0].textContent;
+      dateEl.value  = tr.children[1].textContent;
+      // hämta body igen (exakt text) från Firestore
+      // (du kan optimera genom att lagra body i data-attribut)
+      const docs = await getDocs(query(collection(db,'news'), orderBy('date','desc'), limit(100)));
+      docs.forEach(d=>{ if(d.id===id){ bodyEl.value = d.data().body || ''; }});
+      cancelBtn.style.display = '';
+    }else if(e.target.dataset.del){
+      if(confirm('Ta bort nyheten?')){
+        await deleteDoc(doc(db,'news',id));
+        await loadNews();
+      }
+    }
+  });
+
+  saveBtn.addEventListener('click', async ()=>{
+    const payload = {
+      title: titleEl.value.trim(),
+      date:  dateEl.value,   // YYYY-MM-DD
+      body:  bodyEl.value.trim()
+    };
+    if(!payload.title || !payload.date){ alert('Titel och datum krävs.'); return; }
+
+    if(editId){
+      await updateDoc(doc(db,'news',editId), payload);
+    }else{
+      await addDoc(collection(db,'news'), payload);
+    }
+    titleEl.value = bodyEl.value = ''; dateEl.value = '';
+    editId = null; formTitle.textContent = 'Skapa nyhet'; cancelBtn.style.display='none';
+    await loadNews();
+  });
+
+  cancelBtn.addEventListener('click', ()=>{
+    editId = null; formTitle.textContent = 'Skapa nyhet';
+    titleEl.value = bodyEl.value = ''; dateEl.value = ''; cancelBtn.style.display='none';
+  });
+</script>
+</body>
+</html>
