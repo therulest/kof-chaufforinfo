@@ -41,7 +41,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .chev{transition:transform .18s ease;user-select:none;font-size:16px}
 .card.expanded .chev{transform:rotate(90deg)}
 .summary{white-space:pre-wrap;margin:0;flex:1;font-size:14px;line-height:1.3}
-
 .divider{border:none;border-top:1px solid #eee;margin:0}
 .details{display:none;padding:10px 14px 12px}
 .card.expanded .details{display:block}
@@ -52,8 +51,19 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .details li.qtyblock>div{line-height:1.3}
 .details li.total{font-weight:600}
 .details li.note{margin-top:6px;color:#991b1b}
-
 .muted{color:#6b7280;font-size:13px}
+
+/* Nyheter */
+.news{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:14px}
+.news .item h3{margin:0 0 6px}
+.news .meta{font-size:12px;color:#6b7280;margin-bottom:8px}
+
+/* Kontakter */
+table.contacts{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+table.contacts th,table.contacts td{padding:10px;border-bottom:1px solid #eee;text-align:left}
+table.contacts th{background:#f9fafb;font-weight:600;font-size:14px}
 </style>
 </head>
 <body>
@@ -84,7 +94,11 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   <!-- HOME -->
   <section id="page-home" class="page" data-page>
     <h2>Välkommen!</h2>
-    <p>Välj en sida i menyn ovan. Dagliga turer finns under <strong>Dagab</strong>.</p>
+    <p>Här visas de <strong>senaste nyheterna</strong>. Fler nyheter hittar du under menyn <em>Nyheter</em>.</p>
+    <section style="margin-top:18px">
+      <h3>📰 Senaste nytt</h3>
+      <div id="latestNews" class="news"></div>
+    </section>
   </section>
 
   <!-- DAGAB -->
@@ -97,17 +111,23 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   <!-- NYHETER -->
   <section id="page-nyheter" class="page" data-page hidden>
     <h2>Nyheter</h2>
-    <p class="muted">(Plats för nyheter.)</p>
+    <div id="newsList" class="news"></div>
   </section>
 
   <!-- KONTAKTER -->
   <section id="page-kontakter" class="page" data-page hidden>
     <h2>Kontakter</h2>
-    <p class="muted">(Plats för kontakter.)</p>
+    <div style="overflow:auto">
+      <table class="contacts" id="contactsTable">
+        <thead><tr><th>Namn</th><th>Roll</th><th>Telefon</th><th>E-post</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </section>
 </main>
 
-<script>
+<!-- App-script (med Firestore) -->
+<script type="module">
 /* ---------------- Router ---------------- */
 function setActive(hash){
   document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
@@ -123,9 +143,9 @@ function handleRoute(){
   const h = location.hash || '#/home';
   setActive(h);
   if(h === '#/dagab'){ showPage('page-dagab'); ensureDagabReady(); }
-  else if(h === '#/nyheter'){ showPage('page-nyheter'); }
-  else if(h === '#/kontakter'){ showPage('page-kontakter'); }
-  else { showPage('page-home'); }
+  else if(h === '#/nyheter'){ showPage('page-nyheter'); renderNewsAll(); }
+  else if(h === '#/kontakter'){ showPage('page-kontakter'); renderContacts(); }
+  else { showPage('page-home'); renderLatestNews(); }
 }
 window.addEventListener('hashchange', handleRoute);
 
@@ -229,6 +249,110 @@ function buildCard(car, idx, expanded=false){
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+/* --------------- Firestore: Nyheter & Kontakter --------------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, orderBy, limit, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
+  authDomain: "kofnord-1e371.firebaseapp.com",
+  projectId: "kofnord-1e371",
+  storageBucket: "kofnord-1e371.appspot.com",
+  messagingSenderId: "559491880457",
+  appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+let latestLoaded = false;
+let newsLoaded = false;
+let contactsLoaded = false;
+
+async function renderLatestNews(){
+  if(latestLoaded) return;
+  const box = document.getElementById('latestNews');
+  if(!box) return;
+  box.innerHTML = '<p class="muted">Laddar nyheter…</p>';
+  try{
+    const qy = query(collection(db,'news'), orderBy('date','desc'), limit(3));
+    const snap = await getDocs(qy);
+    if(snap.empty){ box.innerHTML = '<p class="muted">Inga nyheter ännu.</p>'; latestLoaded=true; return; }
+    box.innerHTML = '';
+    snap.forEach(d=>{
+      const n = d.data();
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `
+        <h3>${escapeHtml(n.title || '')}</h3>
+        <div class="meta">${n.date ? new Date(n.date).toLocaleDateString('sv-SE') : ''}</div>
+        <p>${escapeHtml((n.body||'').split('\n')[0])}${(n.body||'').length>100?'…':''}</p>`;
+      box.appendChild(div);
+    });
+    latestLoaded = true;
+  }catch(e){
+    console.error(e);
+    box.innerHTML = '<p style="color:#b00020">Kunde inte läsa nyheter.</p>';
+  }
+}
+
+async function renderNewsAll(){
+  if(newsLoaded) return;
+  const box = document.getElementById('newsList');
+  if(!box) return;
+  box.innerHTML = '<p class="muted">Laddar nyheter…</p>';
+  try{
+    const qy = query(collection(db,'news'), orderBy('date','desc'));
+    const snap = await getDocs(qy);
+    if(snap.empty){ box.innerHTML = '<p class="muted">Inga nyheter ännu.</p>'; newsLoaded=true; return; }
+    box.innerHTML = '';
+    snap.forEach(d=>{
+      const n = d.data();
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `
+        <h3>${escapeHtml(n.title || '')}</h3>
+        <div class="meta">${n.date ? new Date(n.date).toLocaleDateString('sv-SE') : ''}</div>
+        <p>${escapeHtml(n.body || '').replace(/\n/g,'<br>')}</p>`;
+      box.appendChild(div);
+    });
+    newsLoaded = true;
+  }catch(e){
+    console.error(e);
+    box.innerHTML = '<p style="color:#b00020">Kunde inte läsa nyheter.</p>';
+  }
+}
+
+async function renderContacts(){
+  if(contactsLoaded) return;
+  const tb = document.querySelector('#contactsTable tbody');
+  if(!tb) return;
+  tb.innerHTML = '<tr><td colspan="4" class="muted">Laddar kontakter…</td></tr>';
+  try{
+    const qy = query(collection(db,'contacts'), orderBy('sort','asc'), orderBy('name','asc'));
+    const snap = await getDocs(qy);
+    tb.innerHTML = '';
+    if(snap.empty){
+      tb.innerHTML = '<tr><td colspan="4" class="muted">Inga kontakter ännu.</td></tr>';
+      contactsLoaded = true; return;
+    }
+    snap.forEach(d=>{
+      const c = d.data();
+      const tr = document.createElement('tr');
+      const phone = (c.phone||'').replace(/\s+/g,'');
+      tr.innerHTML = `
+        <td>${escapeHtml(c.name||'')}</td>
+        <td>${escapeHtml(c.role||'')}</td>
+        <td>${c.phone ? `<a href="tel:${phone}">${escapeHtml(c.phone)}</a>` : ''}</td>
+        <td>${c.email ? `<a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a>` : ''}</td>`;
+      tb.appendChild(tr);
+    });
+    contactsLoaded = true;
+  }catch(e){
+    console.error(e);
+    tb.innerHTML = '<tr><td colspan="4" style="color:#b00020">Kunde inte läsa kontakter.</td></tr>';
+  }
+}
 
 /* Start */
 handleRoute();           // visa rätt sida vid laddning
