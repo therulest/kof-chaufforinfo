@@ -30,41 +30,21 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   max-width:var(--wrap);margin:0 auto;padding:10px 16px;
   display:flex;align-items:center;justify-content:space-between;gap:14px
 }
-.brand{
-  margin:0;font-size:18px;line-height:1.2;color:var(--blue);font-weight:700;letter-spacing:.2px
-}
+.brand{margin:0;font-size:18px;color:var(--blue);font-weight:700;letter-spacing:.2px}
 
 /* Desktop nav – pill style */
 .nav{
-  display:flex;gap:6px;
-  background:var(--chip-bg);
-  padding:6px;
-  border:1px solid var(--border);
-  border-radius:9999px;
-  box-shadow:var(--shadow)
+  display:flex;gap:6px;background:var(--chip-bg);padding:6px;border:1px solid var(--border);
+  border-radius:9999px;box-shadow:var(--shadow)
 }
 .nav a{
-  --pad-x:14px;
-  text-decoration:none;
-  color:#334155;
-  padding:8px var(--pad-x);
-  border-radius:9999px;
-  font-size:14px;
-  font-weight:600;
-  line-height:1;
-  position:relative;
-  transition:background .15s ease, box-shadow .15s ease, color .15s ease, transform .04s ease
+  --pad-x:14px;text-decoration:none;color:#334155;padding:8px var(--pad-x);border-radius:9999px;
+  font-size:14px;font-weight:600;line-height:1;transition:background .15s,box-shadow .15s,color .15s,transform .04s
 }
 .nav a:hover{background:#eef2f7}
 .nav a:active{transform:translateY(1px)}
-.nav a.active{
-  background:var(--blue-100);
-  color:var(--blue-ink);
-  box-shadow:inset 0 0 0 1px #bae6fd
-}
-.nav a:focus-visible{
-  outline:2px solid #93c5fd; outline-offset:2px
-}
+.nav a.active{background:var(--blue-100);color:var(--blue-ink);box-shadow:inset 0 0 0 1px #bae6fd}
+.nav a:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}
 
 /* Mobil-ikon-meny */
 .mobile-launcher{display:none}
@@ -77,29 +57,41 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;
   display:grid;grid-template-columns:repeat(4,1fr);gap:8px
 }
-.ml-item{
-  display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;
-  text-decoration:none;color:#111;transition:transform .06s ease, box-shadow .15s ease, background .15s ease
-}
+.ml-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;
+  text-decoration:none;color:#111;transition:transform .06s, box-shadow .15s, background .15s}
 .ml-item:hover{background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .ml-item:active{transform:translateY(1px)}
-.micon{
-  width:48px;height:48px;border-radius:12px;background:#fff;display:grid;place-items:center;
-  box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px
-}
+.micon{width:48px;height:48px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
 .ml-label{font-size:13px;color:#111827;font-weight:600}
 
 /* Sidlayout */
 .page{max-width:var(--wrap);margin:16px auto;padding:0 16px 24px}
-.page h2{margin-top:0}
+.page h2{margin:0}
+
+/* Dagab – verktygsrad */
+.tools{
+  display:flex;align-items:center;gap:12px;justify-content:space-between;margin:8px 0 12px
+}
+.tools-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tools-right{margin-left:auto;color:var(--muted);font-size:12px}
+
+/* Knapp */
+.btn{
+  appearance:none;border:1px solid #0273ad;background:var(--blue);color:#fff;
+  font-weight:700;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:var(--shadow);
+  transition:filter .15s, transform .04s
+}
+.btn:hover{filter:brightness(1.05)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.6;cursor:progress}
 
 /* Kortlayout (Dagab) */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-top:10px}
 .card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);
-  overflow:hidden;cursor:pointer;transition:box-shadow .15s ease}
+  overflow:hidden;cursor:pointer;transition:box-shadow .15s}
 .card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .card-header{display:flex;align-items:center;gap:10px;padding:12px}
-.chev{transition:transform .18s ease;user-select:none;font-size:16px}
+.chev{transition:transform .18s;user-select:none;font-size:16px}
 .card.expanded .chev{transform:rotate(90deg)}
 .summary{white-space:pre-wrap;margin:0;flex:1;font-size:14px;line-height:1.3}
 .divider{border:none;border-top:1px solid #eee;margin:0}
@@ -110,35 +102,14 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .details li.store{font-weight:600;color:#111827}
 
 /* MELLANRUM mellan pallantal och nästa butik */
-.details li.qty{
-  color:#4b5563;
-  margin-bottom:8px;
-}
-.details li.total{
-  font-weight:700;
-  margin-top:4px;
-  margin-bottom:8px;
-}
+.details li.qty{color:#4b5563;margin-bottom:8px}
+.details li.total{font-weight:700;margin-top:4px;margin-bottom:8px}
 .details li.note{margin-top:6px;color:#991b1b}
 .muted{color:#6b7280;font-size:13px}
 
 /* Nyheter */
-.news{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-  max-width:720px;
-  margin:0 auto;
-}
-.news .item{
-  border:1px solid var(--border);
-  border-radius:12px;
-  background:#fff;
-  box-shadow:var(--shadow);
-  padding:16px;
-  cursor:pointer;
-  transition:box-shadow .15s ease;
-}
+.news{display:grid;grid-template-columns:1fr;gap:12px;max-width:720px;margin:0 auto}
+.news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:16px;cursor:pointer;transition:box-shadow .15s}
 .news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .news .item h3{margin:0 0 6px}
 .news .meta{font-size:12px;color:#6b7280;margin-bottom:8px}
@@ -146,33 +117,20 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .news .item.collapsed .more::after{content:" – klicka för att läsa mer"}
 .news .item.expanded .more::after{content:" – klicka för att visa mindre"}
 .highlight{animation:flash 1.3s ease-out 1}
-@keyframes flash{
-  0%{box-shadow:0 0 0 0 rgba(2,132,199,.45)}
-  40%{box-shadow:0 0 0 6px rgba(2,132,199,.15)}
-  100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}
-}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(2,132,199,.45)}40%{box-shadow:0 0 0 6px rgba(2,132,199,.15)}100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}}
 
 /* Nyhetslänkar */
 .news-links{list-style:none;padding:0;margin:12px 0 0}
 .news-links li{margin:0 0 10px}
-.news-links a{
-  display:block;background:#fff;border:1px solid var(--border);border-radius:12px;
-  padding:12px 14px;box-shadow:var(--shadow);text-decoration:none;color:#111;transition:box-shadow .15s
-}
+.news-links a{display:block;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);text-decoration:none;color:#111;transition:box-shadow .15s}
 .news-links a:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .news-links .title{font-weight:600}
 .news-links .meta{font-size:12px;color:#6b7280;margin-top:4px}
 
 /* Kontakter */
 .contacts-acc{display:grid;gap:10px}
-.contact-card{
-  border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);
-  overflow:hidden
-}
-.contact-head{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:12px 14px;cursor:pointer
-}
+.contact-card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);overflow:hidden}
+.contact-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer}
 .contact-head .name{font-weight:600}
 .contact-head .chev{transition:transform .18s ease;font-size:16px}
 .contact-card.open .contact-head .chev{transform:rotate(90deg)}
@@ -181,10 +139,8 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .contact-body .row{margin:8px 0;color:#374151}
 .contact-body a{color:#0ea5e9;text-decoration:none}
 
-/* Mindre rörelse för de som valt det */
-@media (prefers-reduced-motion: reduce){
-  .chev,.nav a,.ml-item,.topbar{transition:none}
-}
+/* Mindre rörelse */
+@media (prefers-reduced-motion: reduce){.chev,.nav a,.ml-item,.topbar{transition:none}}
 </style>
 </head>
 <body>
@@ -221,9 +177,16 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   </section>
 
   <section id="page-dagab" class="page" data-page hidden>
-    <h2>Dagens turer</h2>
+    <div class="tools">
+      <div class="tools-left">
+        <h2>Dagens turer</h2>
+        <button id="btnRefresh" class="btn">Uppdatera</button>
+      </div>
+      <div class="tools-right">
+        <span id="status"> </span>
+      </div>
+    </div>
     <div id="grid" class="grid"></div>
-    <p id="status" class="muted" style="text-align:right;margin-top:10px"></p>
   </section>
 
   <section id="page-nyheter" class="page" data-page hidden>
@@ -265,7 +228,7 @@ function handleRoute(){
 }
 window.addEventListener('hashchange', handleRoute);
 
-/* Scrollskugga på topbar */
+/* Scrollskugga */
 const topbar=document.getElementById('topbar');
 function onScroll(){ topbar.classList.toggle('scrolled', window.scrollY>2); }
 onScroll();
@@ -274,19 +237,39 @@ window.addEventListener('scroll', onScroll, {passive:true});
 /* ===== DAGAB ===== */
 const DATA_URL="https://therulest.github.io/kof-chaufforinfo/data.json";
 let dagabInitialized=false;
-function ensureDagabReady(){ if(!dagabInitialized){ dagabInitialized=true; loadDagab(); } }
+const btnRefresh = () => document.getElementById('btnRefresh');
+const statusEl   = () => document.getElementById('status');
 
-async function loadDagab(){
+function ensureDagabReady(){
+  if(!dagabInitialized){
+    dagabInitialized=true;
+    attachRefresh();
+    loadDagab();
+  }
+}
+function attachRefresh(){
+  const b=btnRefresh();
+  if(!b) return;
+  b.addEventListener('click', ()=> loadDagab(true));
+}
+
+async function loadDagab(manual=false){
   const grid=document.getElementById('grid');
-  const status=document.getElementById('status');
-  grid.innerHTML='<p>Laddar…</p>'; status.textContent='';
+  const b=btnRefresh();
+  const s=statusEl();
+  if(manual && b){ b.disabled=true; b.textContent='Uppdaterar…'; }
+  grid.innerHTML = manual ? grid.innerHTML : '<p>Laddar…</p>';
   try{
     const res=await fetch(DATA_URL+'?v='+Date.now(),{cache:'no-store'});
     const data=await res.json();
     buildCards(data);
     const t=new Date(data.updated_at||Date.now());
-    status.textContent='Senast uppdaterad: '+t.toLocaleString('sv-SE');
-  }catch(e){grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>';}
+    if(s) s.textContent='Senast uppdaterad: '+t.toLocaleString('sv-SE');
+  }catch(e){
+    grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>';
+  }finally{
+    if(manual && b){ b.disabled=false; b.textContent='Uppdatera'; }
+  }
 }
 
 function buildCards(data){
@@ -302,31 +285,27 @@ function buildCard(car,idx,expanded){
   const lines=summaryText.split(/\r?\n/);
   const head=lines.slice(0,6);
   const details=Array.isArray(car.details)&&car.details.length?car.details.map(String):lines.slice(6);
+
   const header=document.createElement('div');header.className='card-header';
   const chev=document.createElement('span');chev.className='chev';chev.textContent='▶';
   const pre=document.createElement('pre');pre.className='summary';pre.textContent=head.join('\n');
   header.append(chev,pre);card.append(header);
+
   if(details.length){
     card.append(Object.assign(document.createElement('hr'),{className:'divider'}));
     const d=document.createElement('div');d.className='details';
     const ul=document.createElement('ul');
-
     for(let i=0;i<details.length;i++){
-      const line = String(details[i]);
-      const lower = line.toLowerCase().trim();
-      const li = document.createElement('li');
-      li.textContent = line;
+      const line=String(details[i]);
+      const lower=line.toLowerCase().trim();
+      const li=document.createElement('li');
+      li.textContent=line;
 
-      // Notiser
       if(lower.startsWith('glöm')) li.classList.add('note');
-
-      // Summeringsrader: "Frys:", "Kyl:", "Kol:", "Totalt:"
       if(/^(frys|kyl|kol|totalt)\s*:/i.test(line)){
         if(/^totalt\s*:/i.test(line)) li.classList.add('total');
         else li.classList.add('qty');
       }
-
-      // Mängdrader som "5 FRYS" eller "2 FRYS, 2 KYL, 3 KOL"
       if(/(\d+)\s*(FRYS|KYL|KOL)/i.test(line)) li.classList.add('qty');
 
       ul.append(li);
@@ -455,6 +434,7 @@ handleRoute();
 </script>
 </body>
 </html>
+
 
 
 
