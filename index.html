@@ -334,19 +334,29 @@ const LS_FILTER_KEY="contacts_role_filter_v1";
 function roleFrom(c){ return (c.role||'Övriga').trim() || 'Övriga'; }
 
 async function fetchContacts(){
-  const qy=query(collection(db,'contacts'), orderBy('role','asc'), orderBy('name','asc'));
-  const snap=await getDocs(qy);
-  const groups = new Map();
+  // Hämta utan orderBy för att slippa kompositindex
+  const snap = await getDocs(collection(db,'contacts'));
+
+  const groups = new Map(); // role -> array
   snap.forEach(d=>{
-    const c=d.data();
-    const r=roleFrom(c);
+    const c = d.data();
+    const r = roleFrom(c);
     if(!groups.has(r)) groups.set(r, []);
     groups.get(r).push({...c, id:d.id});
   });
-  const collator=new Intl.Collator('sv-SE',{sensitivity:'base'});
-  const roles=Array.from(groups.keys()).sort(collator.compare);
-  contactsCache={roles, groups, count:snap.size};
+
+  // Sortera roller och personer lokalt (svensk kollation)
+  const collator = new Intl.Collator('sv-SE', { sensitivity:'base', numeric:true });
+
+  // sortera varje grupps personer på name
+  for(const arr of groups.values()){
+    arr.sort((a,b)=>collator.compare(a.name||'', b.name||''));
+  }
+
+  const roles = Array.from(groups.keys()).sort(collator.compare);
+  contactsCache = { roles, groups, count: snap.size };
 }
+
 
 function createContactCard(c){
   const card=document.createElement('div');
