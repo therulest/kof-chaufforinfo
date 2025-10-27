@@ -8,7 +8,7 @@
 <style>
 :root{
   --border:#e5e7eb; --shadow:0 1px 3px rgba(0,0,0,.05);
-  --wrap:1000px; /* TIGHTARE maxbredd för widescreen */
+  --wrap:1000px;
 }
 *{box-sizing:border-box}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:#111}
@@ -75,7 +75,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .news-links .title{font-weight:600}
 .news-links .meta{font-size:12px;color:#6b7280;margin-top:4px}
 
-/* Highlight av en nyhet när man länkas in från Home */
+/* Highlight nyhet */
 .highlight{animation:flash 1.3s ease-out 1}
 @keyframes flash{
   0%{box-shadow:0 0 0 0 rgba(2,132,199,.45)}
@@ -83,11 +83,23 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}
 }
 
-/* Kontakter */
-table.contacts{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--border);
-  border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
-table.contacts th,table.contacts td{padding:10px;border-bottom:1px solid #eee;text-align:left}
-table.contacts th{background:#f9fafb;font-weight:600;font-size:14px}
+/* Kontakter: mobilvänlig accordion */
+.contacts-acc{display:grid;gap:10px}
+.contact-card{
+  border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);
+  overflow:hidden
+}
+.contact-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 14px;cursor:pointer
+}
+.contact-head .name{font-weight:600}
+.contact-head .chev{transition:transform .18s ease;font-size:16px}
+.contact-card.open .contact-head .chev{transform:rotate(90deg)}
+.contact-body{display:none;padding:0 14px 12px 14px}
+.contact-card.open .contact-body{display:block}
+.contact-body .row{margin:8px 0;color:#374151}
+.contact-body a{color:#0ea5e9;text-decoration:none}
 </style>
 </head>
 <body>
@@ -105,14 +117,14 @@ table.contacts th{background:#f9fafb;font-weight:600;font-size:14px}
   </div>
 </header>
 
-<!-- MOBILMENY (ikoner) -->
+<!-- MOBILMENY -->
 <div class="mobile-launcher">
   <div class="wrap">
     <div class="ml-grid">
-      <a class="ml-item" href="#/home" id="ml-home"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
-      <a class="ml-item" href="#/dagab" id="ml-dagab"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
-      <a class="ml-item" href="#/nyheter" id="ml-nyheter"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
-      <a class="ml-item" href="#/kontakter" id="ml-kontakter"><span class="micon">👥</span><span class="ml-label">Kontakter</span></a>
+      <a class="ml-item" href="#/home"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
+      <a class="ml-item" href="#/dagab"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
+      <a class="ml-item" href="#/nyheter"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
+      <a class="ml-item" href="#/kontakter"><span class="micon">👥</span><span class="ml-label">Kontakter</span></a>
     </div>
   </div>
 </div>
@@ -123,7 +135,6 @@ table.contacts th{background:#f9fafb;font-weight:600;font-size:14px}
   <section id="page-home" class="page" data-page>
     <h2>Välkommen till KOF-Nords Chaufförsportal</h2>
     <p>Här ser du de senaste uppdateringarna. Klicka för att läsa hela nyheten under <em>Nyheter</em>.</p>
-
     <h3 style="margin-top:18px">📰 Senaste nytt</h3>
     <ul id="latestNewsLinks" class="news-links"></ul>
   </section>
@@ -144,23 +155,18 @@ table.contacts th{background:#f9fafb;font-weight:600;font-size:14px}
   <!-- KONTAKTER -->
   <section id="page-kontakter" class="page" data-page hidden>
     <h2>Kontakter</h2>
-    <div style="overflow:auto">
-      <table class="contacts" id="contactsTable">
-        <thead><tr><th>Namn</th><th>Roll</th><th>Telefon</th><th>E-post</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <div id="contactsList" class="contacts-acc"></div>
   </section>
 </main>
 
-<!-- App-script (med Firestore) -->
+<!-- APP SCRIPT -->
 <script type="module">
-/* ---------------- Router ---------------- */
+/* ---------- Router ---------- */
 function setActive(hash){
   document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
-  document.querySelectorAll('.mobile-launcher .ml-item').forEach(a=>a.classList.remove('active'));
-  const d=document.querySelector(`.nav a[href="${hash.split('/').slice(0,2).join('/')}"]`); if(d) d.classList.add('active');
-  const m=document.querySelector(`.mobile-launcher .ml-item[href="${hash.split('/').slice(0,2).join('/')}"]`); if(m) m.classList.add('active');
+  const clean = hash.split('/').slice(0,2).join('/');
+  const link = document.querySelector(`.nav a[href="${clean}"]`);
+  if(link) link.classList.add('active');
 }
 function showPage(id){
   document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
@@ -169,7 +175,7 @@ function showPage(id){
 function handleRoute(){
   const h = location.hash || '#/home';
   setActive(h);
-  const parts = h.split('/'); // #, route, maybe id
+  const parts = h.split('/');
   const route = parts[1] || 'home';
   const param = parts[2] || null;
 
@@ -180,214 +186,171 @@ function handleRoute(){
 }
 window.addEventListener('hashchange', handleRoute);
 
-/* --------------- Dagab --------------- */
-const DATA_URL = "https://therulest.github.io/kof-chaufforinfo/data.json";
-let dagabInitialized = false;
-
-function ensureDagabReady(){
-  if(dagabInitialized) return;
-  dagabInitialized = true;
-  loadDagab();
-}
+/* ---------- Dagab (from GitHub JSON) ---------- */
+const DATA_URL="https://therulest.github.io/kof-chaufforinfo/data.json";
+let dagabInitialized=false;
+function ensureDagabReady(){ if(!dagabInitialized){ dagabInitialized=true; loadDagab(); } }
 
 async function loadDagab(){
-  const grid = document.getElementById('grid');
-  const status = document.getElementById('status');
-  grid.innerHTML = '<p>Laddar…</p>'; status.textContent = '';
+  const grid=document.getElementById('grid');
+  const status=document.getElementById('status');
+  grid.innerHTML='<p>Laddar…</p>'; status.textContent='';
   try{
-    const res = await fetch(DATA_URL + '?v=' + Date.now(), {cache:'no-store'});
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+    const res=await fetch(DATA_URL+'?v='+Date.now(),{cache:'no-store'});
+    const data=await res.json();
     buildCards(data);
-    const t = new Date(data.updated_at || Date.now());
-    status.textContent = 'Senast uppdaterad: ' + t.toLocaleString('sv-SE');
-  }catch(err){
-    grid.innerHTML = '<p style="color:#b00020">Kunde inte läsa data.</p>';
-    status.textContent = String(err);
+    const t=new Date(data.updated_at||Date.now());
+    status.textContent='Senast uppdaterad: '+t.toLocaleString('sv-SE');
+  }catch(e){
+    grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>';
   }
 }
 
 function buildCards(data){
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-  const cars = data.cars || [];
-  cars.forEach((car,i)=>grid.append(buildCard(car,i,false)));
+  const grid=document.getElementById('grid');
+  grid.innerHTML='';
+  (data.cars||[]).forEach((car,i)=>grid.append(buildCard(car,i,false)));
 }
 
-function buildCard(car, idx, expanded=false){
-  const card = document.createElement('div');
-  card.className = 'card' + (expanded ? ' expanded' : '');
-
-  const summaryText = String(car.summary || '');
-  const lines = summaryText.split(/\r?\n/);
-  const head = lines.slice(0,6);
-  const details = Array.isArray(car.details) && car.details.length ? car.details.map(String) : lines.slice(6);
-
-  const header = document.createElement('div'); header.className='card-header';
-  const chev = document.createElement('span'); chev.className='chev'; chev.textContent='▶';
-  const pre = document.createElement('pre'); pre.className='summary'; pre.textContent=head.join('\n');
-  header.append(chev, pre); card.append(header);
-
+function buildCard(car,idx,expanded){
+  const card=document.createElement('div');
+  card.className='card'+(expanded?' expanded':'');
+  const summaryText=String(car.summary||'');
+  const lines=summaryText.split(/\r?\n/);
+  const head=lines.slice(0,6);
+  const details=Array.isArray(car.details)&&car.details.length?car.details.map(String):lines.slice(6);
+  const header=document.createElement('div');header.className='card-header';
+  const chev=document.createElement('span');chev.className='chev';chev.textContent='▶';
+  const pre=document.createElement('pre');pre.className='summary';pre.textContent=head.join('\n');
+  header.append(chev,pre);card.append(header);
   if(details.length){
     card.append(Object.assign(document.createElement('hr'),{className:'divider'}));
-    const d = document.createElement('div'); d.className='details';
-    const ul = document.createElement('ul');
-
+    const d=document.createElement('div');d.className='details';
+    const ul=document.createElement('ul');
     for(let i=0;i<details.length;i++){
-      const line = String(details[i]);
-      const lower = line.toLowerCase().trim();
-
+      const line=String(details[i]);const lower=line.toLowerCase().trim();
       if(/^frys\s*:/.test(lower)){
-        const group=[line];
-        const n1=details[i+1]||'', n2=details[i+2]||'';
-        if(/^\s*kyl\s*:/.test(String(n1).toLowerCase())){ group.push(n1); i++; }
-        if(/^\s*kol\s*:/.test(String(n2).toLowerCase())){ group.push(n2); i++; }
-        const li=document.createElement('li'); li.className='qtyblock';
+        const group=[line];const n1=details[i+1]||'',n2=details[i+2]||'';
+        if(/^\s*kyl\s*:/.test(String(n1).toLowerCase())){group.push(n1);i++;}
+        if(/^\s*kol\s*:/.test(String(n2).toLowerCase())){group.push(n2);i++;}
+        const li=document.createElement('li');li.className='qtyblock';
         li.innerHTML=group.map(t=>`<div>${escapeHtml(t)}</div>`).join('');
-        ul.append(li); continue;
+        ul.append(li);continue;
       }
-
-      const li=document.createElement('li'); li.textContent=line;
+      const li=document.createElement('li');li.textContent=line;
       const isQty=/\b(frys|kyl|kol)\b/.test(lower);
       const isTotal=lower.startsWith('totalt');
       const isNote=lower.startsWith('glöm')||lower.startsWith('glom');
-      if(isQty) li.classList.add('qty');
-      if(isTotal) li.classList.add('total');
-      if(isNote) li.classList.add('note');
-
+      if(isQty)li.classList.add('qty');
+      if(isTotal)li.classList.add('total');
+      if(isNote)li.classList.add('note');
       const next=details[i+1];
       if(next){
         const nextIsQty=/\b(frys|kyl|kol)\b/.test(String(next).toLowerCase());
-        if(!isQty && !isTotal && !isNote && nextIsQty) li.classList.add('store');
+        if(!isQty&&!isTotal&&!isNote&&nextIsQty)li.classList.add('store');
       }
       ul.append(li);
     }
-    d.append(ul); card.append(d);
+    d.append(ul);card.append(d);
   }
-
-  card.addEventListener('click', e=>{
-    if(e.target.closest('button,select,a')) return;
-    if(!card.querySelector('.details')) return;
-    card.classList.toggle('expanded');
-  });
-
+  card.addEventListener('click',()=>card.classList.toggle('expanded'));
   return card;
 }
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-/* --------------- Firestore: Nyheter & Kontakter --------------- */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, orderBy, limit, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
-  authDomain: "kofnord-1e371.firebaseapp.com",
-  projectId: "kofnord-1e371",
-  storageBucket: "kofnord-1e371.appspot.com",
-  messagingSenderId: "559491880457",
-  appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
+/* ---------- Firebase (news + contacts) ---------- */
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getFirestore,collection,getDocs,orderBy,limit,query} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig={
+  apiKey:"AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
+  authDomain:"kofnord-1e371.firebaseapp.com",
+  projectId:"kofnord-1e371",
+  storageBucket:"kofnord-1e371.appspot.com",
+  messagingSenderId:"559491880457",
+  appId:"1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
 };
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
-/* Home: 3 senaste som länkar */
-let latestRendered = false;
+/* Home – 3 senaste nyheterna som länkar */
+let latestRendered=false;
 async function renderLatestNewsLinks(){
-  if(latestRendered) return;
-  const list = document.getElementById('latestNewsLinks');
-  list.innerHTML = '<li class="muted">Laddar nyheter…</li>';
+  if(latestRendered)return;
+  const list=document.getElementById('latestNewsLinks');
+  list.innerHTML='<li class="muted">Laddar nyheter…</li>';
   try{
-    const qy = query(collection(db,'news'), orderBy('date','desc'), limit(3));
-    const snap = await getDocs(qy);
-    if(snap.empty){ list.innerHTML = '<li class="muted">Inga nyheter ännu.</li>'; latestRendered = true; return; }
-    list.innerHTML = '';
+    const qy=query(collection(db,'news'),orderBy('date','desc'),limit(3));
+    const snap=await getDocs(qy);
+    list.innerHTML='';
     snap.forEach(d=>{
-      const n = d.data();
-      const li = document.createElement('li');
-      const dstr = n.date ? new Date(n.date).toLocaleDateString('sv-SE') : '';
-      const preview = (n.body||'').split('\n')[0];
-      li.innerHTML = `
-        <a href="#/nyheter/${d.id}">
-          <div class="title">${escapeHtml(n.title || '')}</div>
-          <div class="meta">${dstr}${preview ? ' • ' + escapeHtml(preview) : ''}</div>
-        </a>`;
+      const n=d.data();
+      const dstr=n.date?new Date(n.date).toLocaleDateString('sv-SE'):'';
+      const preview=(n.body||'').split('\n')[0];
+      const li=document.createElement('li');
+      li.innerHTML=`<a href="#/nyheter/${d.id}"><div class="title">${escapeHtml(n.title||'')}</div><div class="meta">${dstr}${preview?' • '+escapeHtml(preview):''}</div></a>`;
       list.appendChild(li);
     });
-    latestRendered = true;
-  }catch(e){
-    console.error(e);
-    list.innerHTML = '<li style="color:#b00020">Kunde inte läsa nyheter.</li>';
-  }
+    latestRendered=true;
+  }catch(e){list.innerHTML='<li style="color:#b00020">Kunde inte läsa nyheter.</li>';}
 }
 
-/* Nyheter: alla + stöd för ankare (#/nyheter/<id>) */
-let newsLoaded = false;
+/* Nyheter – hela listan, med highlight när man kom från Home */
+let newsLoaded=false;
 async function renderNewsAll(targetId=null){
-  const box = document.getElementById('newsList');
-  if(!newsLoaded){ box.innerHTML = '<p class="muted">Laddar nyheter…</p>'; }
+  const box=document.getElementById('newsList');
+  if(!newsLoaded){box.innerHTML='<p class="muted">Laddar nyheter…</p>';}
   try{
     if(!newsLoaded){
-      const qy = query(collection(db,'news'), orderBy('date','desc'));
-      const snap = await getDocs(qy);
-      box.innerHTML = '';
-      if(snap.empty){ box.innerHTML = '<p class="muted">Inga nyheter ännu.</p>'; newsLoaded = true; return; }
+      const qy=query(collection(db,'news'),orderBy('date','desc'));
+      const snap=await getDocs(qy);
+      box.innerHTML='';
       snap.forEach(d=>{
-        const n = d.data();
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.id = 'news-' + d.id;
-        div.innerHTML = `
-          <h3>${escapeHtml(n.title || '')}</h3>
-          <div class="meta">${n.date ? new Date(n.date).toLocaleDateString('sv-SE') : ''}</div>
-          <p>${escapeHtml(n.body || '').replace(/\n/g,'<br>')}</p>`;
-        box.appendChild(div);
+        const n=d.data();
+        const div=document.createElement('div');
+        div.className='item';
+        div.id='news-'+d.id;
+        div.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3><div class="meta">${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div><p>${escapeHtml(n.body||'').replace(/\n/g,'<br>')}</p>`;
+        box.append(div);
       });
-      newsLoaded = true;
+      newsLoaded=true;
     }
     if(targetId){
-      const el = document.getElementById('news-' + targetId);
-      if(el){
-        el.classList.add('highlight');
-        setTimeout(()=>el.classList.remove('highlight'), 1500);
-        el.scrollIntoView({behavior:'smooth',block:'start'});
-      }
+      const el=document.getElementById('news-'+targetId);
+      if(el){el.classList.add('highlight');setTimeout(()=>el.classList.remove('highlight'),1500);el.scrollIntoView({behavior:'smooth',block:'start'});}
     }
-  }catch(e){
-    console.error(e);
-    box.innerHTML = '<p style="color:#b00020">Kunde inte läsa nyheter.</p>';
-  }
+  }catch(e){box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>';}
 }
 
-/* Kontakter: alla */
-let contactsLoaded = false;
+/* Kontakter – accordion */
+let contactsLoaded=false;
 async function renderContacts(){
-  if(contactsLoaded) return;
-  const tb = document.querySelector('#contactsTable tbody');
-  tb.innerHTML = '<tr><td colspan="4" class="muted">Laddar kontakter…</td></tr>';
+  const box=document.getElementById('contactsList');
+  if(contactsLoaded && box.dataset.filled==='1') return;
+  box.innerHTML='<div class="muted">Laddar kontakter…</div>';
   try{
-    const { query, orderBy, getDocs, collection } =
-      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-    const qy = query(collection(db,'contacts'), orderBy('sort','asc'), orderBy('name','asc'));
-    const snap = await getDocs(qy);
-    tb.innerHTML = '';
-    if(snap.empty){ tb.innerHTML = '<tr><td colspan="4" class="muted">Inga kontakter ännu.</td></tr>'; contactsLoaded = true; return; }
+    const qy=query(collection(db,'contacts'),orderBy('sort','asc'));
+    const snap=await getDocs(qy);
+    box.innerHTML='';
     snap.forEach(d=>{
-      const c = d.data();
-      const tr = document.createElement('tr');
-      const phone = (c.phone||'').replace(/\s+/g,'');
-      tr.innerHTML = `
-        <td>${escapeHtml(c.name||'')}</td>
-        <td>${escapeHtml(c.role||'')}</td>
-        <td>${c.phone ? `<a href="tel:${phone}">${escapeHtml(c.phone)}</a>` : ''}</td>
-        <td>${c.email ? `<a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a>` : ''}</td>`;
-      tb.appendChild(tr);
+      const c=d.data();
+      const card=document.createElement('div');
+      card.className='contact-card';
+      card.innerHTML=`
+        <div class="contact-head">
+          <span class="name">${escapeHtml(c.name||'')}</span>
+          <span class="chev">▶</span>
+        </div>
+        <div class="contact-body">
+          ${c.role?`<div class="row"><strong>Roll:</strong> ${escapeHtml(c.role)}</div>`:''}
+          ${c.phone?`<div class="row"><strong>Telefon:</strong> <a href="tel:${escapeHtml(String(c.phone).replace(/\s+/g,''))}">${escapeHtml(c.phone)}</a></div>`:''}
+          ${c.email?`<div class="row"><strong>E-post:</strong> <a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a></div>`:''}
+        </div>`;
+      card.querySelector('.contact-head').addEventListener('click',()=>card.classList.toggle('open'));
+      box.append(card);
     });
-    contactsLoaded = true;
-  }catch(e){
-    console.error(e);
-    tb.innerHTML = '<tr><td colspan="4" style="color:#b00020">Kunde inte läsa kontakter.</td></tr>';
-  }
+    box.dataset.filled='1';
+    contactsLoaded=true;
+  }catch(e){box.innerHTML='<div style="color:#b00020">Kunde inte läsa kontakter.</div>';}
 }
 
 /* Start */
