@@ -7,19 +7,65 @@
 
 <style>
 :root{
-  --border:#e5e7eb; --shadow:0 1px 3px rgba(0,0,0,.05);
+  --border:#e5e7eb;
+  --shadow:0 1px 3px rgba(0,0,0,.05);
   --wrap:1000px;
+  --ink:#0f172a;         /* text */
+  --muted:#475569;       /* sekundär text */
+  --blue:#0284c7;        /* primär */
+  --blue-ink:#0369a1;    /* aktiv text */
+  --blue-100:#e0f2fe;    /* aktiv bakgrund */
+  --chip-bg:#f8fafc;     /* nav bakgrund */
 }
 *{box-sizing:border-box}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:#111}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:var(--ink)}
 
 /* Topbar */
-.topbar{background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:10}
-.topbar .wrap{max-width:var(--wrap);margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
-.brand{margin:0;font-size:17px;color:#0284c7}
-.nav{display:flex;gap:18px}
-.nav a{text-decoration:none;color:#333}
-.nav a.active{color:#0284c7;font-weight:600}
+.topbar{
+  background:#fff;border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:10;transition:box-shadow .18s ease,border-color .18s ease
+}
+.topbar.scrolled{box-shadow:0 6px 18px rgba(2,8,23,.06);border-color:#eef2f7}
+.topbar .wrap{
+  max-width:var(--wrap);margin:0 auto;padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px
+}
+.brand{
+  margin:0;font-size:18px;line-height:1.2;color:var(--blue);font-weight:700;letter-spacing:.2px
+}
+
+/* Desktop nav – pill style */
+.nav{
+  display:flex;gap:6px;
+  background:var(--chip-bg);
+  padding:6px;
+  border:1px solid var(--border);
+  border-radius:9999px;
+  box-shadow:var(--shadow)
+}
+.nav a{
+  --pad-x:14px;
+  text-decoration:none;
+  color:#334155;
+  padding:8px var(--pad-x);
+  border-radius:9999px;
+  font-size:14px;
+  font-weight:600;
+  line-height:1;
+  position:relative;
+  transition:background .15s ease, box-shadow .15s ease, color .15s ease, transform .04s ease
+}
+.nav a:hover{background:#eef2f7}
+.nav a:active{transform:translateY(1px)}
+.nav a.active{
+  background:var(--blue-100);
+  color:var(--blue-ink);
+  box-shadow:inset 0 0 0 1px #bae6fd
+}
+/* Fokus (tangentbord) */
+.nav a:focus-visible{
+  outline:2px solid #93c5fd; outline-offset:2px
+}
 
 /* Mobil-ikon-meny */
 .mobile-launcher{display:none}
@@ -28,12 +74,21 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   .mobile-launcher{display:block}
 }
 .mobile-launcher .wrap{max-width:var(--wrap);margin:12px auto 0;padding:0 16px}
-.ml-grid{background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;
-  display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.ml-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:12px}
-.micon{width:48px;height:48px;border-radius:50%;background:#fff;display:grid;place-items:center;
-  box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
-.ml-label{font-size:13px;color:#111827}
+.ml-grid{
+  background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px
+}
+.ml-item{
+  display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;
+  text-decoration:none;color:#111;transition:transform .06s ease, box-shadow .15s ease, background .15s ease
+}
+.ml-item:hover{background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.ml-item:active{transform:translateY(1px)}
+.micon{
+  width:48px;height:48px;border-radius:12px;background:#fff;display:grid;place-items:center;
+  box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px
+}
+.ml-label{font-size:13px;color:#111827;font-weight:600}
 
 /* Sidlayout */
 .page{max-width:var(--wrap);margin:16px auto;padding:0 16px 24px}
@@ -80,7 +135,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .news .item h3{margin:0 0 6px}
 .news .meta{font-size:12px;color:#6b7280;margin-bottom:8px}
-.news .more{color:#0284c7;font-weight:600;margin-top:6px;user-select:none}
+.news .more{color:var(--blue);font-weight:600;margin-top:6px;user-select:none}
 .news .item.collapsed .more::after{content:" – klicka för att läsa mer"}
 .news .item.expanded .more::after{content:" – klicka för att visa mindre"}
 .highlight{animation:flash 1.3s ease-out 1}
@@ -93,8 +148,10 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 /* Nyhetslänkar på Home */
 .news-links{list-style:none;padding:0;margin:12px 0 0}
 .news-links li{margin:0 0 10px}
-.news-links a{display:block;background:#fff;border:1px solid var(--border);border-radius:12px;
-  padding:12px 14px;box-shadow:var(--shadow);text-decoration:none;color:#111;transition:box-shadow .15s}
+.news-links a{
+  display:block;background:#fff;border:1px solid var(--border);border-radius:12px;
+  padding:12px 14px;box-shadow:var(--shadow);text-decoration:none;color:#111;transition:box-shadow .15s
+}
 .news-links a:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .news-links .title{font-weight:600}
 .news-links .meta{font-size:12px;color:#6b7280;margin-top:4px}
@@ -116,15 +173,20 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .contact-card.open .contact-body{display:block}
 .contact-body .row{margin:8px 0;color:#374151}
 .contact-body a{color:#0ea5e9;text-decoration:none}
+
+/* Mindre rörelse för användare som valt det */
+@media (prefers-reduced-motion: reduce){
+  .chev,.nav a,.ml-item,.topbar{transition:none}
+}
 </style>
 </head>
 <body>
 
 <!-- TOPPMENY -->
-<header class="topbar">
+<header class="topbar" id="topbar">
   <div class="wrap">
     <h1 class="brand">KOF – Chaufförportal</h1>
-    <nav class="nav">
+    <nav class="nav" aria-label="Huvudmeny">
       <a href="#/home" id="link-home">Home</a>
       <a href="#/dagab" id="link-dagab">Dagab</a>
       <a href="#/nyheter" id="link-nyheter">Nyheter</a>
@@ -134,7 +196,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 </header>
 
 <!-- MOBILMENY -->
-<div class="mobile-launcher">
+<div class="mobile-launcher" aria-label="Snabbmeny">
   <div class="wrap">
     <div class="ml-grid">
       <a class="ml-item" href="#/home"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
@@ -174,10 +236,16 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 <script type="module">
 /* ===== ROUTING ===== */
 function setActive(hash){
-  document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
+  document.querySelectorAll('.nav a').forEach(a=>{
+    a.classList.remove('active');
+    a.removeAttribute('aria-current');
+  });
   const clean = hash.split('/').slice(0,2).join('/');
   const link = document.querySelector(`.nav a[href="${clean}"]`);
-  if(link) link.classList.add('active');
+  if(link){
+    link.classList.add('active');
+    link.setAttribute('aria-current','page');
+  }
 }
 function showPage(id){
   document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
@@ -195,6 +263,12 @@ function handleRoute(){
   else { showPage('page-home'); renderLatestNewsLinks(); }
 }
 window.addEventListener('hashchange', handleRoute);
+
+/* ===== TOPBAR SKUGGA PÅ SCROLL ===== */
+const topbar = document.getElementById('topbar');
+function onScroll(){ topbar.classList.toggle('scrolled', window.scrollY>2); }
+onScroll();
+window.addEventListener('scroll', onScroll, {passive:true});
 
 /* ===== DAGAB ===== */
 const DATA_URL="https://therulest.github.io/kof-chaufforinfo/data.json";
@@ -365,6 +439,7 @@ handleRoute();
 </script>
 </body>
 </html>
+
 
 
 
