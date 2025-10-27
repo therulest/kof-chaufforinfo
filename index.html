@@ -1,286 +1,207 @@
 <!doctype html>
 <html lang="sv">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KOF – Chaufförportal</title>
+
 <style>
-  :root{--brand:#0ea5e9;--muted:#6b7280;--border:#e5e7eb;--bg:#fafafa}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#111827}
-  a{color:inherit;text-decoration:none}
+:root{
+  --border:#e5e7eb;
+  --shadow:0 1px 3px rgba(0,0,0,.05);
+}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:#111}
+main{max-width:1200px;margin:0 auto;padding:16px}
 
-  /* Topbar */
-  .topbar{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--border)}
-  .wrap{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:12px}
-  .brand{font-weight:700;color:var(--brand)}
-  .nav{display:flex;gap:8px}
-  .nav a{padding:8px 12px;border-radius:10px}
-  .nav a.active,.nav a:hover{background:#eef6ff}
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border-bottom:1px solid #e5e7eb;padding:10px 16px;position:sticky;top:0;z-index:10}
+.topbar h1{margin:0;font-size:17px;color:#0284c7}
+.topbar .nav{display:flex;gap:20px}
+.topbar a{text-decoration:none;color:#333}
+.topbar a.active{color:#0284c7;font-weight:600}
 
-  /* Pages */
-  .page{max-width:1200px;margin:16px auto;padding:0 16px 24px}
-  header.pagehead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
-  .grid{display:grid;grid-gap:12px}
-  @media(min-width:700px){.grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
-  .card{border:1px solid var(--border);border-radius:12px;background:#fff;padding:12px}
-  .muted{color:var(--muted)}
+/* Mobilmeny */
+.mobile-launcher{display:none;max-width:1200px;margin:12px auto 0;padding:0 16px}
+.ml-wrap{background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;
+         display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ml-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:12px}
+.micon{width:48px;height:48px;border-radius:50%;background:#fff;display:grid;place-items:center;
+       box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
+.ml-label{font-size:13px;color:#111827}
+@media(max-width:700px){
+  .topbar .nav{display:none}
+  .mobile-launcher{display:block}
+}
 
-  /* PIN-lås */
-  .lock-overlay{position:fixed;inset:0;background:rgba(250,250,250,.98);display:none;align-items:center;justify-content:center;z-index:9999}
-  .lock-card{width:min(420px,92vw);background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.10);padding:20px}
-  .lock-title{margin:0 0 8px 0;font-size:20px}
-  .lock-sub{margin:0 0 16px 0;font-size:13px;color:var(--muted)}
-  .lock-row{display:flex;gap:8px}
-  .lock-input{flex:1;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;font-size:16px}
-  .lock-btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-size:15px;cursor:pointer}
-  .lock-err{margin-top:10px;color:#b00020;font-size:13px;min-height:1.2em}
-  .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:8px 12px;cursor:pointer}
-  select.control{padding:8px 12px;border:1px solid #d1d5db;border-radius:8px}
+/* Kortlayout */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-top:10px}
+.card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);
+  overflow:hidden;cursor:pointer;transition:box-shadow .15s ease}
+.card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.card-header{display:flex;align-items:center;gap:10px;padding:12px}
+.chev{transition:transform .18s ease;user-select:none;font-size:16px}
+.card.expanded .chev{transform:rotate(90deg)}
+.summary{white-space:pre-wrap;margin:0;flex:1;font-size:14px;line-height:1.3}
+
+.divider{border:none;border-top:1px solid #eee;margin:0}
+.details{display:none;padding:10px 14px 12px}
+.card.expanded .details{display:block}
+.details ul{margin:8px 0 0 0;padding-left:20px;line-height:1.4}
+.details li{margin-bottom:6px}
+.details li.store{font-weight:600;color:#111827}
+.details li.qty{color:#4b5563}
+.details li.qtyblock>div{line-height:1.3}
+.details li.total{font-weight:600}
+.details li.note{margin-top:6px;color:#991b1b}
+
+/* Övrigt */
+footer{margin-top:30px;color:#6b7280;font-size:13px;text-align:right}
 </style>
 </head>
 <body>
 
-<!-- PIN-lås overlay -->
-<div class="lock-overlay" id="lock">
-  <div class="lock-card">
-    <h2 class="lock-title">Låst</h2>
-    <p class="lock-sub" id="lockMsg">Denna portal kräver PIN-kod.</p>
-    <div class="lock-row">
-      <input id="pin" class="lock-input" type="password" placeholder="PIN-kod">
-      <button id="pinBtn" class="lock-btn">Öppna</button>
-    </div>
-    <div id="lockErr" class="lock-err"></div>
+<header class="topbar">
+  <h1>KOF – Chaufförportal</h1>
+  <nav class="nav">
+    <a href="#" class="active">Home</a>
+    <a href="#">Dagab</a>
+    <a href="#">Nyheter</a>
+    <a href="#">Kontakter</a>
+  </nav>
+</header>
+
+<!-- MOBILMENY -->
+<div class="mobile-launcher">
+  <div class="ml-wrap">
+    <a class="ml-item" href="#"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
+    <a class="ml-item" href="#"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
+    <a class="ml-item" href="#"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
+    <a class="ml-item" href="#"><span class="micon">👥</span><span class="ml-label">Kontakter</span></a>
   </div>
 </div>
 
-<!-- Topbar -->
-<div class="topbar">
-  <div class="wrap">
-    <div class="brand">KOF – Chaufförportal</div>
-    <nav class="nav">
-      <a href="#/home" id="link-home" class="active">Home</a>
-      <a href="#/dagab" id="link-dagab">Dagab</a>
-      <a href="#/nyheter" id="link-nyheter">Nyheter</a>
-      <a href="#/kontakter" id="link-kontakter">Kontakter</a>
-    </nav>
-  </div>
-</div>
-
-<!-- Sidor -->
-<main id="app" class="page">
-  <!-- Home -->
-  <section id="page-home" data-page>
-    <div class="card">
-      <h2 style="margin:0 0 6px">Välkommen!</h2>
-      <p class="muted" style="margin:0">Här samlar vi information för våra chaufförer. Använd menyn ovan.</p>
-    </div>
-    <div id="latest-news" class="grid" style="margin-top:12px"></div>
-  </section>
-
-  <!-- Dagab (valfritt – läser ./data.json) -->
-  <section id="page-dagab" data-page hidden>
-    <header class="pagehead">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <h1 style="margin:0">Dagens turer</h1>
-        <select id="bilSelect" class="control"><option value="all">Visa alla</option></select>
-        <button id="refreshBtn" class="btn">🔄 Uppdatera</button>
-      </div>
-      <div class="muted" id="stamp"></div>
-    </header>
-    <div class="grid" id="grid"></div>
-  </section>
-
-  <!-- Nyheter -->
-  <section id="page-nyheter" data-page hidden>
-    <header class="pagehead"><h1 style="margin:0">Nyheter</h1></header>
-    <div id="newsList" class="grid"></div>
-  </section>
-
-  <!-- Kontakter -->
-  <section id="page-kontakter" data-page hidden>
-    <header class="pagehead"><h1 style="margin:0">Kontakter</h1></header>
-    <div class="card" style="padding:0;overflow:auto">
-      <table style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr style="background:#f9fafb;border-bottom:1px solid var(--border)">
-            <th style="text-align:left;padding:10px">Namn</th>
-            <th style="text-align:left;padding:10px">Roll</th>
-            <th style="text-align:left;padding:10px">Telefon</th>
-            <th style="text-align:left;padding:10px">E-post</th>
-          </tr>
-        </thead>
-        <tbody id="contactsBody"></tbody>
-      </table>
-    </div>
-  </section>
+<main>
+  <h2>Dagens turer</h2>
+  <div id="grid" class="grid"></div>
+  <footer id="status"></footer>
 </main>
 
-<script type="module">
-  // ===== Firebase (endast för läsning här) =====
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, getDoc, orderBy, query, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<script>
+const dataUrl = "https://therulest.github.io/kof-chaufforinfo/data.json";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
-    authDomain: "kofnord-1e371.firebaseapp.com",
-    projectId: "kofnord-1e371",
-  };
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+async function loadData(){
+  try {
+    const res = await fetch(dataUrl + "?v=" + Date.now());
+    if(!res.ok) throw new Error(res.status);
+    const json = await res.json();
+    buildAll(json);
+  } catch(err){
+    document.getElementById('status').textContent = "Kunde inte läsa data: " + err;
+  }
+}
 
-  const $ = s => document.querySelector(s);
+function buildAll(json){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const cars = json.cars || [];
+  cars.forEach((car,i)=>grid.append(buildCard(car,i)));
+  const t = new Date(json.updated_at || Date.now());
+  document.getElementById('status').textContent =
+    "Senast uppdaterad: " + t.toLocaleString('sv-SE');
+}
 
-  /* ========= Router ========= */
-  function setActive(hash){
-    document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
-    const d=document.querySelector(`.nav a[href="${hash}"]`); if(d) d.classList.add('active');
-  }
-  function showPage(id){
-    document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
-    document.getElementById(id).hidden=false;
-  }
-  function handleRoute(){
-    const h=location.hash||'#/home';
-    setActive(h);
-    if(h==='#/dagab'){ showPage('page-dagab'); ensureDagabReady(); }
-    else if(h==='#/nyheter'){ showPage('page-nyheter'); renderNews(); }
-    else if(h==='#/kontakter'){ showPage('page-kontakter'); renderContacts(); }
-    else { showPage('page-home'); renderLatestNews(); }
-  }
-  window.addEventListener('hashchange',handleRoute);
+function buildCard(car, idx, expanded=false){
+  const card = document.createElement('div');
+  card.className = 'card' + (expanded ? ' expanded' : '');
 
-  /* ========= PIN-lås (settings/site) ========= */
-  const LOCK_KEY='kof_portal_pin_hash';
-  async function sha256Hex(str){
-    const enc = new TextEncoder().encode(str);
-    const buf = await crypto.subtle.digest('SHA-256', enc);
-    return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
-  }
-  async function checkLock(){
-    try{
-      const snap = await getDoc(doc(db,'settings','site'));
-      if(!snap.exists()){ unlockUI(); return; }
-      const cfg = snap.data();
-      const need = !!cfg.require_pin;
-      const hash = (cfg.pin_hash||'').trim();
-      $('#lockMsg').textContent = (cfg.lock_message || 'Denna portal kräver PIN-kod.');
+  // --- säkra data ---
+  const summaryText = String(car.summary || '');
+  const allLines = summaryText.split(/\r?\n/);
+  const headLines = allLines.slice(0, 6);             // rad 1–6 i headern
+  let detailsLines = Array.isArray(car.details) && car.details.length
+    ? car.details.map(String)
+    : allLines.slice(6);                               // annars rad 7–… ur summary
 
-      if(!need || !hash){ unlockUI(); return; }
-      if(localStorage.getItem(LOCK_KEY) === hash){ unlockUI(); return; }
+  // --- header ---
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  const chev = document.createElement('span');
+  chev.className = 'chev';
+  chev.textContent = '▶';
+  const pre = document.createElement('pre');
+  pre.className = 'summary';
+  pre.textContent = headLines.join('\n');
+  header.append(chev, pre);
+  card.append(header);
 
-      const lock = $('#lock'), pin=$('#pin'), err=$('#lockErr');
-      lock.style.display='flex'; pin.focus();
-      const tryOpen = async ()=>{
-        err.textContent='';
-        const input=(pin.value||'').trim();
-        if(!input){ err.textContent='Ange PIN-kod.'; return; }
-        if(await sha256Hex(input)===hash){ localStorage.setItem(LOCK_KEY,hash); unlockUI(); }
-        else err.textContent='Fel PIN-kod.';
-      };
-      $('#pinBtn').onclick=tryOpen; pin.onkeydown=e=>{ if(e.key==='Enter') tryOpen(); };
-    }catch(e){ console.error(e); unlockUI(); }
-  }
-  function unlockUI(){ $('#lock').style.display='none'; handleRoute(); }
+  // --- details (dold) ---
+  if (detailsLines.length) {
+    card.append(Object.assign(document.createElement('hr'), {className:'divider'}));
+    const details = document.createElement('div');
+    details.className = 'details';
+    const ul = document.createElement('ul');
 
-  /* ========= Nyheter (read) ========= */
-  async function renderNews(){
-    const box=$('#newsList'); if(!box) return;
-    box.innerHTML='<div class="card muted">Laddar nyheter…</div>';
-    try{
-      const qRef=query(collection(db,'news'),orderBy('date','desc'));
-      const snap=await getDocs(qRef);
-      if(snap.empty){ box.innerHTML='<div class="card muted">Inga nyheter ännu.</div>'; return; }
-      box.innerHTML='';
-      snap.forEach(d=>{
-        const n=d.data();
-        const el=document.createElement('div');
-        el.className='card';
-        el.innerHTML=`<h3 style="margin:0 0 6px">${n.title||''}</h3>
-                      <div class="muted" style="font-size:12px;margin-bottom:6px">${n.date||''}</div>
-                      <div>${(n.body||'').replace(/\n/g,'<br>')}</div>`;
-        box.appendChild(el);
-      });
-    }catch(e){ console.error(e); box.innerHTML='<div class="card" style="color:#b00020">Kunde inte läsa nyheter.</div>'; }
-  }
-  async function renderLatestNews(){
-    const box=$('#latest-news'); if(!box) return;
-    box.innerHTML='';
-    try{
-      const qRef=query(collection(db,'news'),orderBy('date','desc'),limit(3));
-      const snap=await getDocs(qRef);
-      snap.forEach(d=>{
-        const n=d.data();
-        const el=document.createElement('div');
-        el.className='card';
-        el.innerHTML=`<strong>${n.title||''}</strong><div class="muted" style="font-size:12px">${n.date||''}</div>
-                      <div class="muted" style="margin-top:4px">${(n.body||'').split('\n')[0]||''}</div>`;
-        box.appendChild(el);
-      });
-    }catch(e){ /* no-op */ }
-  }
+    for (let i = 0; i < detailsLines.length; i++) {
+      const line = detailsLines[i];
+      const lower = line.toLowerCase().trim();
 
-  /* ========= Kontakter (read) ========= */
-  async function renderContacts(){
-    const tb=$('#contactsBody'); if(!tb) return;
-    tb.innerHTML='<tr><td class="muted" colspan="4" style="padding:10px">Laddar…</td></tr>';
-    try{
-      const qRef=query(collection(db,'contacts')); // sorteras client-side
-      const snap=await getDocs(qRef);
-      const arr=[];
-      snap.forEach(d=>arr.push({id:d.id,...d.data()}));
-      arr.sort((a,b)=> (a.sort??999)-(b.sort??999) || (a.name||'').localeCompare(b.name||''));
-      tb.innerHTML='';
-      arr.forEach(c=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td style="padding:10px;border-bottom:1px solid var(--border)">${c.name||''}</td>
-                      <td style="padding:10px;border-bottom:1px solid var(--border)">${c.role||''}</td>
-                      <td style="padding:10px;border-bottom:1px solid var(--border)"><a href="tel:${(c.phone||'').replace(/\s+/g,'')}">${c.phone||''}</a></td>
-                      <td style="padding:10px;border-bottom:1px solid var(--border)"><a href="mailto:${c.email||''}">${c.email||''}</a></td>`;
-        tb.appendChild(tr);
-      });
-      if(!arr.length) tb.innerHTML='<tr><td class="muted" colspan="4" style="padding:10px">Inga kontakter.</td></tr>';
-    }catch(e){ console.error(e); tb.innerHTML='<tr><td colspan="4" style="padding:10px;color:#b00020">Kunde inte läsa.</td></tr>'; }
-  }
+      // Grupp Frys/Kyl/Kol i ett block
+      if (/^frys\s*:/.test(lower)) {
+        const group = [line];
+        const n1 = detailsLines[i+1] || '', n2 = detailsLines[i+2] || '';
+        if (/^\s*kyl\s*:/.test(String(n1).toLowerCase())) { group.push(n1); i++; }
+        if (/^\s*kol\s*:/.test(String(n2).toLowerCase())) { group.push(n2); i++; }
+        const li = document.createElement('li');
+        li.className = 'qtyblock';
+        li.innerHTML = group.map(t => `<div>${escapeHtml(t)}</div>`).join('');
+        ul.append(li);
+        continue;
+      }
 
-  /* ========= Dagab (valfritt) ========= */
-  let cars=[];
-  async function loadData(){
-    const grid=$('#grid'); grid.innerHTML='<div class="card muted">Laddar…</div>';
-    try{
-      const res=await fetch('./data.json?v='+Date.now(),{cache:'no-store'});
-      const data=await res.json();
-      $('#stamp').textContent='Senast uppdaterad: '+(new Date(data.updated_at)).toLocaleString();
-      cars = Array.isArray(data.cars)? data.cars : [];
-      const sel=$('#bilSelect'); sel.innerHTML='<option value="all">Visa alla</option>';
-      cars.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i;o.textContent=c.label||`Bil ${i+1}`; sel.appendChild(o); });
-      renderAll();
-    }catch(e){ grid.innerHTML='<div class="card" style="color:#b00020">Kunde inte läsa data.json</div>'; }
-  }
-  function buildCard(car,expanded=false){
-    const div=document.createElement('div'); div.className='card';
-    const header=document.createElement('div'); header.innerHTML=`<pre style="white-space:pre-wrap;margin:0">${car.summary||''}</pre>`;
-    div.appendChild(header);
-    if(Array.isArray(car.details)&&car.details.length){
-      const hr=document.createElement('hr'); div.appendChild(hr);
-      const ul=document.createElement('ul'); ul.style.margin='0'; ul.style.padding='0 0 0 18px';
-      car.details.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
-      div.appendChild(ul);
+      // Vanlig rad
+      const li = document.createElement('li');
+      li.textContent = line;
+
+      const isQty   = /\b(frys|kyl|kol)\b/.test(lower);
+      const isTotal = lower.startsWith('totalt');
+      const isNote  = lower.startsWith('glöm') || lower.startsWith('glom');
+
+      if (isQty)   li.classList.add('qty');
+      if (isTotal) li.classList.add('total');
+      if (isNote)  li.classList.add('note');
+
+      // Butiksrad = nästa rad är qty
+      const next = detailsLines[i+1];
+      if (next) {
+        const nextIsQty = /\b(frys|kyl|kol)\b/.test(String(next).toLowerCase());
+        if (!isQty && !isTotal && !isNote && nextIsQty) li.classList.add('store');
+      }
+
+      ul.append(li);
     }
-    return div;
-  }
-  function renderAll(){ const g=$('#grid'); g.innerHTML=''; cars.forEach(c=>g.appendChild(buildCard(c,false))); }
-  function renderOne(i){ const g=$('#grid'); g.innerHTML=''; if(cars[i]) g.appendChild(buildCard(cars[i],true)); }
-  function ensureDagabReady(){
-    const sel=$('#bilSelect'), btn=$('#refreshBtn');
-    if(!btn._b){ btn.addEventListener('click',loadData); btn._b=true; }
-    if(!sel._b){ sel.addEventListener('change',e=> e.target.value==='all'?renderAll():renderOne(parseInt(e.target.value,10))); sel._b=true; }
-    loadData();
+
+    details.append(ul);
+    card.append(details);
   }
 
-  // Start
-  checkLock();
+  // --- expand/collapse på klick ---
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('button,select,a')) return; // ignorerar klick på kontroller
+    if (!card.querySelector('.details')) return;
+    card.classList.toggle('expanded');
+  });
+
+  return card;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+loadData();
 </script>
+
 </body>
 </html>
+
 
