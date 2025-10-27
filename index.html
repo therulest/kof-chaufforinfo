@@ -10,12 +10,12 @@
   --border:#e5e7eb;
   --shadow:0 1px 3px rgba(0,0,0,.05);
   --wrap:1000px;
-  --ink:#0f172a;         /* text */
-  --muted:#475569;       /* sekundär text */
-  --blue:#0284c7;        /* primär */
-  --blue-ink:#0369a1;    /* aktiv text */
-  --blue-100:#e0f2fe;    /* aktiv bakgrund */
-  --chip-bg:#f8fafc;     /* nav bakgrund */
+  --ink:#0f172a;
+  --muted:#475569;
+  --blue:#0284c7;
+  --blue-ink:#0369a1;
+  --blue-100:#e0f2fe;
+  --chip-bg:#f8fafc;
 }
 *{box-sizing:border-box}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:var(--ink)}
@@ -62,7 +62,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   color:var(--blue-ink);
   box-shadow:inset 0 0 0 1px #bae6fd
 }
-/* Fokus (tangentbord) */
 .nav a:focus-visible{
   outline:2px solid #93c5fd; outline-offset:2px
 }
@@ -109,13 +108,21 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .details ul{margin:8px 0 0 0;padding-left:20px;line-height:1.4}
 .details li{margin-bottom:6px}
 .details li.store{font-weight:600;color:#111827}
-.details li.qty{color:#4b5563}
-.details li.qtyblock>div{line-height:1.3}
-.details li.total{font-weight:600}
+
+/* MELLANRUM mellan pallantal och nästa butik */
+.details li.qty{
+  color:#4b5563;
+  margin-bottom:8px;
+}
+.details li.total{
+  font-weight:700;
+  margin-top:4px;
+  margin-bottom:8px;
+}
 .details li.note{margin-top:6px;color:#991b1b}
 .muted{color:#6b7280;font-size:13px}
 
-/* Nyheter: enspaltig, expanderbar */
+/* Nyheter */
 .news{
   display:grid;
   grid-template-columns:1fr;
@@ -145,7 +152,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}
 }
 
-/* Nyhetslänkar på Home */
+/* Nyhetslänkar */
 .news-links{list-style:none;padding:0;margin:12px 0 0}
 .news-links li{margin:0 0 10px}
 .news-links a{
@@ -156,7 +163,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .news-links .title{font-weight:600}
 .news-links .meta{font-size:12px;color:#6b7280;margin-top:4px}
 
-/* Kontakter: mobilvänlig accordion */
+/* Kontakter */
 .contacts-acc{display:grid;gap:10px}
 .contact-card{
   border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);
@@ -174,7 +181,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .contact-body .row{margin:8px 0;color:#374151}
 .contact-body a{color:#0ea5e9;text-decoration:none}
 
-/* Mindre rörelse för användare som valt det */
+/* Mindre rörelse för de som valt det */
 @media (prefers-reduced-motion: reduce){
   .chev,.nav a,.ml-item,.topbar{transition:none}
 }
@@ -182,7 +189,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 </head>
 <body>
 
-<!-- TOPPMENY -->
 <header class="topbar" id="topbar">
   <div class="wrap">
     <h1 class="brand">KOF – Chaufförportal</h1>
@@ -195,7 +201,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   </div>
 </header>
 
-<!-- MOBILMENY -->
 <div class="mobile-launcher" aria-label="Snabbmeny">
   <div class="wrap">
     <div class="ml-grid">
@@ -207,7 +212,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   </div>
 </div>
 
-<!-- SIDOR -->
 <main>
   <section id="page-home" class="page" data-page>
     <h2>Välkommen till KOF-Nords Chaufförsportal</h2>
@@ -242,10 +246,7 @@ function setActive(hash){
   });
   const clean = hash.split('/').slice(0,2).join('/');
   const link = document.querySelector(`.nav a[href="${clean}"]`);
-  if(link){
-    link.classList.add('active');
-    link.setAttribute('aria-current','page');
-  }
+  if(link){ link.classList.add('active'); link.setAttribute('aria-current','page'); }
 }
 function showPage(id){
   document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
@@ -264,8 +265,8 @@ function handleRoute(){
 }
 window.addEventListener('hashchange', handleRoute);
 
-/* ===== TOPBAR SKUGGA PÅ SCROLL ===== */
-const topbar = document.getElementById('topbar');
+/* Scrollskugga på topbar */
+const topbar=document.getElementById('topbar');
 function onScroll(){ topbar.classList.toggle('scrolled', window.scrollY>2); }
 onScroll();
 window.addEventListener('scroll', onScroll, {passive:true});
@@ -309,10 +310,25 @@ function buildCard(car,idx,expanded){
     card.append(Object.assign(document.createElement('hr'),{className:'divider'}));
     const d=document.createElement('div');d.className='details';
     const ul=document.createElement('ul');
+
     for(let i=0;i<details.length;i++){
-      const line=String(details[i]);const lower=line.toLowerCase().trim();
-      const li=document.createElement('li');li.textContent=line;
-      if(lower.startsWith('glöm'))li.classList.add('note');
+      const line = String(details[i]);
+      const lower = line.toLowerCase().trim();
+      const li = document.createElement('li');
+      li.textContent = line;
+
+      // Notiser
+      if(lower.startsWith('glöm')) li.classList.add('note');
+
+      // Summeringsrader: "Frys:", "Kyl:", "Kol:", "Totalt:"
+      if(/^(frys|kyl|kol|totalt)\s*:/i.test(line)){
+        if(/^totalt\s*:/i.test(line)) li.classList.add('total');
+        else li.classList.add('qty');
+      }
+
+      // Mängdrader som "5 FRYS" eller "2 FRYS, 2 KYL, 3 KOL"
+      if(/(\d+)\s*(FRYS|KYL|KOL)/i.test(line)) li.classList.add('qty');
+
       ul.append(li);
     }
     d.append(ul);card.append(d);
