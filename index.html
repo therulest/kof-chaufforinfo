@@ -1,21 +1,10 @@
 <!doctype html>
 <html lang="sv">
 <head>
-  <!-- Redirecta Netlify invite-token vidare till /admin -->
-  <script>
-  (function () {
-    var h = location.hash || "";
-    if (/(invite_token|confirmation_token|recovery_token)=/i.test(h)) {
-      try { sessionStorage.setItem('_nl_hash', h); } catch(e) {}
-      var adminUrl = new URL('/admin/', window.location.origin).toString();
-      location.replace(adminUrl);
-    }
-  })();
-  </script>
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>KOF – Chaufförportal</title>
+
   <style>
   :root{
     --brand:#0ea5e9; --brand-600:#0284c7;
@@ -66,17 +55,14 @@
   .details ul{margin:8px 0 0 0;padding-left:20px;line-height:1.4}
   .details li{margin-bottom:6px}
 
-  /* ---- Butiksrad + pallrad ---- */
-  .details li.store{ margin-bottom:2px; font-weight:600; color:#111827; }
-  .details li.qty{   margin-bottom:12px; color:#4b5563; }
-
-  /* ---- Nytt: Frys/Kyl/Kol som ETT block ---- */
+  /* Butiksrad + pallrad */
+  .details li.store{ margin-bottom:2px;font-weight:600;color:#111827; }
+  .details li.qty{   margin-bottom:12px;color:#4b5563; }
+  /* Frys/Kyl/Kol som ett block */
   .details li.qtyblock{ margin:8px 0; }
   .details li.qtyblock > div{ margin:0; line-height:1.3; }
-
-  /* ---- Totalt & notiser ---- */
   .details li.total{ margin-bottom:6px; }
-  .details li.note{  margin-top:6px;  }
+  .details li.note{  margin-top:6px; }
 
   .muted{color:var(--muted);font-size:12px}
   .btn{background:var(--blue);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;transition:all .2s}
@@ -84,7 +70,7 @@
   select.control{padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;transition:border-color .2s}
   select.control:hover{border-color:var(--blue)}
 
-  /* ---- PIN-lås ---- */
+  /* PIN-lås */
   .lock-overlay{position:fixed;inset:0;background:rgba(250,250,250,.96);display:flex;align-items:center;justify-content:center;z-index:9999}
   .lock-card{width:min(420px,92vw);background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);padding:20px}
   .lock-title{margin:0 0 8px 0;font-size:20px}
@@ -95,7 +81,7 @@
   .lock-btn:hover{background:var(--brand-600)}
   .lock-err{margin-top:10px;color:#b00020;font-size:13px;min-height:1.2em}
 
-  /* ---- Övriga sektioner ---- */
+  /* Nyheter & kontakter */
   .hero{background:linear-gradient(180deg,#fff,#f8fafc);border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
   .hero h2{margin:0 0 8px}
   .hero p{margin:6px 0;color:#374151}
@@ -105,6 +91,7 @@
   .news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:14px}
   .news .item h3{margin:0 0 6px}
   .news .meta{font-size:12px;color:#6b7280;margin-bottom:8px}
+
   table.contacts{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
   table.contacts th,table.contacts td{padding:10px;border-bottom:1px solid #eee;text-align:left}
   table.contacts th{background:#f9fafb;font-weight:600;font-size:14px}
@@ -142,11 +129,13 @@
     <div class="hero">
       <h2>Välkommen!</h2>
       <p>Här samlar vi information för våra chaufförer. Använd menyn ovan.</p>
+      <!-- Senaste nytt läggs här -->
     </div>
   </section>
 
   <!-- Dagab -->
   <section id="page-dagab" data-page hidden>
+    <!-- (valbart) PIN-lås -->
     <div class="lock-overlay" id="lock" style="display:none">
       <div class="lock-card">
         <h2 class="lock-title">Logga in</h2>
@@ -188,7 +177,8 @@
   </section>
 </main>
 
-<script>
+<!-- APP-SCRIPT -->
+<script type="module">
 /* -------- ROUTER -------- */
 function setActive(hash){
   document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
@@ -211,7 +201,7 @@ function handleRoute(){
 window.addEventListener('hashchange',handleRoute);
 
 /* -------- PIN (Dagab) -------- */
-const REQUIRE_LOGIN=false;     // sätt true om Dagab ska kräva PIN
+const REQUIRE_LOGIN=false;     // true = kräver PIN för Dagab
 const LOCK_PIN='kof123';
 const LOCK_KEY='chaufforinfo-unlocked';
 function isUnlocked(){ return localStorage.getItem(LOCK_KEY)==='true'; }
@@ -230,6 +220,7 @@ function checkPin(){
 
 /* -------- DAGAB: hämta & rendera data.json -------- */
 let cars=[];
+
 async function loadData(){
   const grid=document.getElementById('grid');
   grid.innerHTML='<p>Laddar...</p>';
@@ -270,11 +261,13 @@ function buildCard(car,idx,expanded=false){
   const card=document.createElement('div');
   card.className='card'+(expanded?' expanded':'');
 
+  // header
   const header=document.createElement('div'); header.className='card-header';
   const chev=document.createElement('span');  chev.className='chev'; chev.textContent='▶';
   const pre=document.createElement('pre');    pre.className='summary'; pre.textContent=car.summary||'';
   header.append(chev,pre); card.append(header);
 
+  // details
   const hasDetails=Array.isArray(car.details)&&car.details.length>0;
   if(hasDetails){
     card.append(Object.assign(document.createElement('hr'),{className:'divider'}));
@@ -285,6 +278,7 @@ function buildCard(car,idx,expanded=false){
       const line=car.details[i];
       const lower=line.toLowerCase().trim();
 
+      // Grupp: Frys + Kyl + Kol -> ETT li
       if(/^frys\s*:/.test(lower)){
         const group=[line];
         const n1=car.details[i+1]||'', n2=car.details[i+2]||'';
@@ -297,22 +291,22 @@ function buildCard(car,idx,expanded=false){
         continue;
       }
 
+      // Vanlig rad
       const li=document.createElement('li'); li.textContent=line;
-
-      const isQty = /\b(frys|kyl|kol)\b/.test(lower);
+      const isQty   = /\b(frys|kyl|kol)\b/.test(lower);
       const isTotal = lower.startsWith('totalt');
-      const isNote = lower.startsWith('glöm') || lower.startsWith('glom');
+      const isNote  = lower.startsWith('glöm') || lower.startsWith('glom');
 
       if(isQty)   li.classList.add('qty');
       if(isTotal) li.classList.add('total');
       if(isNote)  li.classList.add('note');
 
+      // markera butiksrad om nästa rad är qty
       const next=car.details[i+1];
       if(next){
         const nextIsQty=/\b(frys|kyl|kol)\b/.test(String(next).toLowerCase());
         if(!isQty && !isTotal && !isNote && nextIsQty) li.classList.add('store');
       }
-
       ul.append(li);
     }
 
@@ -325,11 +319,20 @@ function buildCard(car,idx,expanded=false){
     if(!card.querySelector('.details'))   return;
     card.classList.toggle('expanded');
   });
-
   return card;
 }
-function renderAll(){ const g=document.getElementById('grid'); g.innerHTML=''; cars.forEach((c,i)=>g.append(buildCard(c,i,false))); }
-function renderOne(i){ const g=document.getElementById('grid'); g.innerHTML=''; if(cars[i]) g.append(buildCard(cars[i],i,true)); }
+
+function renderAll(){
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  cars.forEach((c,i)=>g.append(buildCard(c,i,false)));
+}
+function renderOne(i){
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  if(cars[i]) g.append(buildCard(cars[i],i,true));
+}
+
 function bindDagabControls(){
   const btn=document.getElementById('refreshBtn');
   const sel=document.getElementById('bilSelect');
@@ -347,126 +350,127 @@ function ensureDagabReady(){
   if(dagabInitialized) return;
   dagabInitialized=true;
   bindDagabControls();
-  setupLock();
+  setupLock(); // laddar data direkt om PIN ej krävs
 }
 
-/* -------- NYHETER & KONTAKTER -------- */
-import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js").then(async ({ initializeApp }) => {
-  const { getFirestore, collection, getDocs, orderBy, limit, query } =
-    await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+/* -------- FIREBASE: Nyheter + Kontakter (READ) -------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, orderBy, limit, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
-    authDomain: "kofnord-1e371.firebaseapp.com",
-    projectId: "kofnord-1e371",
-    storageBucket: "kofnord-1e371.appspot.com",
-    messagingSenderId: "559491880457",
-    appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
+  authDomain: "kofnord-1e371.firebaseapp.com",
+  projectId: "kofnord-1e371",
+  storageBucket: "kofnord-1e371.appspot.com",
+  messagingSenderId: "559491880457",
+  appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db    = getFirestore(fbApp);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+// Hela nyhetslistan
+async function renderNews(){
+  const box = document.getElementById('newsList'); if(!box) return;
+  box.innerHTML = '<p class="muted">Laddar nyheter…</p>';
+  try{
+    const qy = query(collection(db, "news"), orderBy("date", "desc"));
+    const snap = await getDocs(qy);
+    if (snap.empty) { box.innerHTML = '<p class="muted">Inga nyheter ännu.</p>'; return; }
 
-  async function renderNews() {
-    const box = document.getElementById("newsList");
-    if (!box) return;
-    box.innerHTML = '<p class="muted">Laddar nyheter…</p>';
-    try {
-      const q = query(collection(db, "news"), orderBy("date", "desc"));
-      const snap = await getDocs(q);
-      if (snap.empty) {
-        box.innerHTML = '<p class="muted">Inga nyheter ännu.</p>';
-        return;
-      }
-      box.innerHTML = "";
-      snap.forEach(doc => {
-        const n = doc.data();
-        const d = n.date ? new Date(n.date).toLocaleDateString() : "";
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <h3>${n.title || ""}</h3>
-          <div class="meta">${d}</div>
-          <p>${(n.body || "").replace(/\n/g, "<br>")}</p>`;
-        box.appendChild(div);
-      });
-    } catch (err) {
-      console.error(err);
-      box.innerHTML = '<p style="color:#b00020;">Kunde inte läsa nyheter.</p>';
-    }
+    box.innerHTML = '';
+    snap.forEach(docu=>{
+      const n = docu.data();
+      const div = document.createElement('div');
+      div.className = 'item';
+      const d = n.date ? new Date(n.date).toLocaleDateString() : '';
+      div.innerHTML = `<h3>${n.title || ''}</h3>
+        <div class="meta">${d}</div>
+        <p>${(n.body || '').replace(/\n/g,'<br>')}</p>`;
+      box.appendChild(div);
+    });
+  }catch(err){
+    console.error(err);
+    box.innerHTML = '<p style="color:#b00020;">Kunde inte läsa nyheter.</p>';
   }
+}
 
-  async function renderLatestNews() {
-    const home = document.querySelector("#page-home .hero");
-    if (!home) return;
+// Senaste nytt (startsidan)
+async function renderLatestNews(){
+  const home = document.querySelector("#page-home .hero");
+  if (!home) return;
 
-    const section = document.createElement("section");
-    section.id = "latest-news";
-    section.style.marginTop = "30px";
-    section.innerHTML = `
-      <h3>📰 Senaste nytt</h3>
-      <div id="latest-container"><p class="muted">Laddar nyheter...</p></div>
-    `;
-    home.appendChild(section);
+  const section = document.createElement("section");
+  section.id = "latest-news";
+  section.style.marginTop = "30px";
+  section.innerHTML = `
+    <h3>📰 Senaste nytt</h3>
+    <div id="latest-container"><p class="muted">Laddar nyheter...</p></div>
+  `;
+  home.appendChild(section);
 
-    const container = section.querySelector("#latest-container");
+  const container = section.querySelector("#latest-container");
+  try{
+    const qy = query(collection(db, "news"), orderBy("date", "desc"), limit(3));
+    const snap = await getDocs(qy);
+    if (snap.empty) { container.innerHTML = "<p class='muted'>Inga nyheter ännu.</p>"; return; }
 
-    try {
-      const q = query(collection(db, "news"), orderBy("date", "desc"), limit(3));
-      const snap = await getDocs(q);
-      if (snap.empty) {
-        container.innerHTML = "<p class='muted'>Inga nyheter ännu.</p>";
-        return;
-      }
-      container.innerHTML = "";
-      snap.forEach(doc => {
-        const n = doc.data();
-        const div = document.createElement("div");
-        div.style.borderBottom = "1px solid #eee";
-        div.style.marginBottom = "8px";
-        div.style.paddingBottom = "6px";
-        div.innerHTML = `
-          <strong>${n.title}</strong><br>
-          <small style="color:#6b7280">${n.date}</small><br>
-          <span>${(n.body || "").split("\n")[0]}...</span>
-        `;
-        container.appendChild(div);
-      });
-    } catch (e) {
-      console.error(e);
-      container.innerHTML = "<p style='color:#b00020;'>Kunde inte läsa nyheter.</p>";
-    }
+    container.innerHTML = "";
+    snap.forEach(d=>{
+      const n = d.data();
+      const div = document.createElement("div");
+      div.style.borderBottom = "1px solid #eee";
+      div.style.marginBottom = "8px";
+      div.style.paddingBottom = "6px";
+      div.innerHTML = `
+        <strong>${n.title || ''}</strong><br>
+        <small style="color:#6b7280">${n.date || ''}</small><br>
+        <span>${((n.body || '').split("\n")[0] || '')}</span>
+      `;
+      container.appendChild(div);
+    });
+  }catch(e){
+    console.error(e);
+    container.innerHTML = "<p style='color:#b00020;'>Kunde inte läsa nyheter.</p>";
   }
+}
 
-  const CONTACTS = [
-    { name: "Transportledningen", role: "Planering", phone: "+46 90 123456", email: "plan@kof.se" },
-    { name: "IT-support", role: "PDA/Åtkomst", phone: "+46 90 765432", email: "it@kof.se" }
-  ];
-  function renderContacts() {
-    const tb = document.querySelector("#contactsTable tbody");
-    if (!tb) return;
-    tb.innerHTML = "";
-    CONTACTS.forEach(c => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${c.name}</td>
-        <td>${c.role}</td>
-        <td><a href="tel:${c.phone.replace(/\s+/g, "")}">${c.phone}</a></td>
-        <td><a href="mailto:${c.email}">${c.email}</a></td>`;
+// Kontakter från Firestore
+async function renderContacts(){
+  const tb=document.querySelector('#contactsTable tbody'); if(!tb) return;
+  tb.innerHTML='<tr><td colspan="4" class="muted">Laddar kontakter…</td></tr>';
+
+  try{
+    const qy = query(collection(db,'contacts'), orderBy('sort'), orderBy('name'));
+    const snap = await getDocs(qy);
+
+    if(snap.empty){
+      tb.innerHTML='<tr><td colspan="4" class="muted">Inga kontakter ännu.</td></tr>';
+      return;
+    }
+
+    tb.innerHTML='';
+    snap.forEach(d=>{
+      const c=d.data();
+      const tr=document.createElement('tr');
+      tr.innerHTML = `
+        <td>${c.name || ''}</td>
+        <td>${c.role || ''}</td>
+        <td>${c.phone ? `<a href="tel:${String(c.phone).replace(/\s+/g,'')}">${c.phone}</a>` : ''}</td>
+        <td>${c.email ? `<a href="mailto:${c.email}">${c.email}</a>` : ''}</td>
+      `;
       tb.appendChild(tr);
     });
+  }catch(e){
+    console.error(e);
+    tb.innerHTML='<tr><td colspan="4" style="color:#b00020">Kunde inte läsa kontakter.</td></tr>';
   }
-
-  // Exponera för routern
-  window.renderNews = renderNews;
-  window.renderContacts = renderContacts;
-
-  // Visa senaste nytt på startsidan direkt
-  renderLatestNews();
-});
+}
 
 /* -------- Start -------- */
 handleRoute();
+renderLatestNews(); // lägg “Senaste nytt” på startsidan
 </script>
 </body>
 </html>
+
 
