@@ -60,11 +60,35 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .details li.note{margin-top:6px;color:#991b1b}
 .muted{color:#6b7280;font-size:13px}
 
-/* Nyheter */
-.news{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
-.news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:14px}
+/* Nyheter: enspaltig, expanderbar */
+.news{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  max-width:720px;
+  margin:0 auto;
+}
+.news .item{
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  box-shadow:var(--shadow);
+  padding:16px;
+  cursor:pointer;
+  transition:box-shadow .15s ease;
+}
+.news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .news .item h3{margin:0 0 6px}
 .news .meta{font-size:12px;color:#6b7280;margin-bottom:8px}
+.news .more{color:#0284c7;font-weight:600;margin-top:6px;user-select:none}
+.news .item.collapsed .more::after{content:" – klicka för att läsa mer"}
+.news .item.expanded .more::after{content:" – klicka för att visa mindre"}
+.highlight{animation:flash 1.3s ease-out 1}
+@keyframes flash{
+  0%{box-shadow:0 0 0 0 rgba(2,132,199,.45)}
+  40%{box-shadow:0 0 0 6px rgba(2,132,199,.15)}
+  100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}
+}
 
 /* Nyhetslänkar på Home */
 .news-links{list-style:none;padding:0;margin:12px 0 0}
@@ -74,14 +98,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .news-links a:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .news-links .title{font-weight:600}
 .news-links .meta{font-size:12px;color:#6b7280;margin-top:4px}
-
-/* Highlight nyhet */
-.highlight{animation:flash 1.3s ease-out 1}
-@keyframes flash{
-  0%{box-shadow:0 0 0 0 rgba(2,132,199,.45)}
-  40%{box-shadow:0 0 0 6px rgba(2,132,199,.15)}
-  100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}
-}
 
 /* Kontakter: mobilvänlig accordion */
 .contacts-acc{display:grid;gap:10px}
@@ -131,7 +147,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 
 <!-- SIDOR -->
 <main>
-  <!-- HOME -->
   <section id="page-home" class="page" data-page>
     <h2>Välkommen till KOF-Nords Chaufförsportal</h2>
     <p>Här ser du de senaste uppdateringarna. Klicka för att läsa hela nyheten under <em>Nyheter</em>.</p>
@@ -139,29 +154,25 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
     <ul id="latestNewsLinks" class="news-links"></ul>
   </section>
 
-  <!-- DAGAB -->
   <section id="page-dagab" class="page" data-page hidden>
     <h2>Dagens turer</h2>
     <div id="grid" class="grid"></div>
     <p id="status" class="muted" style="text-align:right;margin-top:10px"></p>
   </section>
 
-  <!-- NYHETER -->
   <section id="page-nyheter" class="page" data-page hidden>
     <h2>Nyheter</h2>
     <div id="newsList" class="news"></div>
   </section>
 
-  <!-- KONTAKTER -->
   <section id="page-kontakter" class="page" data-page hidden>
     <h2>Kontakter</h2>
     <div id="contactsList" class="contacts-acc"></div>
   </section>
 </main>
 
-<!-- APP SCRIPT -->
 <script type="module">
-/* ---------- Router ---------- */
+/* ===== ROUTING ===== */
 function setActive(hash){
   document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'));
   const clean = hash.split('/').slice(0,2).join('/');
@@ -178,7 +189,6 @@ function handleRoute(){
   const parts = h.split('/');
   const route = parts[1] || 'home';
   const param = parts[2] || null;
-
   if(route==='dagab'){ showPage('page-dagab'); ensureDagabReady(); }
   else if(route==='nyheter'){ showPage('page-nyheter'); renderNewsAll(param); }
   else if(route==='kontakter'){ showPage('page-kontakter'); renderContacts(); }
@@ -186,7 +196,7 @@ function handleRoute(){
 }
 window.addEventListener('hashchange', handleRoute);
 
-/* ---------- Dagab (from GitHub JSON) ---------- */
+/* ===== DAGAB ===== */
 const DATA_URL="https://therulest.github.io/kof-chaufforinfo/data.json";
 let dagabInitialized=false;
 function ensureDagabReady(){ if(!dagabInitialized){ dagabInitialized=true; loadDagab(); } }
@@ -201,9 +211,7 @@ async function loadDagab(){
     buildCards(data);
     const t=new Date(data.updated_at||Date.now());
     status.textContent='Senast uppdaterad: '+t.toLocaleString('sv-SE');
-  }catch(e){
-    grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>';
-  }
+  }catch(e){grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>';}
 }
 
 function buildCards(data){
@@ -229,26 +237,8 @@ function buildCard(car,idx,expanded){
     const ul=document.createElement('ul');
     for(let i=0;i<details.length;i++){
       const line=String(details[i]);const lower=line.toLowerCase().trim();
-      if(/^frys\s*:/.test(lower)){
-        const group=[line];const n1=details[i+1]||'',n2=details[i+2]||'';
-        if(/^\s*kyl\s*:/.test(String(n1).toLowerCase())){group.push(n1);i++;}
-        if(/^\s*kol\s*:/.test(String(n2).toLowerCase())){group.push(n2);i++;}
-        const li=document.createElement('li');li.className='qtyblock';
-        li.innerHTML=group.map(t=>`<div>${escapeHtml(t)}</div>`).join('');
-        ul.append(li);continue;
-      }
       const li=document.createElement('li');li.textContent=line;
-      const isQty=/\b(frys|kyl|kol)\b/.test(lower);
-      const isTotal=lower.startsWith('totalt');
-      const isNote=lower.startsWith('glöm')||lower.startsWith('glom');
-      if(isQty)li.classList.add('qty');
-      if(isTotal)li.classList.add('total');
-      if(isNote)li.classList.add('note');
-      const next=details[i+1];
-      if(next){
-        const nextIsQty=/\b(frys|kyl|kol)\b/.test(String(next).toLowerCase());
-        if(!isQty&&!isTotal&&!isNote&&nextIsQty)li.classList.add('store');
-      }
+      if(lower.startsWith('glöm'))li.classList.add('note');
       ul.append(li);
     }
     d.append(ul);card.append(d);
@@ -258,7 +248,7 @@ function buildCard(car,idx,expanded){
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
-/* ---------- Firebase (news + contacts) ---------- */
+/* ===== FIREBASE ===== */
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getFirestore,collection,getDocs,orderBy,limit,query} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const firebaseConfig={
@@ -272,7 +262,7 @@ const firebaseConfig={
 const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
 
-/* Home – 3 senaste nyheterna som länkar */
+/* ===== HOME – senaste nyheterna ===== */
 let latestRendered=false;
 async function renderLatestNewsLinks(){
   if(latestRendered)return;
@@ -291,10 +281,11 @@ async function renderLatestNewsLinks(){
       list.appendChild(li);
     });
     latestRendered=true;
-  }catch(e){list.innerHTML='<li style="color:#b00020">Kunde inte läsa nyheter.</li>';}
+  }catch(e){list.innerHTML='<li style="color:#b00020">Kunde inte läsa nyheter.</li>'; }
 }
 
-/* Nyheter – hela listan, med highlight när man kom från Home */
+/* ===== NYHETER – 200 tecken + expandering ===== */
+function truncateText(txt,n=200){const s=String(txt||"");return s.length<=n?s:s.slice(0,n).trimEnd()+"…";}
 let newsLoaded=false;
 async function renderNewsAll(targetId=null){
   const box=document.getElementById('newsList');
@@ -304,12 +295,28 @@ async function renderNewsAll(targetId=null){
       const qy=query(collection(db,'news'),orderBy('date','desc'));
       const snap=await getDocs(qy);
       box.innerHTML='';
-      snap.forEach(d=>{
-        const n=d.data();
+      snap.forEach(docSnap=>{
+        const n=docSnap.data();
+        const full=(n.body||'');
+        const shortText=truncateText(full,200);
         const div=document.createElement('div');
-        div.className='item';
-        div.id='news-'+d.id;
-        div.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3><div class="meta">${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div><p>${escapeHtml(n.body||'').replace(/\n/g,'<br>')}</p>`;
+        div.className='item collapsed';
+        div.id='news-'+docSnap.id;
+        div.dataset.full=full;
+        div.dataset.short=shortText;
+        div.innerHTML=`
+          <h3>${escapeHtml(n.title||'')}</h3>
+          <div class="meta">${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div>
+          <p class="body">${escapeHtml(shortText).replace(/\n/g,'<br>')}</p>
+          <div class="more">Läs mer</div>`;
+        div.addEventListener('click',()=>{
+          const body=div.querySelector('.body');
+          const expanded=div.classList.toggle('expanded');
+          div.classList.toggle('collapsed',!expanded);
+          body.innerHTML=expanded
+            ?escapeHtml(div.dataset.full).replace(/\n/g,'<br>')
+            :escapeHtml(div.dataset.short).replace(/\n/g,'<br>');
+        });
         box.append(div);
       });
       newsLoaded=true;
@@ -318,45 +325,46 @@ async function renderNewsAll(targetId=null){
       const el=document.getElementById('news-'+targetId);
       if(el){el.classList.add('highlight');setTimeout(()=>el.classList.remove('highlight'),1500);el.scrollIntoView({behavior:'smooth',block:'start'});}
     }
-  }catch(e){box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>';}
+  }catch(e){box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>'; }
 }
 
-/* Kontakter – accordion */
+/* ===== KONTAKTER – Accordion ===== */
 let contactsLoaded=false;
 async function renderContacts(){
   const box=document.getElementById('contactsList');
-  if(contactsLoaded && box.dataset.filled==='1') return;
-  box.innerHTML='<div class="muted">Laddar kontakter…</div>';
+  if(!contactsLoaded){box.innerHTML='<div class="muted">Laddar kontakter…</div>';}
   try{
-    const qy=query(collection(db,'contacts'),orderBy('sort','asc'));
-    const snap=await getDocs(qy);
-    box.innerHTML='';
-    snap.forEach(d=>{
-      const c=d.data();
-      const card=document.createElement('div');
-      card.className='contact-card';
-      card.innerHTML=`
-        <div class="contact-head">
-          <span class="name">${escapeHtml(c.name||'')}</span>
-          <span class="chev">▶</span>
-        </div>
-        <div class="contact-body">
-          ${c.role?`<div class="row"><strong>Roll:</strong> ${escapeHtml(c.role)}</div>`:''}
-          ${c.phone?`<div class="row"><strong>Telefon:</strong> <a href="tel:${escapeHtml(String(c.phone).replace(/\s+/g,''))}">${escapeHtml(c.phone)}</a></div>`:''}
-          ${c.email?`<div class="row"><strong>E-post:</strong> <a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a></div>`:''}
-        </div>`;
-      card.querySelector('.contact-head').addEventListener('click',()=>card.classList.toggle('open'));
-      box.append(card);
-    });
-    box.dataset.filled='1';
-    contactsLoaded=true;
-  }catch(e){box.innerHTML='<div style="color:#b00020">Kunde inte läsa kontakter.</div>';}
+    if(!contactsLoaded){
+      const qy=query(collection(db,'contacts'),orderBy('sort','asc'));
+      const snap=await getDocs(qy);
+      box.innerHTML='';
+      snap.forEach(d=>{
+        const c=d.data();
+        const card=document.createElement('div');
+        card.className='contact-card';
+        card.innerHTML=`
+          <div class="contact-head">
+            <span class="name">${escapeHtml(c.name||'')}</span>
+            <span class="chev">▶</span>
+          </div>
+          <div class="contact-body">
+            ${c.role?`<div class="row"><strong>Roll:</strong> ${escapeHtml(c.role)}</div>`:''}
+            ${c.phone?`<div class="row"><strong>Telefon:</strong> <a href="tel:${String(c.phone).replace(/\s+/g,'')}">${escapeHtml(c.phone)}</a></div>`:''}
+            ${c.email?`<div class="row"><strong>E-post:</strong> <a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a></div>`:''}
+          </div>`;
+        card.querySelector('.contact-head').addEventListener('click',()=>card.classList.toggle('open'));
+        box.append(card);
+      });
+      contactsLoaded=true;
+    }
+  }catch(e){box.innerHTML='<div style="color:#b00020">Kunde inte läsa kontakter.</div>'; }
 }
 
-/* Start */
+/* ===== Start ===== */
 handleRoute();
 </script>
 </body>
 </html>
+
 
 
