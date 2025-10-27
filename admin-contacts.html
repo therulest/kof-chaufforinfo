@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin – Kontakter</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:16px;background:#fafafa;color:#111}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:16px;max-width:1000px;margin:0 auto}
+  h1{margin:0 0 12px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  input,button{font:inherit}
+  input{border:1px solid #d1d5db;border-radius:8px;padding:10px;min-width:240px}
+  button{background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:10px 14px;cursor:pointer}
+  button.secondary{background:#6b7280}
+  table{width:100%;border-collapse:collapse;margin-top:16px}
+  th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:top}
+  .muted{color:#6b7280}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Admin – Kontakter</h1>
+
+  <!-- Auth -->
+  <div id="auth">
+    <div class="row">
+      <input id="email" type="email" placeholder="E-post">
+      <input id="password" type="password" placeholder="Lösenord">
+      <button id="loginBtn">Logga in</button>
+      <button id="logoutBtn" class="secondary" style="display:none">Logga ut</button>
+      <span id="who" class="muted"></span>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div id="form" style="display:none">
+    <h3 id="formTitle">Skapa kontakt</h3>
+    <div class="row">
+      <input id="name" placeholder="Namn">
+      <input id="role" placeholder="Roll">
+      <input id="phone" placeholder="Telefon">
+      <input id="emailField" placeholder="E-post">
+      <input id="sort" type="number" placeholder="Sort (t.ex. 10)">
+    </div>
+    <div class="row">
+      <button id="saveBtn">Spara</button>
+      <button id="cancelBtn" class="secondary" style="display:none">Avbryt</button>
+    </div>
+  </div>
+
+  <!-- Lista -->
+  <h3 style="margin-top:20px">Kontaktlista</h3>
+  <table>
+    <thead><tr><th>Namn</th><th>Roll</th><th>Telefon</th><th>E-post</th><th>Sort</th><th></th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <p class="muted">Sortering sker på “sort” (lägst först), därefter namn.</p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Din Firebase-konfig
+const firebaseConfig = {
+  apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
+  authDomain: "kofnord-1e371.firebaseapp.com",
+  projectId: "kofnord-1e371",
+  storageBucket: "kofnord-1e371.appspot.com",
+  messagingSenderId: "559491880457",
+  appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// UI refs
+const emailEl = document.getElementById('email');
+const passEl  = document.getElementById('password');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const who = document.getElementById('who');
+
+const form = document.getElementById('form');
+const formTitle = document.getElementById('formTitle');
+const nameEl  = document.getElementById('name');
+const roleEl  = document.getElementById('role');
+const phoneEl = document.getElementById('phone');
+const mailEl  = document.getElementById('emailField');
+const sortEl  = document.getElementById('sort');
+const saveBtn = document.getElementById('saveBtn');
+const cancelBtn = document.getElementById('cancelBtn');
+
+const tbody = document.getElementById('tbody');
+
+let editId = null;
+
+// Auth state
+onAuthStateChanged(auth, user => {
+  const isIn = !!user;
+  emailEl.style.display = passEl.style.display = isIn ? 'none' : '';
+  loginBtn.style.display = isIn ? 'none' : '';
+  logoutBtn.style.display = isIn ? '' : 'none';
+  who.textContent = isIn ? `Inloggad som ${user.email}` : '';
+  form.style.display = isIn ? '' : 'none';
+  tbody.innerHTML = isIn ? '' : '<tr><td colspan="6" class="muted">Logga in för att se och redigera kontakter.</td></tr>';
+  if (isIn) loadContacts();
+});
+
+loginBtn.addEventListener('click', async () => {
+  const email = emailEl.value.trim();
+  const pwd   = passEl.value.trim();
+  if (!email || !pwd) { alert('Fyll i e-post och lösenord.'); return; }
+  try {
+    await signInWithEmailAndPassword(auth, email, pwd);
+  } catch (e) {
+    console.error(e); alert('Inloggning misslyckades.');
+  }
+});
+
+logoutBtn.addEventListener('click', () => signOut(auth));
+
+// CRUD
+async function loadContacts() {
+  const q = query(collection(db,'contacts'), orderBy('sort'), orderBy('name'), limit(500));
+  const snap = await getDocs(q);
+  tbody.innerHTML = '';
+  snap.forEach(d => {
+    const c = d.data();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.name || ''}</td>
+      <td>${c.role || ''}</td>
+      <td>${c.phone || ''}</td>
+      <td>${c.email || ''}</td>
+      <td>${c.sort ?? ''}</td>
+      <td>
+        <button data-edit="${d.id}">Redigera</button>
+        <button data-del="${d.id}" class="secondary">Ta bort</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+tbody.addEventListener('click', async (e) => {
+  const id = e.target.dataset.edit || e.target.dataset.del;
+  if (!id) return;
+
+  if (e.target.dataset.edit) {
+    // fyll formulär
+    editId = id;
+    formTitle.textContent = 'Redigera kontakt';
+    const rows = await getDocs(query(collection(db,'contacts'), orderBy('sort')));
+    rows.forEach(r => {
+      if (r.id === id) {
+        const c = r.data();
+        nameEl.value  = c.name  || '';
+        roleEl.value  = c.role  || '';
+        phoneEl.value = c.phone || '';
+        mailEl.value  = c.email || '';
+        sortEl.value  = (c.sort ?? '');
+      }
+    });
+    cancelBtn.style.display = '';
+  } else if (e.target.dataset.del) {
+    if (confirm('Ta bort kontakten?')) {
+      await deleteDoc(doc(db,'contacts',id));
+      await loadContacts();
+    }
+  }
+});
+
+saveBtn.addEventListener('click', async () => {
+  const payload = {
+    name:  nameEl.value.trim(),
+    role:  roleEl.value.trim(),
+    phone: phoneEl.value.trim(),
+    email: mailEl.value.trim(),
+    sort:  sortEl.value === '' ? 9999 : Number(sortEl.value)
+  };
+  if (!payload.name || !payload.role) { alert('Namn och roll krävs.'); return; }
+
+  if (editId) {
+    await updateDoc(doc(db,'contacts',editId), payload);
+  } else {
+    await addDoc(collection(db,'contacts'), payload);
+  }
+
+  // reset
+  editId = null;
+  formTitle.textContent = 'Skapa kontakt';
+  cancelBtn.style.display = 'none';
+  nameEl.value = roleEl.value = phoneEl.value = mailEl.value = ''; sortEl.value = '';
+  await loadContacts();
+});
+
+cancelBtn.addEventListener('click', () => {
+  editId = null;
+  formTitle.textContent = 'Skapa kontakt';
+  cancelBtn.style.display = 'none';
+  nameEl.value = roleEl.value = phoneEl.value = mailEl.value = ''; sortEl.value = '';
+});
+</script>
+</body>
+</html>
