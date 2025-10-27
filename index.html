@@ -389,59 +389,121 @@ function ensureDagabReady(){
   setupLock(); // laddar data direkt om PIN ej krävs
 }
 
-/* -------- NYHETER & KONTAKTER (exempeldata) -------- */
-const NEWS=[
-  {title:"Ny rutin",date:"2025-10-25",body:"Från måndag gäller nya lossningstider i Bålsta."},
-  {title:"LotsPDA uppdateras",date:"2025-10-20",body:"Systemet uppdateras kl 18:00–19:00. Kortare störningar kan förekomma."}
-];
-const CONTACTS=[
-  {name:"Transportledningen",role:"Planering",phone:"+46 90 123456",email:"plan@kof.se"},
-  {name:"IT-support",role:"PDA/Åtkomst",phone:"+46 90 765432",email:"it@kof.se"}
-];
+/* -------- NYHETER & KONTAKTER -------- */
+import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js").then(async ({ initializeApp }) => {
+  const { getFirestore, collection, getDocs, orderBy, limit, query } =
+    await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
-async function renderNews(){
-  const box = document.getElementById('newsList'); if(!box) return;
-  box.innerHTML = '<p class="muted">Laddar nyheter…</p>';
-  try{
-    const res = await fetch('./data/news.json?v=' + Date.now(), { cache: 'no-store' });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json(); // { items: [ {title,date,body}, ... ] }
-    const items = Array.isArray(data.items) ? data.items : [];
-    if(!items.length){ box.innerHTML = '<p class="muted">Inga nyheter ännu.</p>'; return; }
+  const firebaseConfig = {
+    apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
+    authDomain: "kofnord-1e371.firebaseapp.com",
+    projectId: "kofnord-1e371",
+    storageBucket: "kofnord-1e371.firebasestorage.app",
+    messagingSenderId: "559491880457",
+    appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
+  };
 
-    box.innerHTML = '';
-    items
-      .sort((a,b)=> new Date(b.date) - new Date(a.date))
-      .forEach(n => {
-        const div = document.createElement('div');
-        div.className = 'item';
-        const d = n.date ? new Date(n.date).toLocaleDateString() : '';
-        div.innerHTML = `<h3>${n.title || ''}</h3>
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ====== Ladda full nyhetslista (Nyheter-sidan) ======
+  async function renderNews() {
+    const box = document.getElementById("newsList");
+    if (!box) return;
+    box.innerHTML = '<p class="muted">Laddar nyheter…</p>';
+    try {
+      const q = query(collection(db, "news"), orderBy("date", "desc"));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        box.innerHTML = '<p class="muted">Inga nyheter ännu.</p>';
+        return;
+      }
+
+      box.innerHTML = "";
+      snap.forEach(doc => {
+        const n = doc.data();
+        const div = document.createElement("div");
+        div.className = "item";
+        const d = n.date ? new Date(n.date).toLocaleDateString() : "";
+        div.innerHTML = `
+          <h3>${n.title || ""}</h3>
           <div class="meta">${d}</div>
-          <p>${(n.body || '').replace(/\n/g,'<br>')}</p>`;
+          <p>${(n.body || "").replace(/\n/g, "<br>")}</p>`;
         box.appendChild(div);
       });
-  }catch(err){
-    console.error(err);
-    box.innerHTML = '<p style="color:#b00020;">Kunde inte läsa nyheter.</p>';
+    } catch (err) {
+      console.error(err);
+      box.innerHTML = '<p style="color:#b00020;">Kunde inte läsa nyheter.</p>';
+    }
   }
-}
 
-function renderContacts(){
-  const tb=document.querySelector('#contactsTable tbody'); if(!tb) return;
-  tb.innerHTML='';
-  CONTACTS.forEach(c=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${c.name}</td>
-      <td>${c.role}</td>
-      <td><a href="tel:${c.phone.replace(/\s+/g,'')}">${c.phone}</a></td>
-      <td><a href="mailto:${c.email}">${c.email}</a></td>`;
-    tb.appendChild(tr);
-  });
-}
+  // ====== Ladda senaste 3 nyheter (startsidan) ======
+  async function renderLatestNews() {
+    const home = document.querySelector("#page-home .hero");
+    if (!home) return;
 
-/* -------- Start -------- */
-handleRoute();
-</script>
-</body>
-</html>
+    const section = document.createElement("section");
+    section.id = "latest-news";
+    section.style.marginTop = "30px";
+    section.innerHTML = `
+      <h3>📰 Senaste nytt</h3>
+      <div id="latest-container"><p class="muted">Laddar nyheter...</p></div>
+    `;
+    home.appendChild(section);
+
+    const container = section.querySelector("#latest-container");
+
+    try {
+      const q = query(collection(db, "news"), orderBy("date", "desc"), limit(3));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        container.innerHTML = "<p class='muted'>Inga nyheter ännu.</p>";
+        return;
+      }
+
+      container.innerHTML = "";
+      snap.forEach(doc => {
+        const n = doc.data();
+        const div = document.createElement("div");
+        div.style.borderBottom = "1px solid #eee";
+        div.style.marginBottom = "8px";
+        div.style.paddingBottom = "6px";
+        div.innerHTML = `
+          <strong>${n.title}</strong><br>
+          <small style="color:#6b7280">${n.date}</small><br>
+          <span>${(n.body || "").split("\n")[0]}...</span>
+        `;
+        container.appendChild(div);
+      });
+    } catch (e) {
+      console.error(e);
+      container.innerHTML = "<p style='color:#b00020;'>Kunde inte läsa nyheter.</p>";
+    }
+  }
+
+  // ====== Kontakter (oförändrat) ======
+  const CONTACTS = [
+    { name: "Transportledningen", role: "Planering", phone: "+46 90 123456", email: "plan@kof.se" },
+    { name: "IT-support", role: "PDA/Åtkomst", phone: "+46 90 765432", email: "it@kof.se" }
+  ];
+
+  function renderContacts() {
+    const tb = document.querySelector("#contactsTable tbody");
+    if (!tb) return;
+    tb.innerHTML = "";
+    CONTACTS.forEach(c => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${c.name}</td>
+        <td>${c.role}</td>
+        <td><a href="tel:${c.phone.replace(/\s+/g, "")}">${c.phone}</a></td>
+        <td><a href="mailto:${c.email}">${c.email}</a></td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  /* -------- Start -------- */
+  window.renderNews = renderNews;
+  window.renderContacts = renderContacts;
+  renderLatestNews(); // kör direkt vid start
+});
+
