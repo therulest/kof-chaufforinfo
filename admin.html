@@ -1,296 +1,310 @@
 <!doctype html>
 <html lang="sv">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Admin – Portal</title>
 <style>
-  :root{--border:#e5e7eb;--muted:#6b7280;--brand:#0ea5e9;--danger:#b91c1c}
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:16px;background:#fafafa;color:#111}
-  .wrap{max-width:1100px;margin:0 auto}
-  .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-  .title{font-weight:700;font-size:20px}
-  .card{background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:16px;margin-bottom:14px}
-  .tabs{display:flex;gap:8px;border-bottom:1px solid var(--border);margin-bottom:12px}
-  .tab{padding:8px 12px;border:1px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0;background:#f9fafb;cursor:pointer}
-  .tab.active{background:#fff;border-bottom:1px solid #fff;font-weight:600}
-  .muted{color:var(--muted)}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:16px;max-width:1000px;margin:0 auto}
+  h1{margin:0 0 12px}
+  .tabs{display:flex;gap:8px;margin:6px 0 14px}
+  .tab{border:1px solid #e5e7eb;background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
+  .tab.active{background:#eef6ff;border-color:#cfe3ff}
+  .section[hidden]{display:none}
   .row{display:flex;gap:12px;flex-wrap:wrap}
   input,textarea,button{font:inherit}
   input,textarea{border:1px solid #d1d5db;border-radius:8px;padding:10px;min-width:260px}
   textarea{min-height:120px;width:100%}
-  .btn{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px 14px;cursor:pointer}
-  .btn.secondary{background:#6b7280}
-  table{width:100%;border-collapse:collapse;margin-top:12px}
-  th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}
-  .alert{display:none;margin-top:10px;padding:10px 12px;border-radius:8px}
-  .alert.err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b}
-  .alert.ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
-  .pill{display:inline-block;background:#eef2ff;color:#3730a3;padding:2px 8px;border-radius:999px;font-size:12px}
-  .section[hidden]{display:none}
+  button{background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:10px 14px;cursor:pointer}
+  button.secondary{background:#6b7280}
+  .muted{color:#6b7280}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:top}
+  .note{font-size:12px;color:#6b7280}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="card">
+  <h1>Admin – Portal</h1>
 
-  <div class="top">
-    <div class="title">Admin – Portal</div>
-    <div id="auth">
-      <button id="loginBtn" class="btn">Logga in</button>
-      <button id="logoutBtn" class="btn secondary" style="display:none">Logga ut</button>
-      <span id="who" class="muted"></span>
+  <!-- Auth -->
+  <div id="auth" class="row" style="align-items:center">
+    <div>
+      <button id="loginBtn">Logga in</button>
+      <button id="logoutBtn" class="secondary" style="display:none">Logga ut</button>
     </div>
+    <span id="who" class="muted"></span>
   </div>
 
-  <div id="msgErr" class="alert err"></div>
-  <div id="msgOk" class="alert ok"></div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="news">Nyheter</button>
+    <button class="tab" data-tab="contacts">Kontakter</button>
+    <button class="tab" data-tab="lock">Lås (PIN)</button>
+  </div>
 
-  <div class="card">
-    <div class="tabs">
-      <button class="tab active" data-tab="nyheter">Nyheter</button>
-      <button class="tab" data-tab="kontakter">Kontakter</button>
+  <!-- Nyheter -->
+  <section id="sec-news" class="section">
+    <h3>Nyheter</h3>
+    <div class="row">
+      <input id="n-title" placeholder="Titel">
+      <input id="n-date" type="date">
+    </div>
+    <div class="row"><textarea id="n-body" placeholder="Text …"></textarea></div>
+    <div class="row">
+      <button id="n-save">Spara</button>
+      <button id="n-cancel" class="secondary" style="display:none">Avbryt</button>
     </div>
 
-    <!-- Nyheter -->
-    <section id="sec-nyheter" class="section">
-      <h3>Nyheter</h3>
-      <div class="row" style="margin-bottom:10px">
-        <input id="news-title" placeholder="Titel">
-        <input id="news-date" type="date">
-      </div>
-      <div class="row" style="margin-bottom:10px">
-        <textarea id="news-body" placeholder="Text …"></textarea>
-      </div>
-      <div class="row">
-        <button id="news-save" class="btn">Spara</button>
-        <button id="news-cancel" class="btn secondary" style="display:none">Avbryt</button>
-      </div>
+    <table id="n-table">
+      <thead><tr><th>Titel</th><th>Datum</th><th>Text</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="note">Visar sorterat på datum (fallande).</p>
+  </section>
 
-      <table id="news-table">
-        <thead><tr><th>Titel</th><th>Datum</th><th>Text</th><th></th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <p class="muted">Visar de senaste 100 posterna, sorterat på datum.</p>
-    </section>
+  <!-- Kontakter -->
+  <section id="sec-contacts" class="section" hidden>
+    <h3>Kontakter</h3>
+    <div class="row">
+      <input id="c-name"  placeholder="Namn">
+      <input id="c-role"  placeholder="Roll">
+      <input id="c-phone" placeholder="Telefon">
+    </div>
+    <div class="row">
+      <input id="c-email" placeholder="E-post">
+      <input id="c-sort"  placeholder="Sort (t.ex. 10)">
+    </div>
+    <div class="row">
+      <button id="c-save">Spara</button>
+      <button id="c-cancel" class="secondary" style="display:none">Avbryt</button>
+    </div>
 
-    <!-- Kontakter -->
-    <section id="sec-kontakter" class="section" hidden>
-      <h3>Kontakter</h3>
-      <div class="row" style="margin-bottom:10px">
-        <input id="c-name"  placeholder="Namn">
-        <input id="c-role"  placeholder="Roll">
-        <input id="c-phone" placeholder="Telefon">
-      </div>
-      <div class="row" style="margin-bottom:10px">
-        <input id="c-email" placeholder="E-post">
-        <input id="c-sort"  placeholder="Sort (t.ex. 10)" inputmode="numeric">
-      </div>
-      <div class="row">
-        <button id="c-save" class="btn">Spara</button>
-        <button id="c-cancel" class="btn secondary" style="display:none">Avbryt</button>
-      </div>
+    <table id="c-table">
+      <thead><tr><th>Namn</th><th>Roll</th><th>Telefon</th><th>E-post</th><th>Sort</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="note">Sortering sker på “sort” (lägst först), därefter namn.</p>
+  </section>
 
-      <table id="c-table">
-        <thead><tr><th>Namn</th><th>Roll</th><th>Telefon</th><th>E-post</th><th>Sort</th><th></th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <p class="muted">Sorteras efter ”sort” (stigande) och sedan namn.</p>
-    </section>
-  </div>
+  <!-- Lås (PIN) -->
+  <section id="sec-lock" class="section" hidden>
+    <h3>Lås (PIN)</h3>
+    <p class="note">Endast hash lagras i Firestore – aldrig själva PIN-koden.</p>
+    <div class="row" style="align-items:center">
+      <label><input type="checkbox" id="l-require"> Kräv PIN</label>
+    </div>
+    <div class="row">
+      <input id="l-new" placeholder="Ny PIN (lämna tom för att inte ändra)">
+      <input id="l-msg" placeholder="Meddelande på låsskärmen (valfritt)" style="min-width:360px">
+    </div>
+    <div class="row">
+      <button id="l-save">Spara låsinställningar</button>
+      <button id="l-clear" class="secondary">Rensa PIN</button>
+    </div>
+    <p class="note" id="l-info"></p>
+  </section>
 </div>
 
-<!-- Firebase -->
 <script type="module">
+  /* ===== Firebase ===== */
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
-    getDocs, query, orderBy, limit
+    getDocs, orderBy, query, setDoc, getDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // === Konfiguration ===
   const firebaseConfig = {
     apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
     authDomain: "kofnord-1e371.firebaseapp.com",
     projectId: "kofnord-1e371",
-    storageBucket: "kofnord-1e371.appspot.com",
-    messagingSenderId: "559491880457",
-    appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
   };
-  const app = initializeApp(firebaseConfig);
+
+  const app  = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  // === UI helpers ===
   const $ = s => document.querySelector(s);
-  const msgErr = $('#msgErr'), msgOk = $('#msgOk');
-  function showErr(t){ msgErr.textContent=t; msgErr.style.display='block'; msgOk.style.display='none'; console.error(t); }
-  function hideErr(){ msgErr.style.display='none'; }
-  function showOk(t='Klart!'){ msgOk.textContent=t; msgOk.style.display='block'; setTimeout(()=>msgOk.style.display='none',2000); }
 
-  // === Auth ===
+  /* ===== Tabs ===== */
+  const tabs=[...document.querySelectorAll('.tab')];
+  function setTab(id){
+    tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===id));
+    $('#sec-news').hidden = id!=='news';
+    $('#sec-contacts').hidden = id!=='contacts';
+    $('#sec-lock').hidden = id!=='lock';
+    if(id==='news') loadNews();
+    if(id==='contacts') loadContacts();
+    if(id==='lock') loadLock();
+  }
+  tabs.forEach(t=> t.addEventListener('click', ()=> setTab(t.dataset.tab)));
+
+  /* ===== Auth (email+password) ===== */
   const loginBtn  = $('#loginBtn');
   const logoutBtn = $('#logoutBtn');
   const who       = $('#who');
 
-  onAuthStateChanged(auth, user => {
-    hideErr();
-    const isIn = !!user;
-    loginBtn.style.display  = isIn ? 'none' : '';
-    logoutBtn.style.display = isIn ? '' : 'none';
+  onAuthStateChanged(auth, user=>{
+    const isIn=!!user;
+    loginBtn.style.display = isIn?'none':'';
+    logoutBtn.style.display= isIn?'':'none';
     who.textContent = isIn ? `Inloggad som ${user.email}` : '';
-    // Ladda om aktuell flik
-    const tab = getTab();
-    if(isIn) (tab==='nyheter'?loadNews:loadContacts)().catch(e=>showErr(e.message));
-    else { $('#news-table tbody').innerHTML=''; $('#c-table tbody').innerHTML=''; }
+    if(isIn){ setTab('news'); } else { setTab('news'); } // default
   });
 
   loginBtn.addEventListener('click', async ()=>{
-    hideErr();
-    const email = prompt('E-post:'); const pass = prompt('Lösenord:');
-    if(!email || !pass) return;
-    try{ await signInWithEmailAndPassword(auth,email.trim(),pass); }
-    catch(e){ showErr('Inloggning misslyckades: ' + e.message); }
+    const email = prompt('E-post:');
+    if(!email) return;
+    const pass  = prompt('Lösenord:');
+    if(!pass) return;
+    try{
+      await signInWithEmailAndPassword(auth,email,pass);
+    }catch(e){ alert('Inloggning misslyckades: '+e.message); }
   });
-  logoutBtn.addEventListener('click', ()=>signOut(auth));
+  logoutBtn.addEventListener('click', ()=> signOut(auth));
 
-  // === Tabs ===
-  function getTab(){ return location.hash.replace('#/','') || 'nyheter'; }
-  function setTab(t){
-    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
-    $('#sec-nyheter').hidden = t!=='nyheter';
-    $('#sec-kontakter').hidden = t!=='kontakter';
-    location.hash = '#/'+t;
-  }
-  document.querySelectorAll('.tab').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      setTab(b.dataset.tab);
-      // Ladda data för vald flik
-      if(auth.currentUser){
-        (b.dataset.tab==='nyheter'?loadNews:loadContacts)().catch(e=>showErr(e.message));
-      }
-    });
-  });
-  // Init
-  setTab(getTab());
-
-  // === Nyheter (CRUD) ===
-  let newsEditId = null;
-  const nTitle=$('#news-title'), nDate=$('#news-date'), nBody=$('#news-body');
-  $('#news-save').addEventListener('click', saveNews);
-  $('#news-cancel').addEventListener('click', ()=>{ newsEditId=null; $('#news-cancel').style.display='none'; nTitle.value=nBody.value=''; nDate.value=''; });
+  /* ===== Nyheter (CRUD) ===== */
+  const nTitle=$('#n-title'), nDate=$('#n-date'), nBody=$('#n-body');
+  const nSave=$('#n-save'), nCancel=$('#n-cancel'), nTbody=$('#n-table tbody');
+  let nEdit=null;
 
   async function loadNews(){
-    const qy = query(collection(db,'news'), orderBy('date','desc'), limit(100));
-    const snap = await getDocs(qy);
-    const tb = $('#news-table tbody'); tb.innerHTML='';
-    if(snap.empty){ tb.innerHTML='<tr><td colspan="4" class="muted">Inga nyheter ännu.</td></tr>'; return; }
+    if(!auth.currentUser) return;
+    nTbody.innerHTML='';
+    const qRef=query(collection(db,'news'), orderBy('date','desc'));
+    const snap=await getDocs(qRef);
     snap.forEach(d=>{
       const it=d.data();
       const tr=document.createElement('tr');
-      tr.innerHTML = `
-        <td>${esc(it.title||'')}</td>
-        <td>${esc(it.date||'')}</td>
-        <td class="muted">${esc((it.body||'').slice(0,120))}${(it.body||'').length>120?'…':''}</td>
+      tr.innerHTML=`
+        <td>${it.title||''}</td>
+        <td>${it.date||''}</td>
+        <td class="muted">${(it.body||'').slice(0,120)}${(it.body||'').length>120?'…':''}</td>
         <td>
-          <button class="btn secondary" data-edit="${d.id}">Redigera</button>
-          <button class="btn" data-del="${d.id}">Ta bort</button>
+          <button data-e="${d.id}">Redigera</button>
+          <button class="secondary" data-d="${d.id}">Ta bort</button>
         </td>`;
-      tb.appendChild(tr);
+      nTbody.appendChild(tr);
     });
   }
-  $('#news-table').addEventListener('click', async (e)=>{
-    const id = e.target.dataset.edit || e.target.dataset.del; if(!id) return;
-    hideErr();
-    if(e.target.dataset.edit){
-      // Läs radens värden från DOM
+  nTbody.addEventListener('click', async e=>{
+    const id=e.target.dataset.e||e.target.dataset.d;
+    if(!id) return;
+    if(e.target.dataset.e){
+      nEdit=id; nCancel.style.display='';
+      // snabb-läs från tabellen
       const tr=e.target.closest('tr');
-      nTitle.value=tr.children[0].textContent.trim();
-      nDate.value =tr.children[1].textContent.trim();
-      // Hämta full body via en extra fetch (enkelt sätt)
-      const qy = query(collection(db,'news'), orderBy('date','desc'), limit(100));
-      const snap = await getDocs(qy);
+      nTitle.value=tr.children[0].textContent;
+      nDate.value=tr.children[1].textContent;
+      // hämta hela body
+      const snap=await getDocs(query(collection(db,'news'), orderBy('date','desc')));
       snap.forEach(d=>{ if(d.id===id) nBody.value=(d.data().body||''); });
-      newsEditId=id; $('#news-cancel').style.display='';
-    }else if(e.target.dataset.del){
-      if(confirm('Ta bort nyheten?')){ await deleteDoc(doc(db,'news',id)); showOk('Borttagen.'); await loadNews(); }
+    }else{
+      if(confirm('Ta bort nyheten?')){ await deleteDoc(doc(db,'news',id)); loadNews(); }
     }
   });
-  async function saveNews(){
-    try{
-      const payload={ title:nTitle.value.trim(), date:nDate.value, body:nBody.value.trim() };
-      if(!payload.title || !payload.date){ showErr('Titel och datum krävs.'); return; }
-      if(newsEditId){ await updateDoc(doc(db,'news',newsEditId), payload); showOk('Uppdaterad.'); }
-      else { await addDoc(collection(db,'news'), payload); showOk('Skapad.'); }
-      newsEditId=null; $('#news-cancel').style.display='none'; nTitle.value=nBody.value=''; nDate.value='';
-      await loadNews();
-    }catch(e){ showErr('Kunde inte spara nyhet: ' + e.message); }
-  }
+  nSave.addEventListener('click', async ()=>{
+    if(!auth.currentUser) return;
+    const payload={ title:nTitle.value.trim(), date:nDate.value, body:nBody.value.trim() };
+    if(!payload.title||!payload.date){ alert('Titel och datum krävs.'); return; }
+    if(nEdit) await updateDoc(doc(db,'news',nEdit), payload);
+    else      await addDoc(collection(db,'news'), payload);
+    nTitle.value=nBody.value=''; nDate.value=''; nEdit=null; nCancel.style.display='none'; loadNews();
+  });
+  nCancel.addEventListener('click', ()=>{ nEdit=null; nTitle.value=nBody.value=''; nDate.value=''; nCancel.style.display='none'; });
 
-  // === Kontakter (CRUD) ===
-  let cEditId=null;
+  /* ===== Kontakter (CRUD) ===== */
   const cName=$('#c-name'), cRole=$('#c-role'), cPhone=$('#c-phone'), cEmail=$('#c-email'), cSort=$('#c-sort');
-  $('#c-save').addEventListener('click', saveContact);
-  $('#c-cancel').addEventListener('click', ()=>{ cEditId=null; $('#c-cancel').style.display='none'; cName.value=cRole.value=cPhone.value=cEmail.value=cSort.value=''; });
+  const cSave=$('#c-save'), cCancel=$('#c-cancel'), cTbody=$('#c-table tbody');
+  let cEdit=null;
 
   async function loadContacts(){
-    const qy = query(collection(db,'contacts'), orderBy('sort','asc'), orderBy('name','asc'));
-    const snap = await getDocs(qy);
-    const tb=$('#c-table tbody'); tb.innerHTML='';
-    if(snap.empty){ tb.innerHTML='<tr><td colspan="6" class="muted">Inga kontakter ännu.</td></tr>'; return; }
-    snap.forEach(d=>{
-      const c=d.data();
+    if(!auth.currentUser) return;
+    cTbody.innerHTML='';
+    const snap=await getDocs(collection(db,'contacts'));
+    const arr=[]; snap.forEach(d=>arr.push({id:d.id,...d.data()}));
+    arr.sort((a,b)=>(a.sort??999)-(b.sort??999) || (a.name||'').localeCompare(b.name||''));
+    arr.forEach(it=>{
       const tr=document.createElement('tr');
       tr.innerHTML=`
-        <td>${esc(c.name||'')}</td>
-        <td>${esc(c.role||'')}</td>
-        <td><a href="tel:${(c.phone||'').replace(/\s+/g,'')}">${esc(c.phone||'')}</a></td>
-        <td><a href="mailto:${esc(c.email||'')}">${esc(c.email||'')}</a></td>
-        <td><span class="pill">${Number(c.sort ?? 9999)}</span></td>
+        <td>${it.name||''}</td>
+        <td>${it.role||''}</td>
+        <td>${it.phone||''}</td>
+        <td>${it.email||''}</td>
+        <td>${it.sort??''}</td>
         <td>
-          <button class="btn secondary" data-edit="${d.id}">Redigera</button>
-          <button class="btn" data-del="${d.id}">Ta bort</button>
+          <button data-e="${it.id}">Redigera</button>
+          <button class="secondary" data-d="${it.id}">Ta bort</button>
         </td>`;
-      tb.appendChild(tr);
+      cTbody.appendChild(tr);
     });
   }
-  $('#c-table').addEventListener('click', async (e)=>{
-    const id = e.target.dataset.edit || e.target.dataset.del; if(!id) return;
-    hideErr();
-    if(e.target.dataset.edit){
+  cTbody.addEventListener('click', async e=>{
+    const id=e.target.dataset.e||e.target.dataset.d;
+    if(!id) return;
+    if(e.target.dataset.e){
+      cEdit=id; cCancel.style.display='';
       const tr=e.target.closest('tr');
-      cName.value = tr.children[0].textContent.trim();
-      cRole.value = tr.children[1].textContent.trim();
-      cPhone.value= tr.children[2].textContent.trim();
-      cEmail.value= tr.children[3].textContent.trim();
-      cSort.value = tr.children[4].textContent.trim();
-      cEditId=id; $('#c-cancel').style.display='';
-    }else if(e.target.dataset.del){
-      if(confirm('Ta bort kontakten?')){ await deleteDoc(doc(db,'contacts',id)); showOk('Borttagen.'); await loadContacts(); }
+      cName.value = tr.children[0].textContent;
+      cRole.value = tr.children[1].textContent;
+      cPhone.value= tr.children[2].textContent;
+      cEmail.value= tr.children[3].textContent;
+      cSort.value = tr.children[4].textContent;
+    }else{
+      if(confirm('Ta bort kontakten?')){ await deleteDoc(doc(db,'contacts',id)); loadContacts(); }
     }
   });
-  async function saveContact(){
-    hideErr();
-    try{
-      const payload={
-        name:cName.value.trim(),
-        role:cRole.value.trim(),
-        phone:cPhone.value.trim(),
-        email:cEmail.value.trim(),
-        sort:Number.parseInt(cSort.value,10)
-      };
-      if(!payload.name){ showErr('Namn krävs.'); return; }
-      if(Number.isNaN(payload.sort)) payload.sort=9999;
-      if(cEditId){ await updateDoc(doc(db,'contacts',cEditId), payload); showOk('Uppdaterad.'); }
-      else { await addDoc(collection(db,'contacts'), payload); showOk('Skapad.'); }
-      cEditId=null; $('#c-cancel').style.display='none';
-      cName.value=cRole.value=cPhone.value=cEmail.value=cSort.value='';
-      await loadContacts();
-    }catch(e){ showErr('Kunde inte spara kontakt: ' + e.message); }
-  }
+  cSave.addEventListener('click', async ()=>{
+    if(!auth.currentUser) return;
+    const payload={
+      name:cName.value.trim(), role:cRole.value.trim(), phone:cPhone.value.trim(), email:cEmail.value.trim(),
+      sort: (cSort.value||'').trim()==='' ? null : Number(cSort.value)
+    };
+    if(!payload.name){ alert('Namn krävs.'); return; }
+    if(cEdit) await updateDoc(doc(db,'contacts',cEdit), payload);
+    else      await addDoc(collection(db,'contacts'), payload);
+    cName.value=cRole.value=cPhone.value=cEmail.value=cSort.value=''; cEdit=null; cCancel.style.display='none'; loadContacts();
+  });
+  cCancel.addEventListener('click', ()=>{ cEdit=null; cName.value=cRole.value=cPhone.value=cEmail.value=cSort.value=''; cCancel.style.display='none'; });
 
-  // Util
-  function esc(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  /* ===== Lås (PIN) ===== */
+  const lReq=$('#l-require'), lNew=$('#l-new'), lMsg=$('#l-msg'), lInfo=$('#l-info');
+  async function sha256Hex(str){
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  async function loadLock(){
+    if(!auth.currentUser) return;
+    const snap=await getDoc(doc(db,'settings','site'));
+    if(!snap.exists()){ lReq.checked=false; lMsg.value=''; lInfo.textContent='Ingen PIN konfigurerad.'; return; }
+    const it=snap.data();
+    lReq.checked=!!it.require_pin;
+    lMsg.value=it.lock_message||'';
+    lInfo.textContent=`Status: ${it.require_pin?'Kräver PIN':'Ej låst'}`;
+  }
+  $('#l-save').addEventListener('click', async ()=>{
+    if(!auth.currentUser) return;
+    const next={ require_pin: !!lReq.checked, lock_message: (lMsg.value||'').trim(), pin_updated_at: serverTimestamp() };
+    const newPin=(lNew.value||'').trim();
+    if(newPin){ next.pin_hash=await sha256Hex(newPin); }
+    await setDoc(doc(db,'settings','site'), next, {merge:true});
+    lNew.value=''; alert('Låsinställningar sparade.'); loadLock();
+  });
+  $('#l-clear').addEventListener('click', async ()=>{
+    if(!auth.currentUser) return;
+    if(!confirm('Rensa PIN och avaktivera lås?')) return;
+    await setDoc(doc(db,'settings','site'), {require_pin:false, pin_hash:'', pin_updated_at:serverTimestamp()}, {merge:true});
+    alert('PIN rensad.'); loadLock();
+  });
+
+  // Init
+  setTab('news');
 </script>
 </body>
 </html>
+
