@@ -1,1 +1,74 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nyheter – KOF Chaufförportal</title>
+<style>
+  body {
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    margin: 16px;
+    background: #fafafa;
+  }
+  .news-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  h2 { margin: 0 0 8px; }
+  .date { color: #6b7280; font-size: 14px; }
+</style>
+</head>
+<body>
+  <h1>Nyheter</h1>
+  <div id="news-list">Laddar nyheter...</div>
 
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, orderBy, query } 
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Samma Firebase-konfiguration som i admin
+    const firebaseConfig = {
+      apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
+      authDomain: "kofnord-1e371.firebaseapp.com",
+      projectId: "kofnord-1e371",
+      storageBucket: "kofnord-1e371.firebasestorage.app",
+      messagingSenderId: "559491880457",
+      appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const listEl = document.getElementById("news-list");
+
+    async function loadNews() {
+      const q = query(collection(db, "news"), orderBy("date", "desc"));
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        listEl.textContent = "Inga nyheter ännu.";
+        return;
+      }
+
+      listEl.innerHTML = "";
+      snap.forEach(doc => {
+        const n = doc.data();
+        const card = document.createElement("div");
+        card.className = "news-card";
+        card.innerHTML = `
+          <h2>${n.title}</h2>
+          <div class="date">${n.date}</div>
+          <p>${n.body.replace(/\n/g, "<br>")}</p>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    loadNews();
+  </script>
+</body>
+</html>
