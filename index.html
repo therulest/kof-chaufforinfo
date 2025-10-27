@@ -7,40 +7,21 @@
 
 <style>
 :root{
-  --border:#e5e7eb;
-  --shadow:0 1px 3px rgba(0,0,0,.05);
-  --wrap:1000px;
-  --ink:#0f172a;
-  --muted:#475569;
-  --blue:#0284c7;
-  --blue-ink:#0369a1;
-  --blue-100:#e0f2fe;
-  --chip-bg:#f8fafc;
+  --border:#e5e7eb; --shadow:0 1px 3px rgba(0,0,0,.05); --wrap:1000px;
+  --ink:#0f172a; --muted:#475569; --blue:#0284c7; --blue-ink:#0369a1; --blue-100:#e0f2fe; --chip-bg:#f8fafc;
 }
 *{box-sizing:border-box}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:var(--ink)}
 
 /* Topbar */
-.topbar{
-  background:#fff;border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:10;transition:box-shadow .18s ease,border-color .18s ease
-}
+.topbar{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;transition:box-shadow .18s ease,border-color .18s ease}
 .topbar.scrolled{box-shadow:0 6px 18px rgba(2,8,23,.06);border-color:#eef2f7}
-.topbar .wrap{
-  max-width:var(--wrap);margin:0 auto;padding:10px 16px;
-  display:flex;align-items:center;justify-content:space-between;gap:14px
-}
+.topbar .wrap{max-width:var(--wrap);margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px}
 .brand{margin:0;font-size:18px;color:var(--blue);font-weight:700;letter-spacing:.2px}
 
 /* Desktop nav – pill style */
-.nav{
-  display:flex;gap:6px;background:var(--chip-bg);padding:6px;border:1px solid var(--border);
-  border-radius:9999px;box-shadow:var(--shadow)
-}
-.nav a{
-  --pad-x:14px;text-decoration:none;color:#334155;padding:8px var(--pad-x);border-radius:9999px;
-  font-size:14px;font-weight:600;line-height:1;transition:background .15s,box-shadow .15s,color .15s,transform .04s
-}
+.nav{display:flex;gap:6px;background:var(--chip-bg);padding:6px;border:1px solid var(--border);border-radius:9999px;box-shadow:var(--shadow)}
+.nav a{--pad-x:14px;text-decoration:none;color:#334155;padding:8px var(--pad-x);border-radius:9999px;font-size:14px;font-weight:600;line-height:1;transition:background .15s,box-shadow .15s,color .15s,transform .04s}
 .nav a:hover{background:#eef2f7}
 .nav a:active{transform:translateY(1px)}
 .nav a.active{background:var(--blue-100);color:var(--blue-ink);box-shadow:inset 0 0 0 1px #bae6fd}
@@ -48,17 +29,10 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 
 /* Mobil-ikon-meny */
 .mobile-launcher{display:none}
-@media(max-width:700px){
-  .nav{display:none}
-  .mobile-launcher{display:block}
-}
+@media(max-width:700px){ .nav{display:none} .mobile-launcher{display:block} }
 .mobile-launcher .wrap{max-width:var(--wrap);margin:12px auto 0;padding:0 16px}
-.ml-grid{
-  background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;
-  display:grid;grid-template-columns:repeat(4,1fr);gap:8px
-}
-.ml-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;
-  text-decoration:none;color:#111;transition:transform .06s, box-shadow .15s, background .15s}
+.ml-grid{background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ml-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;text-decoration:none;color:#111;transition:transform .06s, box-shadow .15s, background .15s}
 .ml-item:hover{background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .ml-item:active{transform:translateY(1px)}
 .micon{width:48px;height:48px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
@@ -69,26 +43,19 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .page h2{margin:0}
 
 /* Dagab – verktygsrad */
-.tools{
-  display:flex;align-items:center;gap:12px;justify-content:space-between;margin:8px 0 12px
-}
+.tools{display:flex;align-items:center;gap:12px;justify-content:space-between;margin:8px 0 12px}
 .tools-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .tools-right{margin-left:auto;color:var(--muted);font-size:12px}
 
 /* Knapp */
-.btn{
-  appearance:none;border:1px solid #0273ad;background:var(--blue);color:#fff;
-  font-weight:700;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:var(--shadow);
-  transition:filter .15s, transform .04s
-}
+.btn{appearance:none;border:1px solid #0273ad;background:var(--blue);color:#fff;font-weight:700;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:var(--shadow);transition:filter .15s, transform .04s}
 .btn:hover{filter:brightness(1.05)}
 .btn:active{transform:translateY(1px)}
 .btn:disabled{opacity:.6;cursor:progress}
 
 /* Kortlayout (Dagab) */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-top:10px}
-.card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);
-  overflow:hidden;cursor:pointer;transition:box-shadow .15s}
+.card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:box-shadow .15s}
 .card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .card-header{display:flex;align-items:center;gap:10px;padding:12px}
 .chev{transition:transform .18s;user-select:none;font-size:16px}
@@ -100,8 +67,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .details ul{margin:8px 0 0 0;padding-left:20px;line-height:1.4}
 .details li{margin-bottom:6px}
 .details li.store{font-weight:600;color:#111827}
-
-/* MELLANRUM mellan pallantal och nästa butik */
 .details li.qty{color:#4b5563;margin-bottom:8px}
 .details li.total{font-weight:700;margin-top:4px;margin-bottom:8px}
 .details li.note{margin-top:6px;color:#991b1b}
@@ -116,8 +81,8 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .news .more{color:var(--blue);font-weight:600;margin-top:6px;user-select:none}
 .news .item.collapsed .more::after{content:" – klicka för att läsa mer"}
 .news .item.expanded .more::after{content:" – klicka för att visa mindre"}
-.highlight{animation:flash 1.3s ease-out 1}
 @keyframes flash{0%{box-shadow:0 0 0 0 rgba(2,132,199,.45)}40%{box-shadow:0 0 0 6px rgba(2,132,199,.15)}100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}}
+.highlight{animation:flash 1.3s ease-out 1}
 
 /* Nyhetslänkar */
 .news-links{list-style:none;padding:0;margin:12px 0 0}
@@ -127,8 +92,13 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .news-links .title{font-weight:600}
 .news-links .meta{font-size:12px;color:#6b7280;margin-top:4px}
 
-/* Kontakter */
+/* Kontakter – filter & grupper */
+.contacts-toolbar{display:flex;align-items:center;gap:10px;margin:8px 0 12px}
+.select{appearance:none;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;box-shadow:var(--shadow)}
 .contacts-acc{display:grid;gap:10px}
+.contact-group{margin-top:18px}
+.contact-group h3{margin:0 0 8px;font-size:16px;font-weight:800;color:#0f172a;display:flex;align-items:center;gap:8px}
+.contact-count{font-size:12px;color:#475569;background:#eef2f7;border:1px solid #e5e7eb;border-radius:9999px;padding:2px 8px}
 .contact-card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);overflow:hidden}
 .contact-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer}
 .contact-head .name{font-weight:600}
@@ -139,7 +109,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .contact-body .row{margin:8px 0;color:#374151}
 .contact-body a{color:#0ea5e9;text-decoration:none}
 
-/* Mindre rörelse */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce){.chev,.nav a,.ml-item,.topbar{transition:none}}
 </style>
 </head>
@@ -195,32 +165,30 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   </section>
 
   <section id="page-kontakter" class="page" data-page hidden>
-    <h2>Kontakter</h2>
-    <div id="contactsList" class="contacts-acc"></div>
+    <div class="contacts-toolbar">
+      <h2 style="margin-right:auto">Kontakter</h2>
+      <label for="roleFilter" class="muted" style="font-size:13px">Filter:</label>
+      <select id="roleFilter" class="select" aria-label="Filtrera på roll"></select>
+    </div>
+    <div id="contactsList"></div>
   </section>
 </main>
 
 <script type="module">
 /* ===== ROUTING ===== */
 function setActive(hash){
-  document.querySelectorAll('.nav a').forEach(a=>{
-    a.classList.remove('active');
-    a.removeAttribute('aria-current');
-  });
+  document.querySelectorAll('.nav a').forEach(a=>{a.classList.remove('active');a.removeAttribute('aria-current');});
   const clean = hash.split('/').slice(0,2).join('/');
   const link = document.querySelector(`.nav a[href="${clean}"]`);
   if(link){ link.classList.add('active'); link.setAttribute('aria-current','page'); }
 }
-function showPage(id){
-  document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
-  document.getElementById(id).hidden=false;
-}
+function showPage(id){ document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true); document.getElementById(id).hidden=false; }
 function handleRoute(){
   const h = location.hash || '#/home';
-  setActive(h);
   const parts = h.split('/');
   const route = parts[1] || 'home';
   const param = parts[2] || null;
+  setActive(h);
   if(route==='dagab'){ showPage('page-dagab'); ensureDagabReady(); }
   else if(route==='nyheter'){ showPage('page-nyheter'); renderNewsAll(param); }
   else if(route==='kontakter'){ showPage('page-kontakter'); renderContacts(); }
@@ -231,32 +199,18 @@ window.addEventListener('hashchange', handleRoute);
 /* Scrollskugga */
 const topbar=document.getElementById('topbar');
 function onScroll(){ topbar.classList.toggle('scrolled', window.scrollY>2); }
-onScroll();
-window.addEventListener('scroll', onScroll, {passive:true});
+onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
 
 /* ===== DAGAB ===== */
 const DATA_URL="https://therulest.github.io/kof-chaufforinfo/data.json";
 let dagabInitialized=false;
-const btnRefresh = () => document.getElementById('btnRefresh');
-const statusEl   = () => document.getElementById('status');
-
-function ensureDagabReady(){
-  if(!dagabInitialized){
-    dagabInitialized=true;
-    attachRefresh();
-    loadDagab();
-  }
-}
-function attachRefresh(){
-  const b=btnRefresh();
-  if(!b) return;
-  b.addEventListener('click', ()=> loadDagab(true));
-}
+function ensureDagabReady(){ if(!dagabInitialized){ dagabInitialized=true; attachRefresh(); loadDagab(); } }
+function attachRefresh(){ const b=document.getElementById('btnRefresh'); if(b) b.addEventListener('click',()=>loadDagab(true)); }
 
 async function loadDagab(manual=false){
   const grid=document.getElementById('grid');
-  const b=btnRefresh();
-  const s=statusEl();
+  const b=document.getElementById('btnRefresh');
+  const s=document.getElementById('status');
   if(manual && b){ b.disabled=true; b.textContent='Uppdaterar…'; }
   grid.innerHTML = manual ? grid.innerHTML : '<p>Laddar…</p>';
   try{
@@ -265,52 +219,35 @@ async function loadDagab(manual=false){
     buildCards(data);
     const t=new Date(data.updated_at||Date.now());
     if(s) s.textContent='Senast uppdaterad: '+t.toLocaleString('sv-SE');
-  }catch(e){
-    grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>';
-  }finally{
-    if(manual && b){ b.disabled=false; b.textContent='Uppdatera'; }
-  }
+  }catch(e){ grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>'; }
+  finally{ if(manual && b){ b.disabled=false; b.textContent='Uppdatera'; } }
 }
-
 function buildCards(data){
-  const grid=document.getElementById('grid');
-  grid.innerHTML='';
+  const grid=document.getElementById('grid'); grid.innerHTML='';
   (data.cars||[]).forEach((car,i)=>grid.append(buildCard(car,i,false)));
 }
-
 function buildCard(car,idx,expanded){
-  const card=document.createElement('div');
-  card.className='card'+(expanded?' expanded':'');
-  const summaryText=String(car.summary||'');
-  const lines=summaryText.split(/\r?\n/);
+  const card=document.createElement('div'); card.className='card'+(expanded?' expanded':'');
+  const summaryText=String(car.summary||''); const lines=summaryText.split(/\r?\n/);
   const head=lines.slice(0,6);
   const details=Array.isArray(car.details)&&car.details.length?car.details.map(String):lines.slice(6);
-
-  const header=document.createElement('div');header.className='card-header';
-  const chev=document.createElement('span');chev.className='chev';chev.textContent='▶';
-  const pre=document.createElement('pre');pre.className='summary';pre.textContent=head.join('\n');
-  header.append(chev,pre);card.append(header);
-
+  const header=document.createElement('div'); header.className='card-header';
+  const chev=document.createElement('span'); chev.className='chev'; chev.textContent='▶';
+  const pre=document.createElement('pre'); pre.className='summary'; pre.textContent=head.join('\n');
+  header.append(chev,pre); card.append(header);
   if(details.length){
     card.append(Object.assign(document.createElement('hr'),{className:'divider'}));
-    const d=document.createElement('div');d.className='details';
+    const d=document.createElement('div'); d.className='details';
     const ul=document.createElement('ul');
     for(let i=0;i<details.length;i++){
-      const line=String(details[i]);
-      const lower=line.toLowerCase().trim();
-      const li=document.createElement('li');
-      li.textContent=line;
-
+      const line=String(details[i]); const lower=line.toLowerCase().trim();
+      const li=document.createElement('li'); li.textContent=line;
       if(lower.startsWith('glöm')) li.classList.add('note');
-      if(/^(frys|kyl|kol|totalt)\s*:/i.test(line)){
-        if(/^totalt\s*:/i.test(line)) li.classList.add('total');
-        else li.classList.add('qty');
-      }
+      if(/^(frys|kyl|kol|totalt)\s*:/i.test(line)){ if(/^totalt\s*:/i.test(line)) li.classList.add('total'); else li.classList.add('qty'); }
       if(/(\d+)\s*(FRYS|KYL|KOL)/i.test(line)) li.classList.add('qty');
-
       ul.append(li);
     }
-    d.append(ul);card.append(d);
+    d.append(ul); card.append(d);
   }
   card.addEventListener('click',()=>card.classList.toggle('expanded'));
   return card;
@@ -353,7 +290,7 @@ async function renderLatestNewsLinks(){
   }catch(e){list.innerHTML='<li style="color:#b00020">Kunde inte läsa nyheter.</li>'; }
 }
 
-/* ===== NYHETER – 200 tecken + expandering ===== */
+/* ===== NYHETER ===== */
 function truncateText(txt,n=200){const s=String(txt||"");return s.length<=n?s:s.slice(0,n).trimEnd()+"…";}
 let newsLoaded=false;
 async function renderNewsAll(targetId=null){
@@ -365,16 +302,11 @@ async function renderNewsAll(targetId=null){
       const snap=await getDocs(qy);
       box.innerHTML='';
       snap.forEach(docSnap=>{
-        const n=docSnap.data();
-        const full=(n.body||'');
-        const shortText=truncateText(full,200);
+        const n=docSnap.data(); const full=(n.body||''); const shortText=truncateText(full,200);
         const div=document.createElement('div');
-        div.className='item collapsed';
-        div.id='news-'+docSnap.id;
-        div.dataset.full=full;
-        div.dataset.short=shortText;
-        div.innerHTML=`
-          <h3>${escapeHtml(n.title||'')}</h3>
+        div.className='item collapsed'; div.id='news-'+docSnap.id;
+        div.dataset.full=full; div.dataset.short=shortText;
+        div.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3>
           <div class="meta">${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div>
           <p class="body">${escapeHtml(shortText).replace(/\n/g,'<br>')}</p>
           <div class="more">Läs mer</div>`;
@@ -382,9 +314,7 @@ async function renderNewsAll(targetId=null){
           const body=div.querySelector('.body');
           const expanded=div.classList.toggle('expanded');
           div.classList.toggle('collapsed',!expanded);
-          body.innerHTML=expanded
-            ?escapeHtml(div.dataset.full).replace(/\n/g,'<br>')
-            :escapeHtml(div.dataset.short).replace(/\n/g,'<br>');
+          body.innerHTML=expanded?escapeHtml(div.dataset.full).replace(/\n/g,'<br>'):escapeHtml(div.dataset.short).replace(/\n/g,'<br>');
         });
         box.append(div);
       });
@@ -397,36 +327,86 @@ async function renderNewsAll(targetId=null){
   }catch(e){box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>'; }
 }
 
-/* ===== KONTAKTER – Accordion ===== */
+/* ===== KONTAKTER – Grupper + Filter ===== */
+let contactsCache=null; // {roles: string[], groups: Map, count:number}
+const LS_FILTER_KEY="contacts_role_filter_v1";
+
+function roleFrom(c){ return (c.role||'Övriga').trim() || 'Övriga'; }
+
+async function fetchContacts(){
+  const qy=query(collection(db,'contacts'), orderBy('role','asc'), orderBy('name','asc'));
+  const snap=await getDocs(qy);
+  const groups = new Map();
+  snap.forEach(d=>{
+    const c=d.data();
+    const r=roleFrom(c);
+    if(!groups.has(r)) groups.set(r, []);
+    groups.get(r).push({...c, id:d.id});
+  });
+  const collator=new Intl.Collator('sv-SE',{sensitivity:'base'});
+  const roles=Array.from(groups.keys()).sort(collator.compare);
+  contactsCache={roles, groups, count:snap.size};
+}
+
+function createContactCard(c){
+  const card=document.createElement('div');
+  card.className='contact-card';
+  card.innerHTML=`
+    <div class="contact-head">
+      <span class="name">${escapeHtml(c.name||'')}</span>
+      <span class="chev">▶</span>
+    </div>
+    <div class="contact-body">
+      ${c.role?`<div class="row"><strong>Roll:</strong> ${escapeHtml(c.role)}</div>`:''}
+      ${c.phone?`<div class="row"><strong>Telefon:</strong> <a href="tel:${String(c.phone).replace(/\s+/g,'')}">${escapeHtml(c.phone)}</a></div>`:''}
+      ${c.email?`<div class="row"><strong>E-post:</strong> <a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a></div>`:''}
+    </div>`;
+  card.querySelector('.contact-head').addEventListener('click',()=>card.classList.toggle('open'));
+  return card;
+}
+
+function renderContactsUI(filterRole){
+  const container=document.getElementById('contactsList');
+  const {roles,groups}=contactsCache;
+  container.innerHTML='';
+
+  // Om filter valt – rendera bara den gruppen; annars alla
+  const renderRoles = filterRole && filterRole!=='ALL' ? [filterRole] : roles;
+
+  renderRoles.forEach(role=>{
+    const people=groups.get(role)||[];
+    const sec=document.createElement('section'); sec.className='contact-group';
+    sec.innerHTML=`<h3>${escapeHtml(role)} <span class="contact-count">${people.length}</span></h3>`;
+    const acc=document.createElement('div'); acc.className='contacts-acc';
+    people.forEach(p=>acc.append(createContactCard(p)));
+    sec.append(acc); container.append(sec);
+  });
+}
+
+function populateFilterSelect(){
+  const sel=document.getElementById('roleFilter');
+  const saved = localStorage.getItem(LS_FILTER_KEY) || 'ALL';
+  sel.innerHTML='';
+  const optAll=new Option('Alla roller','ALL'); sel.add(optAll);
+  contactsCache.roles.forEach(r=> sel.add(new Option(r,r)));
+  sel.value = saved;
+  sel.onchange = ()=>{ localStorage.setItem(LS_FILTER_KEY, sel.value); renderContactsUI(sel.value); };
+}
+
 let contactsLoaded=false;
 async function renderContacts(){
-  const box=document.getElementById('contactsList');
-  if(!contactsLoaded){box.innerHTML='<div class="muted">Laddar kontakter…</div>';}
+  const container=document.getElementById('contactsList');
+  container.innerHTML='<div class="muted">Laddar kontakter…</div>';
   try{
-    if(!contactsLoaded){
-      const qy=query(collection(db,'contacts'),orderBy('sort','asc'));
-      const snap=await getDocs(qy);
-      box.innerHTML='';
-      snap.forEach(d=>{
-        const c=d.data();
-        const card=document.createElement('div');
-        card.className='contact-card';
-        card.innerHTML=`
-          <div class="contact-head">
-            <span class="name">${escapeHtml(c.name||'')}</span>
-            <span class="chev">▶</span>
-          </div>
-          <div class="contact-body">
-            ${c.role?`<div class="row"><strong>Roll:</strong> ${escapeHtml(c.role)}</div>`:''}
-            ${c.phone?`<div class="row"><strong>Telefon:</strong> <a href="tel:${String(c.phone).replace(/\s+/g,'')}">${escapeHtml(c.phone)}</a></div>`:''}
-            ${c.email?`<div class="row"><strong>E-post:</strong> <a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a></div>`:''}
-          </div>`;
-        card.querySelector('.contact-head').addEventListener('click',()=>card.classList.toggle('open'));
-        box.append(card);
-      });
-      contactsLoaded=true;
-    }
-  }catch(e){box.innerHTML='<div style="color:#b00020">Kunde inte läsa kontakter.</div>'; }
+    if(!contactsCache) await fetchContacts();
+    populateFilterSelect();
+    const current = document.getElementById('roleFilter').value || 'ALL';
+    renderContactsUI(current);
+    contactsLoaded=true;
+  }catch(e){
+    console.error(e);
+    container.innerHTML='<div style="color:#b00020">Kunde inte läsa kontakter.</div>';
+  }
 }
 
 /* ===== Start ===== */
@@ -434,6 +414,7 @@ handleRoute();
 </script>
 </body>
 </html>
+
 
 
 
