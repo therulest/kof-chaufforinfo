@@ -3,103 +3,112 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin – Nyheter</title>
+<title>Admin – Portal</title>
 <style>
+  :root{--border:#e5e7eb;--muted:#6b7280;--brand:#0ea5e9;--danger:#b91c1c}
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:16px;background:#fafafa;color:#111}
-  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:16px;max-width:900px;margin:0 auto}
-  h1{margin:0 0 12px}
+  .wrap{max-width:1100px;margin:0 auto}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .title{font-weight:700;font-size:20px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:16px;margin-bottom:14px}
+  .tabs{display:flex;gap:8px;border-bottom:1px solid var(--border);margin-bottom:12px}
+  .tab{padding:8px 12px;border:1px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0;background:#f9fafb;cursor:pointer}
+  .tab.active{background:#fff;border-bottom:1px solid #fff;font-weight:600}
+  .muted{color:var(--muted)}
   .row{display:flex;gap:12px;flex-wrap:wrap}
   input,textarea,button{font:inherit}
   input,textarea{border:1px solid #d1d5db;border-radius:8px;padding:10px;min-width:260px}
   textarea{min-height:120px;width:100%}
-  button{background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:10px 14px;cursor:pointer}
-  button.secondary{background:#6b7280}
-  table{width:100%;border-collapse:collapse;margin-top:16px}
-  th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:top}
-  .muted{color:#6b7280}
-  .right{float:right}
-
-  /* login-modal återanvänder dina “lock”-klasser för utseende */
-  .lock-overlay{position:fixed;inset:0;background:rgba(250,250,250,.96);display:flex;align-items:center;justify-content:center;z-index:9999}
-  .lock-card{width:min(420px,92vw);background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.10);padding:20px}
-  .lock-title{margin:0 0 8px 0;font-size:20px}
-  .lock-sub{margin:0 0 16px 0;font-size:13px;color:#6b7280}
-  .lock-row{display:flex;gap:8px}
-  .lock-input{flex:1;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;font-size:16px}
-  .lock-btn{background:#0ea5e9;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-size:15px;cursor:pointer;transition:all .2s;white-space:nowrap}
-  .lock-btn:hover{background:#0284c7}
-  .lock-err{margin-top:10px;color:#b00020;font-size:13px;min-height:1.2em}
+  .btn{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:10px 14px;cursor:pointer}
+  .btn.secondary{background:#6b7280}
+  table{width:100%;border-collapse:collapse;margin-top:12px}
+  th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}
+  .alert{display:none;margin-top:10px;padding:10px 12px;border-radius:8px}
+  .alert.err{background:#fee2e2;border:1px solid #fecaca;color:#991b1b}
+  .alert.ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+  .pill{display:inline-block;background:#eef2ff;color:#3730a3;padding:2px 8px;border-radius:999px;font-size:12px}
+  .section[hidden]{display:none}
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>Admin – Nyheter</h1>
+<div class="wrap">
 
-  <!-- Auth status + knappar -->
-  <div id="auth" style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-    <button id="loginBtn">Logga in</button>
-    <button id="logoutBtn" class="secondary" style="display:none">Logga ut</button>
-    <span id="who" class="muted"></span>
-    <button id="resetBtn" class="secondary" style="display:none">Återställ lösenord</button>
+  <div class="top">
+    <div class="title">Admin – Portal</div>
+    <div id="auth">
+      <button id="loginBtn" class="btn">Logga in</button>
+      <button id="logoutBtn" class="btn secondary" style="display:none">Logga ut</button>
+      <span id="who" class="muted"></span>
+    </div>
   </div>
 
-  <!-- Login-dialog (email + lösenord) -->
-  <div id="loginModal" class="lock-overlay" style="display:none">
-    <div class="lock-card">
-      <h2 class="lock-title">Logga in</h2>
-      <p class="lock-sub">Ange e-post och lösenord för administratör.</p>
-      <div class="lock-row" style="flex-direction:column;gap:10px">
-        <input id="emailEl" class="lock-input" type="email" placeholder="namn@exempel.se" autocomplete="username">
-        <input id="passEl"  class="lock-input" type="password" placeholder="Lösenord" autocomplete="current-password">
-        <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button id="cancelLogin" class="lock-btn" style="background:#6b7280">Avbryt</button>
-          <button id="doLogin" class="lock-btn">Logga in</button>
-        </div>
-        <div style="display:flex;justify-content:flex-end">
-          <a href="#" id="forgotLink" class="muted" style="font-size:12px;text-decoration:underline">Glömt lösenord?</a>
-        </div>
+  <div id="msgErr" class="alert err"></div>
+  <div id="msgOk" class="alert ok"></div>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" data-tab="nyheter">Nyheter</button>
+      <button class="tab" data-tab="kontakter">Kontakter</button>
+    </div>
+
+    <!-- Nyheter -->
+    <section id="sec-nyheter" class="section">
+      <h3>Nyheter</h3>
+      <div class="row" style="margin-bottom:10px">
+        <input id="news-title" placeholder="Titel">
+        <input id="news-date" type="date">
       </div>
-      <div id="loginErr" class="lock-err"></div>
-    </div>
-  </div>
+      <div class="row" style="margin-bottom:10px">
+        <textarea id="news-body" placeholder="Text …"></textarea>
+      </div>
+      <div class="row">
+        <button id="news-save" class="btn">Spara</button>
+        <button id="news-cancel" class="btn secondary" style="display:none">Avbryt</button>
+      </div>
 
-  <!-- Formulär -->
-  <div id="form" style="display:none;margin-top:16px">
-    <h3 id="formTitle">Skapa nyhet</h3>
-    <div class="row">
-      <input id="title" placeholder="Titel">
-      <input id="date" type="date">
-    </div>
-    <div class="row">
-      <textarea id="body" placeholder="Text …"></textarea>
-    </div>
-    <div class="row">
-      <button id="saveBtn">Spara</button>
-      <button id="cancelBtn" class="secondary" style="display:none">Avbryt</button>
-    </div>
-  </div>
+      <table id="news-table">
+        <thead><tr><th>Titel</th><th>Datum</th><th>Text</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="muted">Visar de senaste 100 posterna, sorterat på datum.</p>
+    </section>
 
-  <h3 style="margin-top:20px">Nyhetslista</h3>
-  <table id="tbl">
-    <thead><tr><th>Titel</th><th>Datum</th><th>Text</th><th></th></tr></thead>
-    <tbody></tbody>
-  </table>
-  <p class="muted">Visar de senaste 100 posterna, sorterat på datum.</p>
+    <!-- Kontakter -->
+    <section id="sec-kontakter" class="section" hidden>
+      <h3>Kontakter</h3>
+      <div class="row" style="margin-bottom:10px">
+        <input id="c-name"  placeholder="Namn">
+        <input id="c-role"  placeholder="Roll">
+        <input id="c-phone" placeholder="Telefon">
+      </div>
+      <div class="row" style="margin-bottom:10px">
+        <input id="c-email" placeholder="E-post">
+        <input id="c-sort"  placeholder="Sort (t.ex. 10)" inputmode="numeric">
+      </div>
+      <div class="row">
+        <button id="c-save" class="btn">Spara</button>
+        <button id="c-cancel" class="btn secondary" style="display:none">Avbryt</button>
+      </div>
+
+      <table id="c-table">
+        <thead><tr><th>Namn</th><th>Roll</th><th>Telefon</th><th>E-post</th><th>Sort</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="muted">Sorteras efter ”sort” (stigande) och sedan namn.</p>
+    </section>
+  </div>
 </div>
 
-<!-- 🔥 Firebase + Admin Script -->
+<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getAuth, setPersistence, browserLocalPersistence,
-    onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import {
-    getFirestore, collection, addDoc, updateDoc, deleteDoc,
-    doc, getDocs, query, orderBy, limit
+    getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+    getDocs, query, orderBy, limit
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // ===== Din Firebase-konfiguration =====
+  // === Konfiguration ===
   const firebaseConfig = {
     apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
     authDomain: "kofnord-1e371.firebaseapp.com",
@@ -108,176 +117,180 @@
     messagingSenderId: "559491880457",
     appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
   };
-
-  // ===== Initiera Firebase =====
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
-  await setPersistence(auth, browserLocalPersistence);
 
-  // ===== Referenser till HTML-element =====
-  const loginBtn    = document.getElementById('loginBtn');
-  const logoutBtn   = document.getElementById('logoutBtn');
-  const resetBtn    = document.getElementById('resetBtn');
-  const who         = document.getElementById('who');
+  // === UI helpers ===
+  const $ = s => document.querySelector(s);
+  const msgErr = $('#msgErr'), msgOk = $('#msgOk');
+  function showErr(t){ msgErr.textContent=t; msgErr.style.display='block'; msgOk.style.display='none'; console.error(t); }
+  function hideErr(){ msgErr.style.display='none'; }
+  function showOk(t='Klart!'){ msgOk.textContent=t; msgOk.style.display='block'; setTimeout(()=>msgOk.style.display='none',2000); }
 
-  const loginModal  = document.getElementById('loginModal');
-  const emailEl     = document.getElementById('emailEl');
-  const passEl      = document.getElementById('passEl');
-  const doLogin     = document.getElementById('doLogin');
-  const cancelLogin = document.getElementById('cancelLogin');
-  const loginErr    = document.getElementById('loginErr');
-  const forgotLink  = document.getElementById('forgotLink');
+  // === Auth ===
+  const loginBtn  = $('#loginBtn');
+  const logoutBtn = $('#logoutBtn');
+  const who       = $('#who');
 
-  const form      = document.getElementById('form');
-  const formTitle = document.getElementById('formTitle');
-  const titleEl   = document.getElementById('title');
-  const dateEl    = document.getElementById('date');
-  const bodyEl    = document.getElementById('body');
-  const saveBtn   = document.getElementById('saveBtn');
-  const cancelBtn = document.getElementById('cancelBtn');
-  const tbody     = document.querySelector('#tbl tbody');
-
-  let editId = null;
-
-  // ===== Små helpers (modal) =====
-  function openLogin()  { loginModal.style.display = 'flex'; loginErr.textContent=''; }
-  function closeLogin() { loginModal.style.display = 'none'; emailEl.value=''; passEl.value=''; loginErr.textContent=''; }
-
-  // ===== Autentisering =====
   onAuthStateChanged(auth, user => {
+    hideErr();
     const isIn = !!user;
     loginBtn.style.display  = isIn ? 'none' : '';
     logoutBtn.style.display = isIn ? '' : 'none';
-    resetBtn.style.display  = isIn ? '' : 'none';
     who.textContent = isIn ? `Inloggad som ${user.email}` : '';
-    form.style.display = isIn ? '' : 'none';
-    if(isIn) loadNews();
-    else tbody.innerHTML = '';
+    // Ladda om aktuell flik
+    const tab = getTab();
+    if(isIn) (tab==='nyheter'?loadNews:loadContacts)().catch(e=>showErr(e.message));
+    else { $('#news-table tbody').innerHTML=''; $('#c-table tbody').innerHTML=''; }
   });
 
-  loginBtn.addEventListener('click', openLogin);
-  cancelLogin.addEventListener('click', closeLogin);
-
-  doLogin.addEventListener('click', async () => {
-    try{
-      const email = emailEl.value.trim();
-      const pass  = passEl.value;
-      if(!email || !pass) { loginErr.textContent = 'Fyll i e-post och lösenord.'; return; }
-      await signInWithEmailAndPassword(auth, email, pass);
-      closeLogin();
-    }catch(e){
-      loginErr.textContent = (e.message || 'Kunde inte logga in').replace('Firebase:','').trim();
-    }
+  loginBtn.addEventListener('click', async ()=>{
+    hideErr();
+    const email = prompt('E-post:'); const pass = prompt('Lösenord:');
+    if(!email || !pass) return;
+    try{ await signInWithEmailAndPassword(auth,email.trim(),pass); }
+    catch(e){ showErr('Inloggning misslyckades: ' + e.message); }
   });
+  logoutBtn.addEventListener('click', ()=>signOut(auth));
 
-  logoutBtn.addEventListener('click', () => signOut(auth));
-
-  forgotLink.addEventListener('click', async (e)=>{
-    e.preventDefault();
-    try{
-      const email = emailEl.value.trim();
-      if(!email) { loginErr.textContent = 'Skriv din e-post ovan och klicka igen.'; return; }
-      await sendPasswordResetEmail(auth, email);
-      loginErr.style.color = '#065f46';
-      loginErr.textContent = 'Återställningslänk skickad. Kolla din e-post.';
-    }catch(err){
-      loginErr.style.color = '#b00020';
-      loginErr.textContent = (err.message || '').replace('Firebase:','').trim();
-    }
+  // === Tabs ===
+  function getTab(){ return location.hash.replace('#/','') || 'nyheter'; }
+  function setTab(t){
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
+    $('#sec-nyheter').hidden = t!=='nyheter';
+    $('#sec-kontakter').hidden = t!=='kontakter';
+    location.hash = '#/'+t;
+  }
+  document.querySelectorAll('.tab').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      setTab(b.dataset.tab);
+      // Ladda data för vald flik
+      if(auth.currentUser){
+        (b.dataset.tab==='nyheter'?loadNews:loadContacts)().catch(e=>showErr(e.message));
+      }
+    });
   });
+  // Init
+  setTab(getTab());
 
-  resetBtn.addEventListener('click', async ()=>{
-    try{
-      if(!auth.currentUser?.email){ alert('Ingen inloggad e-post.'); return; }
-      await sendPasswordResetEmail(auth, auth.currentUser.email);
-      alert('Återställningslänk skickad till ' + auth.currentUser.email);
-    }catch(err){
-      alert('Kunde inte skicka återställning: ' + (err.message || ''));
-    }
-  });
+  // === Nyheter (CRUD) ===
+  let newsEditId = null;
+  const nTitle=$('#news-title'), nDate=$('#news-date'), nBody=$('#news-body');
+  $('#news-save').addEventListener('click', saveNews);
+  $('#news-cancel').addEventListener('click', ()=>{ newsEditId=null; $('#news-cancel').style.display='none'; nTitle.value=nBody.value=''; nDate.value=''; });
 
-  // ===== CRUD =====
   async function loadNews(){
-    const q = query(collection(db,'news'), orderBy('date','desc'), limit(100));
-    const snap = await getDocs(q);
-    tbody.innerHTML = '';
-    snap.forEach(d => {
-      const item = d.data();
-      const tr = document.createElement('tr');
+    const qy = query(collection(db,'news'), orderBy('date','desc'), limit(100));
+    const snap = await getDocs(qy);
+    const tb = $('#news-table tbody'); tb.innerHTML='';
+    if(snap.empty){ tb.innerHTML='<tr><td colspan="4" class="muted">Inga nyheter ännu.</td></tr>'; return; }
+    snap.forEach(d=>{
+      const it=d.data();
+      const tr=document.createElement('tr');
       tr.innerHTML = `
-        <td>${escapeHtml(item.title || '')}</td>
-        <td>${item.date || ''}</td>
-        <td class="muted">${(item.body || '').substring(0,120)}${(item.body||'').length>120?'…':''}</td>
+        <td>${esc(it.title||'')}</td>
+        <td>${esc(it.date||'')}</td>
+        <td class="muted">${esc((it.body||'').slice(0,120))}${(it.body||'').length>120?'…':''}</td>
         <td>
-          <button data-edit="${d.id}">Redigera</button>
-          <button data-del="${d.id}" class="secondary">Ta bort</button>
+          <button class="btn secondary" data-edit="${d.id}">Redigera</button>
+          <button class="btn" data-del="${d.id}">Ta bort</button>
         </td>`;
-      tbody.appendChild(tr);
+      tb.appendChild(tr);
     });
   }
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, m => (
-      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
-    ));
+  $('#news-table').addEventListener('click', async (e)=>{
+    const id = e.target.dataset.edit || e.target.dataset.del; if(!id) return;
+    hideErr();
+    if(e.target.dataset.edit){
+      // Läs radens värden från DOM
+      const tr=e.target.closest('tr');
+      nTitle.value=tr.children[0].textContent.trim();
+      nDate.value =tr.children[1].textContent.trim();
+      // Hämta full body via en extra fetch (enkelt sätt)
+      const qy = query(collection(db,'news'), orderBy('date','desc'), limit(100));
+      const snap = await getDocs(qy);
+      snap.forEach(d=>{ if(d.id===id) nBody.value=(d.data().body||''); });
+      newsEditId=id; $('#news-cancel').style.display='';
+    }else if(e.target.dataset.del){
+      if(confirm('Ta bort nyheten?')){ await deleteDoc(doc(db,'news',id)); showOk('Borttagen.'); await loadNews(); }
+    }
+  });
+  async function saveNews(){
+    try{
+      const payload={ title:nTitle.value.trim(), date:nDate.value, body:nBody.value.trim() };
+      if(!payload.title || !payload.date){ showErr('Titel och datum krävs.'); return; }
+      if(newsEditId){ await updateDoc(doc(db,'news',newsEditId), payload); showOk('Uppdaterad.'); }
+      else { await addDoc(collection(db,'news'), payload); showOk('Skapad.'); }
+      newsEditId=null; $('#news-cancel').style.display='none'; nTitle.value=nBody.value=''; nDate.value='';
+      await loadNews();
+    }catch(e){ showErr('Kunde inte spara nyhet: ' + e.message); }
   }
 
-  tbody.addEventListener('click', async (e)=>{
-    const id = e.target.dataset.edit || e.target.dataset.del;
-    if(!id) return;
+  // === Kontakter (CRUD) ===
+  let cEditId=null;
+  const cName=$('#c-name'), cRole=$('#c-role'), cPhone=$('#c-phone'), cEmail=$('#c-email'), cSort=$('#c-sort');
+  $('#c-save').addEventListener('click', saveContact);
+  $('#c-cancel').addEventListener('click', ()=>{ cEditId=null; $('#c-cancel').style.display='none'; cName.value=cRole.value=cPhone.value=cEmail.value=cSort.value=''; });
 
+  async function loadContacts(){
+    const qy = query(collection(db,'contacts'), orderBy('sort','asc'), orderBy('name','asc'));
+    const snap = await getDocs(qy);
+    const tb=$('#c-table tbody'); tb.innerHTML='';
+    if(snap.empty){ tb.innerHTML='<tr><td colspan="6" class="muted">Inga kontakter ännu.</td></tr>'; return; }
+    snap.forEach(d=>{
+      const c=d.data();
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${esc(c.name||'')}</td>
+        <td>${esc(c.role||'')}</td>
+        <td><a href="tel:${(c.phone||'').replace(/\s+/g,'')}">${esc(c.phone||'')}</a></td>
+        <td><a href="mailto:${esc(c.email||'')}">${esc(c.email||'')}</a></td>
+        <td><span class="pill">${Number(c.sort ?? 9999)}</span></td>
+        <td>
+          <button class="btn secondary" data-edit="${d.id}">Redigera</button>
+          <button class="btn" data-del="${d.id}">Ta bort</button>
+        </td>`;
+      tb.appendChild(tr);
+    });
+  }
+  $('#c-table').addEventListener('click', async (e)=>{
+    const id = e.target.dataset.edit || e.target.dataset.del; if(!id) return;
+    hideErr();
     if(e.target.dataset.edit){
-      editId = id;
-      formTitle.textContent = 'Redigera nyhet';
-      const tr = e.target.closest('tr');
-      titleEl.value = tr.children[0].textContent;
-      dateEl.value  = tr.children[1].textContent;
-
-      // hämta body exakt från Firestore
-      const docs = await getDocs(query(collection(db,'news'), orderBy('date','desc'), limit(100)));
-      docs.forEach(d=>{ if(d.id===id){ bodyEl.value = d.data().body || ''; }});
-      cancelBtn.style.display = '';
+      const tr=e.target.closest('tr');
+      cName.value = tr.children[0].textContent.trim();
+      cRole.value = tr.children[1].textContent.trim();
+      cPhone.value= tr.children[2].textContent.trim();
+      cEmail.value= tr.children[3].textContent.trim();
+      cSort.value = tr.children[4].textContent.trim();
+      cEditId=id; $('#c-cancel').style.display='';
     }else if(e.target.dataset.del){
-      if(confirm('Ta bort nyheten?')){
-        await deleteDoc(doc(db,'news',id));
-        await loadNews();
-      }
+      if(confirm('Ta bort kontakten?')){ await deleteDoc(doc(db,'contacts',id)); showOk('Borttagen.'); await loadContacts(); }
     }
   });
+  async function saveContact(){
+    hideErr();
+    try{
+      const payload={
+        name:cName.value.trim(),
+        role:cRole.value.trim(),
+        phone:cPhone.value.trim(),
+        email:cEmail.value.trim(),
+        sort:Number.parseInt(cSort.value,10)
+      };
+      if(!payload.name){ showErr('Namn krävs.'); return; }
+      if(Number.isNaN(payload.sort)) payload.sort=9999;
+      if(cEditId){ await updateDoc(doc(db,'contacts',cEditId), payload); showOk('Uppdaterad.'); }
+      else { await addDoc(collection(db,'contacts'), payload); showOk('Skapad.'); }
+      cEditId=null; $('#c-cancel').style.display='none';
+      cName.value=cRole.value=cPhone.value=cEmail.value=cSort.value='';
+      await loadContacts();
+    }catch(e){ showErr('Kunde inte spara kontakt: ' + e.message); }
+  }
 
-  saveBtn.addEventListener('click', async ()=>{
-    const payload = {
-      title: titleEl.value.trim(),
-      date:  dateEl.value,   // YYYY-MM-DD
-      body:  bodyEl.value.trim()
-    };
-    if(!payload.title || !payload.date){
-      alert('Titel och datum krävs.');
-      return;
-    }
-
-    if(editId){
-      await updateDoc(doc(db,'news',editId), payload);
-    }else{
-      await addDoc(collection(db,'news'), payload);
-    }
-
-    titleEl.value = bodyEl.value = '';
-    dateEl.value = '';
-    editId = null;
-    formTitle.textContent = 'Skapa nyhet';
-    cancelBtn.style.display='none';
-    await loadNews();
-  });
-
-  cancelBtn.addEventListener('click', ()=>{
-    editId = null;
-    formTitle.textContent = 'Skapa nyhet';
-    titleEl.value = bodyEl.value = '';
-    dateEl.value = '';
-    cancelBtn.style.display='none';
-  });
+  // Util
+  function esc(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 </script>
 </body>
 </html>
