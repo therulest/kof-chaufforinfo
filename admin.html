@@ -18,17 +18,52 @@
   th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;vertical-align:top}
   .muted{color:#6b7280}
   .right{float:right}
+
+  /* login-modal återanvänder dina “lock”-klasser för utseende */
+  .lock-overlay{position:fixed;inset:0;background:rgba(250,250,250,.96);display:flex;align-items:center;justify-content:center;z-index:9999}
+  .lock-card{width:min(420px,92vw);background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.10);padding:20px}
+  .lock-title{margin:0 0 8px 0;font-size:20px}
+  .lock-sub{margin:0 0 16px 0;font-size:13px;color:#6b7280}
+  .lock-row{display:flex;gap:8px}
+  .lock-input{flex:1;border:1px solid #d1d5db;border-radius:10px;padding:10px 12px;font-size:16px}
+  .lock-btn{background:#0ea5e9;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-size:15px;cursor:pointer;transition:all .2s;white-space:nowrap}
+  .lock-btn:hover{background:#0284c7}
+  .lock-err{margin-top:10px;color:#b00020;font-size:13px;min-height:1.2em}
 </style>
 </head>
 <body>
 <div class="card">
   <h1>Admin – Nyheter</h1>
-  <div id="auth">
+
+  <!-- Auth status + knappar -->
+  <div id="auth" style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
     <button id="loginBtn">Logga in</button>
     <button id="logoutBtn" class="secondary" style="display:none">Logga ut</button>
     <span id="who" class="muted"></span>
+    <button id="resetBtn" class="secondary" style="display:none">Återställ lösenord</button>
   </div>
 
+  <!-- Login-dialog (email + lösenord) -->
+  <div id="loginModal" class="lock-overlay" style="display:none">
+    <div class="lock-card">
+      <h2 class="lock-title">Logga in</h2>
+      <p class="lock-sub">Ange e-post och lösenord för administratör.</p>
+      <div class="lock-row" style="flex-direction:column;gap:10px">
+        <input id="emailEl" class="lock-input" type="email" placeholder="namn@exempel.se" autocomplete="username">
+        <input id="passEl"  class="lock-input" type="password" placeholder="Lösenord" autocomplete="current-password">
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button id="cancelLogin" class="lock-btn" style="background:#6b7280">Avbryt</button>
+          <button id="doLogin" class="lock-btn">Logga in</button>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <a href="#" id="forgotLink" class="muted" style="font-size:12px;text-decoration:underline">Glömt lösenord?</a>
+        </div>
+      </div>
+      <div id="loginErr" class="lock-err"></div>
+    </div>
+  </div>
+
+  <!-- Formulär -->
   <div id="form" style="display:none;margin-top:16px">
     <h3 id="formTitle">Skapa nyhet</h3>
     <div class="row">
@@ -54,11 +89,10 @@
 
 <!-- 🔥 Firebase + Admin Script -->
 <script type="module">
-
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
-    getAuth, signInWithEmailLink, isSignInWithEmailLink,
-    sendSignInLinkToEmail, onAuthStateChanged, signOut
+    getAuth, setPersistence, browserLocalPersistence,
+    onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, collection, addDoc, updateDoc, deleteDoc,
@@ -79,11 +113,22 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
+  await setPersistence(auth, browserLocalPersistence);
 
   // ===== Referenser till HTML-element =====
-  const loginBtn  = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const who       = document.getElementById('who');
+  const loginBtn    = document.getElementById('loginBtn');
+  const logoutBtn   = document.getElementById('logoutBtn');
+  const resetBtn    = document.getElementById('resetBtn');
+  const who         = document.getElementById('who');
+
+  const loginModal  = document.getElementById('loginModal');
+  const emailEl     = document.getElementById('emailEl');
+  const passEl      = document.getElementById('passEl');
+  const doLogin     = document.getElementById('doLogin');
+  const cancelLogin = document.getElementById('cancelLogin');
+  const loginErr    = document.getElementById('loginErr');
+  const forgotLink  = document.getElementById('forgotLink');
+
   const form      = document.getElementById('form');
   const formTitle = document.getElementById('formTitle');
   const titleEl   = document.getElementById('title');
@@ -95,36 +140,62 @@
 
   let editId = null;
 
+  // ===== Små helpers (modal) =====
+  function openLogin()  { loginModal.style.display = 'flex'; loginErr.textContent=''; }
+  function closeLogin() { loginModal.style.display = 'none'; emailEl.value=''; passEl.value=''; loginErr.textContent=''; }
+
   // ===== Autentisering =====
   onAuthStateChanged(auth, user => {
     const isIn = !!user;
     loginBtn.style.display  = isIn ? 'none' : '';
     logoutBtn.style.display = isIn ? '' : 'none';
+    resetBtn.style.display  = isIn ? '' : 'none';
     who.textContent = isIn ? `Inloggad som ${user.email}` : '';
     form.style.display = isIn ? '' : 'none';
     if(isIn) loadNews();
     else tbody.innerHTML = '';
   });
 
-  loginBtn.addEventListener('click', async () => {
-    const email = prompt('Ange din e-post för inloggning:');
-    if(!email) return;
-    await sendSignInLinkToEmail(auth, email, {
-      url: window.location.href,
-      handleCodeInApp: true
-    });
-    alert('En inloggningslänk har skickats. Kolla din e-post och öppna länken på denna enhet.');
-    window.localStorage.setItem('emailForSignIn', email);
+  loginBtn.addEventListener('click', openLogin);
+  cancelLogin.addEventListener('click', closeLogin);
+
+  doLogin.addEventListener('click', async () => {
+    try{
+      const email = emailEl.value.trim();
+      const pass  = passEl.value;
+      if(!email || !pass) { loginErr.textContent = 'Fyll i e-post och lösenord.'; return; }
+      await signInWithEmailAndPassword(auth, email, pass);
+      closeLogin();
+    }catch(e){
+      loginErr.textContent = (e.message || 'Kunde inte logga in').replace('Firebase:','').trim();
+    }
   });
 
-  if (isSignInWithEmailLink(auth, window.location.href)) {
-    let email = window.localStorage.getItem('emailForSignIn');
-    if (!email) email = prompt('Bekräfta din e-post för att logga in');
-    await signInWithEmailLink(auth, email, window.location.href);
-    window.localStorage.removeItem('emailForSignIn');
-  }
-
   logoutBtn.addEventListener('click', () => signOut(auth));
+
+  forgotLink.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    try{
+      const email = emailEl.value.trim();
+      if(!email) { loginErr.textContent = 'Skriv din e-post ovan och klicka igen.'; return; }
+      await sendPasswordResetEmail(auth, email);
+      loginErr.style.color = '#065f46';
+      loginErr.textContent = 'Återställningslänk skickad. Kolla din e-post.';
+    }catch(err){
+      loginErr.style.color = '#b00020';
+      loginErr.textContent = (err.message || '').replace('Firebase:','').trim();
+    }
+  });
+
+  resetBtn.addEventListener('click', async ()=>{
+    try{
+      if(!auth.currentUser?.email){ alert('Ingen inloggad e-post.'); return; }
+      await sendPasswordResetEmail(auth, auth.currentUser.email);
+      alert('Återställningslänk skickad till ' + auth.currentUser.email);
+    }catch(err){
+      alert('Kunde inte skicka återställning: ' + (err.message || ''));
+    }
+  });
 
   // ===== CRUD =====
   async function loadNews(){
@@ -147,7 +218,7 @@
   }
 
   function escapeHtml(s){
-    return s.replace(/[&<>"']/g, m => (
+    return String(s).replace(/[&<>"']/g, m => (
       {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
     ));
   }
@@ -162,6 +233,8 @@
       const tr = e.target.closest('tr');
       titleEl.value = tr.children[0].textContent;
       dateEl.value  = tr.children[1].textContent;
+
+      // hämta body exakt från Firestore
       const docs = await getDocs(query(collection(db,'news'), orderBy('date','desc'), limit(100)));
       docs.forEach(d=>{ if(d.id===id){ bodyEl.value = d.data().body || ''; }});
       cancelBtn.style.display = '';
@@ -176,7 +249,7 @@
   saveBtn.addEventListener('click', async ()=>{
     const payload = {
       title: titleEl.value.trim(),
-      date:  dateEl.value,
+      date:  dateEl.value,   // YYYY-MM-DD
       body:  bodyEl.value.trim()
     };
     if(!payload.title || !payload.date){
@@ -205,7 +278,6 @@
     dateEl.value = '';
     cancelBtn.style.display='none';
   });
-
 </script>
 </body>
 </html>
