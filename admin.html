@@ -52,24 +52,8 @@
   <p class="muted">Visar de senaste 100 posterna, sorterat på datum.</p>
 </div>
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
-  authDomain: "kofnord-1e371.firebaseapp.com",
-  projectId: "kofnord-1e371",
-  storageBucket: "kofnord-1e371.firebasestorage.app",
-  messagingSenderId: "559491880457",
-  appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-  // ==============================================
+<!-- 🔥 Firebase + Admin Script -->
+<script type="module">
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
@@ -81,10 +65,22 @@ const app = initializeApp(firebaseConfig);
     doc, getDocs, query, orderBy, limit
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+  // ===== Din Firebase-konfiguration =====
+  const firebaseConfig = {
+    apiKey: "AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",
+    authDomain: "kofnord-1e371.firebaseapp.com",
+    projectId: "kofnord-1e371",
+    storageBucket: "kofnord-1e371.appspot.com",
+    messagingSenderId: "559491880457",
+    appId: "1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"
+  };
+
+  // ===== Initiera Firebase =====
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
+  // ===== Referenser till HTML-element =====
   const loginBtn  = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const who       = document.getElementById('who');
@@ -97,9 +93,9 @@ const app = initializeApp(firebaseConfig);
   const cancelBtn = document.getElementById('cancelBtn');
   const tbody     = document.querySelector('#tbl tbody');
 
-  let editId = null; // doc id om vi redigerar
+  let editId = null;
 
-  // --- Auth state ---
+  // ===== Autentisering =====
   onAuthStateChanged(auth, user => {
     const isIn = !!user;
     loginBtn.style.display  = isIn ? 'none' : '';
@@ -110,18 +106,17 @@ const app = initializeApp(firebaseConfig);
     else tbody.innerHTML = '';
   });
 
-  // --- Magic link-inloggning ---
   loginBtn.addEventListener('click', async () => {
     const email = prompt('Ange din e-post för inloggning:');
     if(!email) return;
     await sendSignInLinkToEmail(auth, email, {
-      url: window.location.href, handleCodeInApp: true
+      url: window.location.href,
+      handleCodeInApp: true
     });
     alert('En inloggningslänk har skickats. Kolla din e-post och öppna länken på denna enhet.');
     window.localStorage.setItem('emailForSignIn', email);
   });
 
-  // Slutför inlogg om vi öppnats via e-postlänk
   if (isSignInWithEmailLink(auth, window.location.href)) {
     let email = window.localStorage.getItem('emailForSignIn');
     if (!email) email = prompt('Bekräfta din e-post för att logga in');
@@ -131,7 +126,7 @@ const app = initializeApp(firebaseConfig);
 
   logoutBtn.addEventListener('click', () => signOut(auth));
 
-  // --- CRUD ---
+  // ===== CRUD =====
   async function loadNews(){
     const q = query(collection(db,'news'), orderBy('date','desc'), limit(100));
     const snap = await getDocs(q);
@@ -151,20 +146,22 @@ const app = initializeApp(firebaseConfig);
     });
   }
 
-  function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, m => (
+      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
+    ));
+  }
 
   tbody.addEventListener('click', async (e)=>{
     const id = e.target.dataset.edit || e.target.dataset.del;
     if(!id) return;
+
     if(e.target.dataset.edit){
-      // hämta raden i UI direkt
       editId = id;
       formTitle.textContent = 'Redigera nyhet';
       const tr = e.target.closest('tr');
       titleEl.value = tr.children[0].textContent;
       dateEl.value  = tr.children[1].textContent;
-      // hämta body igen (exakt text) från Firestore
-      // (du kan optimera genom att lagra body i data-attribut)
       const docs = await getDocs(query(collection(db,'news'), orderBy('date','desc'), limit(100)));
       docs.forEach(d=>{ if(d.id===id){ bodyEl.value = d.data().body || ''; }});
       cancelBtn.style.display = '';
@@ -179,25 +176,36 @@ const app = initializeApp(firebaseConfig);
   saveBtn.addEventListener('click', async ()=>{
     const payload = {
       title: titleEl.value.trim(),
-      date:  dateEl.value,   // YYYY-MM-DD
+      date:  dateEl.value,
       body:  bodyEl.value.trim()
     };
-    if(!payload.title || !payload.date){ alert('Titel och datum krävs.'); return; }
+    if(!payload.title || !payload.date){
+      alert('Titel och datum krävs.');
+      return;
+    }
 
     if(editId){
       await updateDoc(doc(db,'news',editId), payload);
     }else{
       await addDoc(collection(db,'news'), payload);
     }
-    titleEl.value = bodyEl.value = ''; dateEl.value = '';
-    editId = null; formTitle.textContent = 'Skapa nyhet'; cancelBtn.style.display='none';
+
+    titleEl.value = bodyEl.value = '';
+    dateEl.value = '';
+    editId = null;
+    formTitle.textContent = 'Skapa nyhet';
+    cancelBtn.style.display='none';
     await loadNews();
   });
 
   cancelBtn.addEventListener('click', ()=>{
-    editId = null; formTitle.textContent = 'Skapa nyhet';
-    titleEl.value = bodyEl.value = ''; dateEl.value = ''; cancelBtn.style.display='none';
+    editId = null;
+    formTitle.textContent = 'Skapa nyhet';
+    titleEl.value = bodyEl.value = '';
+    dateEl.value = '';
+    cancelBtn.style.display='none';
   });
+
 </script>
 </body>
 </html>
