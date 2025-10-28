@@ -36,7 +36,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .dropdown-menu{
   position:absolute;top:100%;left:50%;transform:translateX(-50%);
   background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 10px 24px rgba(2,8,23,.12);
-  padding:8px;display:none;min-width:240px;
+  padding:8px;display:none;min-width:260px;
 }
 .dropdown.open .dropdown-menu{display:block}
 .dropdown-menu a{
@@ -69,36 +69,20 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .page{max-width:var(--wrap);margin:16px auto;padding:0 16px 24px}
 .page h2{margin:0}
 
-/* Region-grid (på startsidan) */
-.region-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:12px;margin:4px 0 18px;
-}
-.region-card{
-  display:flex;align-items:center;gap:12px;
-  background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 14px;
-  text-decoration:none;color:#0f172a;box-shadow:var(--shadow);
-  transition:box-shadow .15s, transform .04s, border-color .15s;
-}
+/* Region-grid (INTE längre använd på home, men CSS får vara kvar ifall du vill använda den på annan sida) */
+.region-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:4px 0 18px}
+.region-card{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 14px;text-decoration:none;color:#0f172a;box-shadow:var(--shadow);transition:box-shadow .15s, transform .04s, border-color .15s}
 .region-card:hover{box-shadow:0 6px 16px rgba(2,8,23,.08);border-color:#dbe4f0}
 .region-card:active{transform:translateY(1px)}
-.region-badge{
-  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
-  font-weight:800;color:#0b1324;background:linear-gradient(135deg,#e0f2fe,#c7e2ff);
-  border:1px solid #cde6ff; box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
-}
-.region-title{font-weight:800}
-.region-sub{font-size:12px;color:#64748b;margin-top:2px}
+.region-badge{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;color:#0b1324;background:linear-gradient(135deg,#e0f2fe,#c7e2ff);border:1px solid #cde6ff; box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.region-title{font-weight:800}.region-sub{font-size:12px;color:#64748b;margin-top:2px}
 .region-card .meta{display:flex;flex-direction:column}
 
-/* Undermenyn på regionsidor: tunna flikar */
+/* Flikar på regionsidor */
 .tabs{display:flex;gap:16px;border-bottom:1px solid #e8eef6;margin:0 0 14px}
 .tabs a{padding:10px 2px;text-decoration:none;color:#334155;font-weight:700;position:relative}
 .tabs a.active{color:#0369a1}
-.tabs a.active::after{
-  content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:3px;background:#7dd3fc;
-}
+.tabs a.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:3px;background:#7dd3fc}
 
 /* Dagab */
 .tools{display:flex;align-items:center;gap:12px;justify-content:space-between;margin:8px 0 12px}
@@ -118,7 +102,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .details li.total{font-weight:700;margin-top:4px;margin-bottom:8px}.details li.note{margin-top:6px;color:#991b1b}
 .muted{color:#6b7280;font-size:13px}
 
-/* Nyheter (sidan finns kvar, men ej i nav) */
+/* Nyheter */
 .news{display:grid;grid-template-columns:1fr;gap:12px;max-width:720px;margin:0 auto}
 .news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:16px;cursor:pointer;transition:box-shadow .15s}
 .news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}.news .item h3{margin:0 0 6px}
@@ -146,18 +130,19 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
       <a href="#/home" id="link-home">Home</a>
       <a href="#/dagab" id="link-dagab">Dagab</a>
 
-      <!-- Distrikt med dropdown -->
+      <!-- Distrikt med dropdown (inkl. Nyheter) -->
       <div class="dropdown" id="dd-distrikt">
         <a href="#/distrikt" id="link-distrikt" aria-haspopup="true" aria-expanded="false">
           Distrikt <span class="chev">▾</span>
         </a>
         <div class="dropdown-menu" role="menu" aria-label="Distrikt">
-          <a href="#/fjarr"><span class="dm-badge">FJ</span> Fjärr</a>
-          <a href="#/sundsvall"><span class="dm-badge">SU</span> Sundsvall</a>
-          <a href="#/ostersund"><span class="dm-badge">ÖS</span> Östersund</a>
-          <a href="#/umea"><span class="dm-badge">UM</span> Umeå</a>
-          <a href="#/lulea"><span class="dm-badge">LU</span> Luleå</a>
-          <a href="#/stab"><span class="dm-badge">ST</span> Stab</a>
+          <a href="#/nyheter" role="menuitem" id="dd-news"><span class="dm-badge">📰</span> Nyheter</a>
+          <a href="#/fjarr" role="menuitem"><span class="dm-badge">FJ</span> Fjärr</a>
+          <a href="#/sundsvall" role="menuitem"><span class="dm-badge">SU</span> Sundsvall</a>
+          <a href="#/ostersund" role="menuitem"><span class="dm-badge">ÖS</span> Östersund</a>
+          <a href="#/umea" role="menuitem"><span class="dm-badge">UM</span> Umeå</a>
+          <a href="#/lulea" role="menuitem"><span class="dm-badge">LU</span> Luleå</a>
+          <a href="#/stab" role="menuitem"><span class="dm-badge">ST</span> Stab</a>
         </div>
       </div>
 
@@ -166,7 +151,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   </div>
 </header>
 
-<!-- Mobil snabbmeny (inkl. distrikt) -->
+<!-- Mobil snabbmeny (lämnas oförändrad enligt din önskan) -->
 <div class="mobile-launcher" aria-label="Snabbmeny">
   <div class="wrap">
     <div class="ml-grid">
@@ -174,7 +159,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
       <a class="ml-item" href="#/dagab"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
       <a class="ml-item" href="#/kontakter"><span class="micon">👥</span><span class="ml-label">Kontakter</span></a>
 
-      <!-- Distrikt som text-badges -->
+      <!-- Distrikt badges -->
       <a class="ml-item" href="#/fjarr"><span class="micon badge">FJ</span><span class="ml-label">Fjärr</span></a>
       <a class="ml-item" href="#/sundsvall"><span class="micon badge">SU</span><span class="ml-label">Sundsvall</span></a>
       <a class="ml-item" href="#/ostersund"><span class="micon badge">ÖS</span><span class="ml-label">Östersund</span></a>
@@ -186,36 +171,8 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 </div>
 
 <main>
-  <!-- HOME -->
+  <!-- HOME (region-grid borttagen) -->
   <section id="page-home" class="page" data-page>
-    <!-- Regiongrid -->
-    <div class="region-grid">
-      <a class="region-card" href="#/fjarr">
-        <div class="region-badge">FJ</div>
-        <div class="meta"><div class="region-title">Fjärr</div><div class="region-sub">Långlinjer & planering</div></div>
-      </a>
-      <a class="region-card" href="#/sundsvall">
-        <div class="region-badge">SU</div>
-        <div class="meta"><div class="region-title">Sundsvall</div><div class="region-sub">Terminal & lokala turer</div></div>
-      </a>
-      <a class="region-card" href="#/ostersund">
-        <div class="region-badge">ÖS</div>
-        <div class="meta"><div class="region-title">Östersund</div><div class="region-sub">Region Jämtland</div></div>
-      </a>
-      <a class="region-card" href="#/umea">
-        <div class="region-badge">UM</div>
-        <div class="meta"><div class="region-title">Umeå</div><div class="region-sub">Region Västerbotten</div></div>
-      </a>
-      <a class="region-card" href="#/lulea">
-        <div class="region-badge">LU</div>
-        <div class="meta"><div class="region-title">Luleå</div><div class="region-sub">Region Norrbotten</div></div>
-      </a>
-      <a class="region-card" href="#/stab">
-        <div class="region-badge">ST</div>
-        <div class="meta"><div class="region-title">Stab</div><div class="region-sub">HR, IT & admin</div></div>
-      </a>
-    </div>
-
     <h2>Välkommen till KOF-Nords Chaufförsportal</h2>
     <p>Här ser du de senaste uppdateringarna. Klicka för att läsa hela nyheten under <em>Nyheter</em>.</p>
 
@@ -235,7 +192,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
     <div id="grid" class="grid"></div>
   </section>
 
-  <!-- NYHETER (ej i toppmeny) -->
+  <!-- NYHETER -->
   <section id="page-nyheter" class="page" data-page hidden>
     <h2>Nyheter</h2>
     <div id="newsList" class="news"></div>
@@ -304,21 +261,15 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 <script type="module">
 /* ===== ROUTING ===== */
 function setActive(hash){
-  // Rensa
   document.querySelectorAll('.nav a').forEach(a=>{a.classList.remove('active');a.removeAttribute('aria-current')});
-
   const clean=hash.split('/').slice(0,2).join('/');
-
-  // Markera direktlänkar (home/dagab/kontakter)
-  const direct = document.querySelector(`.nav a[href="${clean}"]`);
-  if(direct){ direct.classList.add('active'); direct.setAttribute('aria-current','page'); }
-
-  // Om route är ett distrikt -> markera "Distrikt"
+  const direct=document.querySelector(`.nav a[href="${clean}"]`);
+  if(direct){direct.classList.add('active');direct.setAttribute('aria-current','page')}
   const route=(hash||'#/home').split('/')[1]||'home';
-  const isRegion = REGION_ROUTES.includes(route);
+  const isRegion=REGION_ROUTES.includes(route) || route==='nyheter';
   if(isRegion){
     const dl=document.getElementById('link-distrikt');
-    if(dl){ dl.classList.add('active'); dl.setAttribute('aria-current','page'); }
+    if(dl){dl.classList.add('active');dl.setAttribute('aria-current','page')}
   }
 }
 function showPage(id){document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);document.getElementById(id).hidden=false}
@@ -338,7 +289,7 @@ window.addEventListener('hashchange',handleRoute);
 const topbar=document.getElementById('topbar');
 function onScroll(){topbar.classList.toggle('scrolled',window.scrollY>2)}; onScroll(); window.addEventListener('scroll',onScroll,{passive:true});
 
-/* ===== Dropdown-beteende för Distrikt ===== */
+/* Dropdown-beteende för Distrikt */
 const dd=document.getElementById('dd-distrikt');
 const ddLink=document.getElementById('link-distrikt');
 function closeDropdown(){dd?.classList.remove('open'); ddLink?.setAttribute('aria-expanded','false');}
@@ -445,7 +396,7 @@ async function renderNewsAll(targetId=null){
   }catch(e){box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>'}
 }
 
-/* KONTAKTER – grupper + filter (lokalsortering) */
+/* KONTAKTER */
 let contactsCache=null; const LS_FILTER_KEY="contacts_role_filter_v1";
 function roleFrom(c){return (c.role||'Övriga').trim()||'Övriga'}
 async function fetchContacts(){
