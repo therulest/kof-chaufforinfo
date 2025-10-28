@@ -53,6 +53,24 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 @media(max-width:700px){.nav{display:none}.mobile-launcher{display:block}}
 .mobile-launcher .wrap{max-width:var(--wrap);margin:12px auto 0;padding:0 16px}
 .ml-grid{background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+
+/* NEW: Dölj alla ikoner från och med den 5:e när griden är kollapsad (mobilläge) */
+@media(max-width:700px){
+  .ml-grid.collapsed .ml-item:nth-child(n+5){display:none}
+}
+
+/* NEW: Toggle-knapp under ikon-griden (visas bara i mobilläge) */
+.ml-toggle{display:none}
+@media(max-width:700px){
+  .ml-toggle{display:flex;justify-content:center;margin-top:8px}
+  .ml-toggle button{
+    appearance:none;background:#fff;border:1px solid var(--border);
+    border-radius:9999px;padding:8px 12px;font-weight:700;cursor:pointer;
+    box-shadow:var(--shadow)
+  }
+  .ml-toggle button:active{transform:translateY(1px)}
+}
+
 .ml-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;text-decoration:none;color:#111;transition:transform .06s,box-shadow .15s,background .15s}
 .ml-item:hover{background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.08)}.ml-item:active{transform:translateY(1px)}
 .micon{width:48px;height:48px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
@@ -159,7 +177,8 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 <!-- Mobil snabbmeny (inkl. Nyheter) -->
 <div class="mobile-launcher" aria-label="Snabbmeny">
   <div class="wrap">
-    <div class="ml-grid">
+    <!-- NEW: id + starta som kollapsad -->
+    <div class="ml-grid collapsed" id="mlGrid">
       <a class="ml-item" href="#/home"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
       <a class="ml-item" href="#/nyheter"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
       <a class="ml-item" href="#/dagab"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
@@ -170,6 +189,10 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
       <a class="ml-item" href="#/umea"><span class="micon badge">UM</span><span class="ml-label">Umeå</span></a>
       <a class="ml-item" href="#/lulea"><span class="micon badge">LU</span><span class="ml-label">Luleå</span></a>
       <a class="ml-item" href="#/stab"><span class="micon badge">ST</span><span class="ml-label">Stab</span></a>
+    </div>
+    <!-- NEW: Toggle-knapp -->
+    <div class="ml-toggle">
+      <button id="mlMoreBtn" aria-expanded="false" aria-controls="mlGrid" type="button">Visa fler ▾</button>
     </div>
   </div>
 </div>
@@ -402,7 +425,7 @@ async function renderNewsAll(targetId=null){
         div.dataset.full=full; div.dataset.short=shortText;
         div.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3>
           <div class="meta">${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div>
-          <p class="body">${escapeHtml(shortText).replace(/\n/g,'<br>')}</p>
+          <p class="body">${escapeHtml(shortText).replace(/\n,g,'<br>')}</p>
           <div class="more">Läs mer</div>`;
         div.addEventListener('click',()=>{
           const body=div.querySelector('.body');
@@ -464,11 +487,24 @@ async function renderContacts(){
   catch(e){console.error('Kontaktfel:',e); container.innerHTML='<div style="color:#b00020">Kunde inte läsa kontakter.</div>'}
 }
 
+/* NEW: Toggle "Visa fler/färre" för mobila ikoner */
+const mlGrid=document.getElementById('mlGrid');
+const mlBtn=document.getElementById('mlMoreBtn');
+if(mlGrid && mlBtn){
+  mlBtn.addEventListener('click',()=>{
+    const collapsed=mlGrid.classList.toggle('collapsed'); // true = kollapsad, false = expanderad
+    const expanded = !collapsed;
+    mlBtn.setAttribute('aria-expanded', String(expanded));
+    mlBtn.textContent = expanded ? 'Visa färre ▴' : 'Visa fler ▾';
+  });
+}
+
 /* Start */
 handleRoute();
 </script>
 </body>
 </html>
+
 
 
 
