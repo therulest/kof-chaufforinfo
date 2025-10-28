@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KOF – Chaufförsportal</title>
 <style>
-:root{--border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.05);--wrap:1000px;
---ink:#0f172a;--muted:#475569;--blue:#0284c7;--blue-ink:#0369a1;--blue-100:#e0f2fe;--chip-bg:#f8fafc}
+:root{
+  --border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.05);--wrap:1000px;
+  --ink:#0f172a;--muted:#475569;--blue:#0284c7;--blue-ink:#0369a1;--blue-100:#e0f2fe;--chip-bg:#f8fafc
+}
 *{box-sizing:border-box}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:var(--ink)}
 
@@ -24,7 +26,8 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 /* Toppmeny */
 .nav{display:flex;gap:6px;background:var(--chip-bg);padding:6px;border:1px solid var(--border);border-radius:9999px;box-shadow:var(--shadow);align-items:center}
 .nav a{--pad-x:14px;text-decoration:none;color:#334155;padding:8px var(--pad-x);border-radius:9999px;font-size:14px;font-weight:600;line-height:1;transition:background .15s,box-shadow .15s,color .15s,transform .04s}
-.nav a:hover{background:#eef2f7}.nav a:active{transform:translateY(1px)}
+.nav a:hover{background:#eef2f7}
+.nav a:active{transform:translateY(1px)}
 .nav a.active{background:var(--blue-100);color:var(--blue-ink);box-shadow:inset 0 0 0 1px #bae6fd}
 .nav a:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}
 
@@ -52,27 +55,27 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .mobile-launcher{display:none}
 @media(max-width:700px){.nav{display:none}.mobile-launcher{display:block}}
 .mobile-launcher .wrap{max-width:var(--wrap);margin:12px auto 0;padding:0 16px}
-.ml-grid{background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-
-/* NEW: Dölj alla ikoner från och med den 5:e när griden är kollapsad (mobilläge) */
+.ml-grid{
+  background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px
+}
+/* Dölj alla ikoner från och med den 5:e när griden är kollapsad (mobilläge) */
 @media(max-width:700px){
   .ml-grid.collapsed .ml-item:nth-child(n+5){display:none}
 }
-
-/* NEW: Toggle-knapp under ikon-griden (visas bara i mobilläge) */
+/* Toggle-knapp under ikon-griden (mobilläge) */
 .ml-toggle{display:none}
 @media(max-width:700px){
   .ml-toggle{display:flex;justify-content:center;margin-top:8px}
   .ml-toggle button{
     appearance:none;background:#fff;border:1px solid var(--border);
-    border-radius:9999px;padding:8px 12px;font-weight:700;cursor:pointer;
-    box-shadow:var(--shadow)
+    border-radius:9999px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)
   }
   .ml-toggle button:active{transform:translateY(1px)}
 }
-
 .ml-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;text-decoration:none;color:#111;transition:transform .06s,box-shadow .15s,background .15s}
-.ml-item:hover{background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.08)}.ml-item:active{transform:translateY(1px)}
+.ml-item:hover{background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.ml-item:active{transform:translateY(1px)}
 .micon{width:48px;height:48px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
 .micon.badge{background:linear-gradient(135deg,#e0f2fe,#c7e2ff);border:1px solid #cde6ff;font-weight:800;font-size:14px;color:#0b1324}
 .ml-label{font-size:13px;color:#111827;font-weight:600}
@@ -92,29 +95,31 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .tools-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .tools-right{margin-left:auto;color:var(--muted);font-size:12px}
 .btn{appearance:none;border:1px solid #0273ad;background:var(--blue);color:#fff;font-weight:700;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:var(--shadow);transition:filter .15s,transform .04s}
-.btn:hover{filter:brightness(1.05)}.btn:active{transform:translateY(1px)}.btn:disabled{opacity:.6;cursor:progress}
+.btn:hover{filter:brightness(1.05)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.6;cursor:progress}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-top:10px}
 .card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:box-shadow .15s}
-.card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}.card-header{display:flex;align-items:center;gap:10px;padding:12px}
-.chev{transition:transform .18s;user-select:none;font-size:16px}.card.expanded .chev{transform:rotate(90deg)}
+.card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.card-header{display:flex;align-items:center;gap:10px;padding:12px}
+.chev{transition:transform .18s;user-select:none;font-size:16px}
+.card.expanded .chev{transform:rotate(90deg)}
 .summary{white-space:pre-wrap;margin:0;flex:1;font-size:14px;line-height:1.3}
 .divider{border:none;border-top:1px solid #eee;margin:0}
-.details{display:none;padding:10px 14px 12px}.card.expanded .details{display:block}
+.details{display:none;padding:10px 14px 12px}
+.card.expanded .details{display:block}
 .details ul{margin:8px 0 0 0;padding-left:20px;line-height:1.4}
-.details li{margin-bottom:6px}.details li.qty{color:#4b5563;margin-bottom:8px}
-.details li.total{font-weight:700;margin-top:4px;margin-bottom:8px}.details li.note{margin-top:6px;color:#991b1b}
+.details li{margin-bottom:6px}
+.details li.qty{color:#4b5563;margin-bottom:8px}
+.details li.total{font-weight:700;margin-top:4px;margin-bottom:8px}
+.details li.note{margin-top:6px;color:#991b1b}
 .muted{color:#6b7280;font-size:13px}
 
-/* Nyheter (home + nyheter-sida) — uppdaterad bredd */
-.news{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:12px;
-  width:100%;
-  margin:0;
-}
+/* Nyheter (home + nyheter-sida) */
+.news{display:grid;grid-template-columns:1fr;gap:12px;width:100%;margin:0}
 .news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:16px;cursor:pointer;transition:box-shadow .15s}
-.news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}.news .item h3{margin:0 0 6px}
+.news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.news .item h3{margin:0 0 6px}
 .news .meta{font-size:12px;color:#6b7280;margin-bottom:8px}
 .news .more{color:var(--blue);font-weight:600;margin-top:6px;user-select:none}
 .news .item.collapsed .more::after{content:" – klicka för att läsa mer"}
@@ -139,7 +144,9 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .contact-body .row{margin:8px 0;color:#374151}
 .contact-body a{color:#0ea5e9;text-decoration:none}
 
-@media (prefers-reduced-motion: reduce){.chev,.nav a,.ml-item,.topbar,.dropdown .chev{transition:none}}
+@media (prefers-reduced-motion: reduce){
+  .chev,.nav a,.ml-item,.topbar,.dropdown .chev{transition:none}
+}
 </style>
 </head>
 <body>
@@ -149,11 +156,11 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
     <a href="#/home" class="brand">
       <img src="https://kylofrysexpressen.se/wp-content/themes/kof/images/kyl-o-frys-logo.png" alt="Kyl & Frysexpressen Nord AB" class="brand-logo">
     </a>
+
     <nav class="nav" aria-label="Huvudmeny">
       <a href="#/home" id="link-home">Home</a>
       <a href="#/dagab" id="link-dagab">Dagab</a>
 
-      <!-- Distrikt med dropdown (inkl. Nyheter) -->
       <div class="dropdown" id="dd-distrikt">
         <a href="#/distrikt" id="link-distrikt" aria-haspopup="true" aria-expanded="false">
           Distrikt <span class="chev">▾</span>
@@ -174,10 +181,9 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   </div>
 </header>
 
-<!-- Mobil snabbmeny (inkl. Nyheter) -->
+<!-- Mobil snabbmeny -->
 <div class="mobile-launcher" aria-label="Snabbmeny">
   <div class="wrap">
-    <!-- NEW: id + starta som kollapsad -->
     <div class="ml-grid collapsed" id="mlGrid">
       <a class="ml-item" href="#/home"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
       <a class="ml-item" href="#/nyheter"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
@@ -190,7 +196,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
       <a class="ml-item" href="#/lulea"><span class="micon badge">LU</span><span class="ml-label">Luleå</span></a>
       <a class="ml-item" href="#/stab"><span class="micon badge">ST</span><span class="ml-label">Stab</span></a>
     </div>
-    <!-- NEW: Toggle-knapp -->
     <div class="ml-toggle">
       <button id="mlMoreBtn" aria-expanded="false" aria-controls="mlGrid" type="button">Visa fler ▾</button>
     </div>
@@ -202,7 +207,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   <section id="page-home" class="page" data-page>
     <h2>Välkommen till KOF-Nords Chaufförsportal</h2>
     <p>Här ser du de senaste uppdateringarna. Klicka för att läsa hela nyheten under <em>Nyheter</em>.</p>
-
     <h3 style="margin-top:18px">📰 Senaste nytt</h3>
     <div id="latestNewsHome" class="news"></div>
   </section>
@@ -288,54 +292,71 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 <script type="module">
 /* ===== ROUTING ===== */
 function setActive(hash){
-  document.querySelectorAll('.nav a').forEach(a=>{a.classList.remove('active');a.removeAttribute('aria-current')});
+  document.querySelectorAll('.nav a').forEach(a=>{
+    a.classList.remove('active'); a.removeAttribute('aria-current')
+  });
   const clean=hash.split('/').slice(0,2).join('/');
   const direct=document.querySelector(`.nav a[href="${clean}"]`);
-  if(direct){direct.classList.add('active');direct.setAttribute('aria-current','page')}
+  if(direct){ direct.classList.add('active'); direct.setAttribute('aria-current','page'); }
   const route=(hash||'#/home').split('/')[1]||'home';
   const isRegion=REGION_ROUTES.includes(route) || route==='nyheter';
   if(isRegion){
     const dl=document.getElementById('link-distrikt');
-    if(dl){dl.classList.add('active');dl.setAttribute('aria-current','page')}
+    if(dl){ dl.classList.add('active'); dl.setAttribute('aria-current','page'); }
   }
 }
-function showPage(id){document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);document.getElementById(id).hidden=false}
+function showPage(id){
+  document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);
+  document.getElementById(id).hidden=false
+}
 const REGION_ROUTES=['fjarr','sundsvall','ostersund','umea','lulea','stab'];
 function handleRoute(){
-  const h=location.hash||'#/home'; const parts=h.split('/'); const route=parts[1]||'home'; const param=parts[2]||null;
+  const h=location.hash||'#/home';
+  const parts=h.split('/');
+  const route=parts[1]||'home';
+  const param=parts[2]||null;
   setActive(h);
-  if(route==='dagab'){showPage('page-dagab'); ensureDagabReady()}
-  else if(route==='nyheter'){showPage('page-nyheter'); renderNewsAll(param)}
-  else if(route==='kontakter'){showPage('page-kontakter'); renderContacts()}
+  if(route==='dagab'){ showPage('page-dagab'); ensureDagabReady(); }
+  else if(route==='nyheter'){ showPage('page-nyheter'); renderNewsAll(param); }
+  else if(route==='kontakter'){ showPage('page-kontakter'); renderContacts(); }
   else if(REGION_ROUTES.includes(route)){ showPage('page-'+route); }
-  else{ showPage('page-home'); renderLatestNewsHome(); }
+  else { showPage('page-home'); renderLatestNewsHome(); }
 }
 window.addEventListener('hashchange',handleRoute);
 
 /* TOPBAR SKUGGA */
 const topbar=document.getElementById('topbar');
-function onScroll(){topbar.classList.toggle('scrolled',window.scrollY>2)}; onScroll(); window.addEventListener('scroll',onScroll,{passive:true});
+function onScroll(){ topbar.classList.toggle('scrolled', window.scrollY>2); }
+onScroll(); window.addEventListener('scroll',onScroll,{passive:true});
 
 /* Dropdown-beteende för Distrikt */
 const dd=document.getElementById('dd-distrikt');
 const ddLink=document.getElementById('link-distrikt');
-function closeDropdown(){dd?.classList.remove('open'); ddLink?.setAttribute('aria-expanded','false');}
-ddLink?.addEventListener('click',(e)=>{e.preventDefault(); dd.classList.toggle('open'); ddLink.setAttribute('aria-expanded', dd.classList.contains('open')?'true':'false');});
-document.addEventListener('click',(e)=>{ if(!dd.contains(e.target)) closeDropdown(); });
-dd.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeDropdown(); });
+function closeDropdown(){ dd?.classList.remove('open'); ddLink?.setAttribute('aria-expanded','false'); }
+ddLink?.addEventListener('click',(e)=>{ e.preventDefault(); dd.classList.toggle('open'); ddLink.setAttribute('aria-expanded', dd.classList.contains('open')?'true':'false'); });
+document.addEventListener('click',(e)=>{ if(dd && !dd.contains(e.target)) closeDropdown(); });
+dd?.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeDropdown(); });
 
 /* ===== DAGAB ===== */
 const DATA_URL="https://therulest.github.io/kof-chaufforinfo/data.json";
 let dagabInitialized=false;
-function ensureDagabReady(){if(!dagabInitialized){dagabInitialized=true;attachRefresh();loadDagab()}}
-function attachRefresh(){const b=document.getElementById('btnRefresh');if(b)b.addEventListener('click',()=>loadDagab(true))}
+function ensureDagabReady(){ if(!dagabInitialized){ dagabInitialized=true; attachRefresh(); loadDagab(); } }
+function attachRefresh(){ const b=document.getElementById('btnRefresh'); if(b) b.addEventListener('click',()=>loadDagab(true)); }
 async function loadDagab(manual=false){
   const grid=document.getElementById('grid'), b=document.getElementById('btnRefresh'), s=document.getElementById('status');
-  if(manual&&b){b.disabled=true;b.textContent='Uppdaterar…'} grid.innerHTML=manual?grid.innerHTML:'<p>Laddar…</p>';
+  if(manual&&b){ b.disabled=true; b.textContent='Uppdaterar…'; }
+  grid.innerHTML=manual?grid.innerHTML:'<p>Laddar…</p>';
   try{
-    const res=await fetch(DATA_URL+'?v='+Date.now(),{cache:'no-store'}); const data=await res.json();
-    buildCards(data); const t=new Date(data.updated_at||Date.now()); if(s)s.textContent='Senast uppdaterad: '+t.toLocaleString('sv-SE');
-  }catch(e){grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>'}finally{if(manual&&b){b.disabled=false;b.textContent='Uppdatera'}}
+    const res=await fetch(DATA_URL+'?v='+Date.now(),{cache:'no-store'});
+    const data=await res.json();
+    buildCards(data);
+    const t=new Date(data.updated_at||Date.now());
+    if(s) s.textContent='Senast uppdaterad: '+t.toLocaleString('sv-SE');
+  }catch(e){
+    grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>';
+  }finally{
+    if(manual&&b){ b.disabled=false; b.textContent='Uppdatera'; }
+  }
 }
 function buildCards(data){
   const grid=document.getElementById('grid'); grid.innerHTML='';
@@ -343,7 +364,8 @@ function buildCards(data){
 }
 function buildCard(car,idx,expanded){
   const card=document.createElement('div'); card.className='card'+(expanded?' expanded':'');
-  const lines=String(car.summary||'').split(/\r?\n/); const head=lines.slice(0,6);
+  const lines=String(car.summary||'').split(/\r?\n/);
+  const head=lines.slice(0,6);
   const details=Array.isArray(car.details)&&car.details.length?car.details.map(String):lines.slice(6);
   const header=document.createElement('div'); header.className='card-header';
   const chev=document.createElement('span'); chev.className='chev'; chev.textContent='▶';
@@ -355,13 +377,16 @@ function buildCard(car,idx,expanded){
     for(let i=0;i<details.length;i++){
       const line=String(details[i]); const lower=line.toLowerCase().trim(); const li=document.createElement('li'); li.textContent=line;
       if(lower.startsWith('glöm')) li.classList.add('note');
-      if(/^(frys|kyl|kol|totalt)\s*:/i.test(line)){ if(/^totalt\s*:/i.test(line)) li.classList.add('total'); else li.classList.add('qty'); }
+      if(/^(frys|kyl|kol|totalt)\s*:/i.test(line)){
+        if(/^totalt\s*:/i.test(line)) li.classList.add('total'); else li.classList.add('qty');
+      }
       if(/(\d+)\s*(FRYS|KYL|KOL)/i.test(line)) li.classList.add('qty');
       ul.append(li);
     }
     d.append(ul); card.append(d);
   }
-  card.addEventListener('click',()=>card.classList.toggle('expanded')); return card;
+  card.addEventListener('click',()=>card.classList.toggle('expanded'));
+  return card;
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 
@@ -414,31 +439,50 @@ async function renderLatestNewsHome(){
 /* NYHETER-sidan */
 let newsLoaded=false;
 async function renderNewsAll(targetId=null){
-  const box=document.getElementById('newsList'); if(!newsLoaded){box.innerHTML='<p class="muted">Laddar nyheter…</p>'}
+  const box=document.getElementById('newsList');
+  if(!newsLoaded){ box.innerHTML='<p class="muted">Laddar nyheter…</p>'; }
   try{
     if(!newsLoaded){
-      const qy=query(collection(db,'news'),orderBy('date','desc')); const snap=await getDocs(qy);
+      const qy=query(collection(db,'news'),orderBy('date','desc'));
+      const snap=await getDocs(qy);
       box.innerHTML='';
       snap.forEach(docSnap=>{
-        const n=docSnap.data(); const full=(n.body||''); const shortText=truncateText(full,200);
-        const div=document.createElement('div'); div.className='item collapsed'; div.id='news-'+docSnap.id;
-        div.dataset.full=full; div.dataset.short=shortText;
+        const n=docSnap.data();
+        const full=(n.body||'');
+        const shortText=truncateText(full,200);
+        const div=document.createElement('div'); 
+        div.className='item collapsed'; 
+        div.id='news-'+docSnap.id;
+        div.dataset.full=full; 
+        div.dataset.short=shortText;
         div.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3>
           <div class="meta">${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div>
-          <p class="body">${escapeHtml(shortText).replace(/\n,g,'<br>')}</p>
+          <p class="body">${escapeHtml(shortText).replace(/\n/g,'<br>')}</p>
           <div class="more">Läs mer</div>`;
         div.addEventListener('click',()=>{
           const body=div.querySelector('.body');
           const expanded=div.classList.toggle('expanded');
           div.classList.toggle('collapsed',!expanded);
-          body.innerHTML=expanded?escapeHtml(div.dataset.full).replace(/\n/g,'<br>'):escapeHtml(div.dataset.short).replace(/\n/g,'<br>');
+          body.innerHTML=expanded
+            ? escapeHtml(div.dataset.full).replace(/\n/g,'<br>')
+            : escapeHtml(div.dataset.short).replace(/\n/g,'<br>');
         });
         box.append(div);
       });
       newsLoaded=true;
     }
-    if(targetId){const el=document.getElementById('news-'+targetId); if(el){el.classList.add('highlight');setTimeout(()=>el.classList.remove('highlight'),1500);el.scrollIntoView({behavior:'smooth',block:'start'})}}
-  }catch(e){box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>'}
+    if(targetId){
+      const el=document.getElementById('news-'+targetId);
+      if(el){
+        el.classList.add('highlight');
+        setTimeout(()=>el.classList.remove('highlight'),1500);
+        el.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+    }
+  }catch(e){
+    console.error(e);
+    box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>';
+  }
 }
 
 /* KONTAKTER */
@@ -463,7 +507,7 @@ function createContactCard(c){
   const head=card.querySelector('.contact-head');
   const toggle=()=>card.classList.toggle('open');
   head.addEventListener('click',toggle);
-  head.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ') {e.preventDefault();toggle();}});
+  head.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
   return card;
 }
 function renderContactsUI(filterRole){
@@ -483,17 +527,24 @@ function populateFilterSelect(){
 }
 async function renderContacts(){
   const container=document.getElementById('contactsList'); container.innerHTML='<div class="muted">Laddar kontakter…</div>';
-  try{ if(!contactsCache) await fetchContacts(); populateFilterSelect(); const current=document.getElementById('roleFilter').value||'ALL'; renderContactsUI(current) }
-  catch(e){console.error('Kontaktfel:',e); container.innerHTML='<div style="color:#b00020">Kunde inte läsa kontakter.</div>'}
+  try{
+    if(!contactsCache) await fetchContacts();
+    populateFilterSelect();
+    const current=document.getElementById('roleFilter').value||'ALL';
+    renderContactsUI(current);
+  }catch(e){
+    console.error('Kontaktfel:',e);
+    container.innerHTML='<div style="color:#b00020">Kunde inte läsa kontakter.</div>';
+  }
 }
 
-/* NEW: Toggle "Visa fler/färre" för mobila ikoner */
+/* Mobila ikoner: Visa fler/färre */
 const mlGrid=document.getElementById('mlGrid');
 const mlBtn=document.getElementById('mlMoreBtn');
 if(mlGrid && mlBtn){
   mlBtn.addEventListener('click',()=>{
-    const collapsed=mlGrid.classList.toggle('collapsed'); // true = kollapsad, false = expanderad
-    const expanded = !collapsed;
+    const collapsed=mlGrid.classList.toggle('collapsed'); // true=kollapsad, false=expanderad
+    const expanded=!collapsed;
     mlBtn.setAttribute('aria-expanded', String(expanded));
     mlBtn.textContent = expanded ? 'Visa färre ▴' : 'Visa fler ▾';
   });
@@ -504,6 +555,7 @@ handleRoute();
 </script>
 </body>
 </html>
+
 
 
 
