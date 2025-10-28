@@ -12,10 +12,36 @@
 *{box-sizing:border-box}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:var(--ink)}
 
-/* Topbar */
-.topbar{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;transition:box-shadow .18s,border-color .18s}
-.topbar.scrolled{box-shadow:0 6px 18px rgba(2,8,23,.06);border-color:#eef2f7}
-.topbar .wrap{max-width:var(--wrap);margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+/* Ta bort den tunna grå kanten – vi ersätter med en blå list */
+.topbar{
+  background:#fff;
+  position:sticky;
+  top:0;
+  z-index:10;
+  transition:box-shadow .18s,border-color .18s;
+  border-bottom: none;              /* <-- ny */
+}
+
+/* Blå list under menyerna */
+.topbar::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:6px;                       /* tjocklek på linjen */
+  background:#0ea5e9;               /* solid blå */
+}
+
+/* (valfritt) lite gradient för “glans” likt gamla system */
+.topbar.scrolled::after{
+  background: linear-gradient(180deg, #16a3ee 0%, #0ea5e9 55%, #0b8fcc 100%);
+}
+
+/* (valfritt) något tunnare på riktigt små skärmar */
+@media (max-width:700px){
+  .topbar::after{ height:4px; }
+}
 
 /* Brand / logo */
 .brand{display:flex;align-items:center;text-decoration:none}
