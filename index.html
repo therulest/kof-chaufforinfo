@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KOF – Chaufförportal</title>
+<title>KOF – Chaufförsportal</title>
 <style>
 :root{--border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.05);--wrap:1000px;
 --ink:#0f172a;--muted:#475569;--blue:#0284c7;--blue-ink:#0369a1;--blue-100:#e0f2fe;--chip-bg:#f8fafc}
@@ -87,7 +87,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .details li.total{font-weight:700;margin-top:4px;margin-bottom:8px}.details li.note{margin-top:6px;color:#991b1b}
 .muted{color:#6b7280;font-size:13px}
 
-/* Nyheter (återanvänds både på home och nyheter-sidan) */
+/* Nyheter (home + nyheter-sida) */
 .news{display:grid;grid-template-columns:1fr;gap:12px;max-width:720px;margin:0 auto}
 .news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:16px;cursor:pointer;transition:box-shadow .15s}
 .news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}.news .item h3{margin:0 0 6px}
@@ -128,6 +128,8 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
     <nav class="nav" aria-label="Huvudmeny">
       <a href="#/home" id="link-home">Home</a>
       <a href="#/dagab" id="link-dagab">Dagab</a>
+
+      <!-- Distrikt med dropdown (inkl. Nyheter) -->
       <div class="dropdown" id="dd-distrikt">
         <a href="#/distrikt" id="link-distrikt" aria-haspopup="true" aria-expanded="false">
           Distrikt <span class="chev">▾</span>
@@ -142,12 +144,13 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
           <a href="#/stab" role="menuitem"><span class="dm-badge">ST</span> Stab</a>
         </div>
       </div>
+
       <a href="#/kontakter" id="link-kontakter">Kontakter</a>
     </nav>
   </div>
 </header>
 
-<!-- Mobil snabbmeny -->
+<!-- Mobil snabbmeny (inkl. Nyheter) -->
 <div class="mobile-launcher" aria-label="Snabbmeny">
   <div class="wrap">
     <div class="ml-grid">
@@ -172,7 +175,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
     <p>Här ser du de senaste uppdateringarna. Klicka för att läsa hela nyheten under <em>Nyheter</em>.</p>
 
     <h3 style="margin-top:18px">📰 Senaste nytt</h3>
-    <!-- Bytt till kort som kan expandera -->
     <div id="latestNewsHome" class="news"></div>
   </section>
 
@@ -204,7 +206,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
     <div id="contactsList"></div>
   </section>
 
-  <!-- REGIONSIDOR (oförändrat) -->
+  <!-- REGIONSIDOR -->
   <section id="page-fjarr" class="page" data-page hidden>
     <nav class="tabs">
       <a href="#/fjarr" class="active">Fjärr</a><a href="#/sundsvall">Sundsvall</a><a href="#/ostersund">Östersund</a>
@@ -367,8 +369,8 @@ async function renderLatestNewsHome(){
         const body=item.querySelector('.body');
         const expanded=item.classList.toggle('expanded');
         item.classList.toggle('collapsed',!expanded);
-        body.innerHTML=expanded
-          ? escapeHtml(item.dataset.full).replace(/\n,g','<br>')
+        body.innerHTML = expanded
+          ? escapeHtml(item.dataset.full).replace(/\n/g,'<br>')
           : escapeHtml(item.dataset.short).replace(/\n/g,'<br>');
       });
       box.append(item);
@@ -380,7 +382,7 @@ async function renderLatestNewsHome(){
   }
 }
 
-/* NYHETER-sidan (oförändrad) */
+/* NYHETER-sidan */
 let newsLoaded=false;
 async function renderNewsAll(targetId=null){
   const box=document.getElementById('newsList'); if(!newsLoaded){box.innerHTML='<p class="muted">Laddar nyheter…</p>'}
@@ -461,6 +463,7 @@ handleRoute();
 </script>
 </body>
 </html>
+
 
 
 
