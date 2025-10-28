@@ -40,8 +40,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 }
 .dropdown.open .dropdown-menu{display:block}
 .dropdown-menu a{
-  display:flex;align-items:center;gap:10px;
-  border-radius:10px;padding:10px 12px;color:#0f172a;text-decoration:none;
+  display:flex;align-items:center;gap:10px;border-radius:10px;padding:10px 12px;color:#0f172a;text-decoration:none;
 }
 .dropdown-menu a:hover{background:#f1f5f9}
 .dm-badge{
@@ -59,21 +58,17 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .ml-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:12px;text-decoration:none;color:#111;transition:transform .06s,box-shadow .15s,background .15s}
 .ml-item:hover{background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.08)}.ml-item:active{transform:translateY(1px)}
 .micon{width:48px;height:48px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
-.micon.badge{
-  background:linear-gradient(135deg,#e0f2fe,#c7e2ff);
-  border:1px solid #cde6ff;font-weight:800;font-size:14px;color:#0b1324;
-}
+.micon.badge{background:linear-gradient(135deg,#e0f2fe,#c7e2ff);border:1px solid #cde6ff;font-weight:800;font-size:14px;color:#0b1324}
 .ml-label{font-size:13px;color:#111827;font-weight:600}
 
 /* Sidlayout */
 .page{max-width:var(--wrap);margin:16px auto;padding:0 16px 24px}
 .page h2{margin:0}
 
-/* Region-grid (INTE längre använd på home, men CSS får vara kvar ifall du vill använda den på annan sida) */
+/* (Region-grid finns kvar i CSS ifall du vill använda senare) */
 .region-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:4px 0 18px}
 .region-card{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 14px;text-decoration:none;color:#0f172a;box-shadow:var(--shadow);transition:box-shadow .15s, transform .04s, border-color .15s}
 .region-card:hover{box-shadow:0 6px 16px rgba(2,8,23,.08);border-color:#dbe4f0}
-.region-card:active{transform:translateY(1px)}
 .region-badge{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;color:#0b1324;background:linear-gradient(135deg,#e0f2fe,#c7e2ff);border:1px solid #cde6ff; box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
 .region-title{font-weight:800}.region-sub{font-size:12px;color:#64748b;margin-top:2px}
 .region-card .meta{display:flex;flex-direction:column}
@@ -116,6 +111,23 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .news-links a{display:block;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);text-decoration:none;color:#111;transition:box-shadow .15s}
 .news-links a:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}.news-links .title{font-weight:600}.news-links .meta{font-size:12px;color:#6b7280;margin-top:4px}
 
+/* === KONTAKTER (återställd & förbättrad) === */
+.contacts-toolbar{display:flex;align-items:center;gap:10px;margin:8px 0 12px}
+.select{appearance:none;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;box-shadow:var(--shadow)}
+.contacts-acc{display:grid;gap:10px}
+.contact-group{margin-top:18px}
+.contact-group h3{margin:0 0 8px;font-size:16px;font-weight:800;color:#0f172a;display:flex;align-items:center;gap:8px}
+.contact-count{font-size:12px;color:#475569;background:#eef2f7;border:1px solid #e5e7eb;border-radius:9999px;padding:2px 8px}
+.contact-card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);overflow:hidden}
+.contact-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer}
+.contact-head .name{font-weight:600}
+.contact-head .chev{transition:transform .18s;font-size:16px}
+.contact-card.open .contact-head .chev{transform:rotate(90deg)}
+.contact-body{display:none;padding:0 14px 12px 14px}
+.contact-card.open .contact-body{display:block}
+.contact-body .row{margin:8px 0;color:#374151}
+.contact-body a{color:#0ea5e9;text-decoration:none}
+
 @media (prefers-reduced-motion: reduce){.chev,.nav a,.ml-item,.topbar,.dropdown .chev{transition:none}}
 </style>
 </head>
@@ -151,11 +163,12 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   </div>
 </header>
 
-<!-- Mobil snabbmeny (lämnas oförändrad enligt din önskan) -->
+<!-- Mobil snabbmeny (nu även Nyheter) -->
 <div class="mobile-launcher" aria-label="Snabbmeny">
   <div class="wrap">
     <div class="ml-grid">
       <a class="ml-item" href="#/home"><span class="micon">🏠</span><span class="ml-label">Home</span></a>
+      <a class="ml-item" href="#/nyheter"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
       <a class="ml-item" href="#/dagab"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
       <a class="ml-item" href="#/kontakter"><span class="micon">👥</span><span class="ml-label">Kontakter</span></a>
 
@@ -171,7 +184,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 </div>
 
 <main>
-  <!-- HOME (region-grid borttagen) -->
+  <!-- HOME (regionkorten borttagna) -->
   <section id="page-home" class="page" data-page>
     <h2>Välkommen till KOF-Nords Chaufförsportal</h2>
     <p>Här ser du de senaste uppdateringarna. Klicka för att läsa hela nyheten under <em>Nyheter</em>.</p>
@@ -293,7 +306,6 @@ function onScroll(){topbar.classList.toggle('scrolled',window.scrollY>2)}; onScr
 const dd=document.getElementById('dd-distrikt');
 const ddLink=document.getElementById('link-distrikt');
 function closeDropdown(){dd?.classList.remove('open'); ddLink?.setAttribute('aria-expanded','false');}
-function openDropdown(){dd?.classList.add('open'); ddLink?.setAttribute('aria-expanded','true');}
 ddLink?.addEventListener('click',(e)=>{e.preventDefault(); dd.classList.toggle('open'); ddLink.setAttribute('aria-expanded', dd.classList.contains('open')?'true':'false');});
 document.addEventListener('click',(e)=>{ if(!dd.contains(e.target)) closeDropdown(); });
 dd.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeDropdown(); });
@@ -396,7 +408,7 @@ async function renderNewsAll(targetId=null){
   }catch(e){box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>'}
 }
 
-/* KONTAKTER */
+/* KONTAKTER – grupper + filter + accordions */
 let contactsCache=null; const LS_FILTER_KEY="contacts_role_filter_v1";
 function roleFrom(c){return (c.role||'Övriga').trim()||'Övriga'}
 async function fetchContacts(){
@@ -408,13 +420,18 @@ async function fetchContacts(){
 }
 function createContactCard(c){
   const card=document.createElement('div'); card.className='contact-card';
-  card.innerHTML=`<div class="contact-head"><span class="name">${escapeHtml(c.name||'')}</span><span class="chev">▶</span></div>
+  card.innerHTML=`<div class="contact-head" role="button" tabindex="0">
+    <span class="name">${escapeHtml(c.name||'')}</span><span class="chev">▶</span></div>
   <div class="contact-body">
     ${c.role?`<div class="row"><strong>Roll:</strong> ${escapeHtml(c.role)}</div>`:''}
     ${c.phone?`<div class="row"><strong>Telefon:</strong> <a href="tel:${String(c.phone).replace(/\s+/g,'')}">${escapeHtml(c.phone)}</a></div>`:''}
     ${c.email?`<div class="row"><strong>E-post:</strong> <a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a></div>`:''}
   </div>`;
-  card.querySelector('.contact-head').addEventListener('click',()=>card.classList.toggle('open')); return card;
+  const head=card.querySelector('.contact-head');
+  const toggle=()=>card.classList.toggle('open');
+  head.addEventListener('click',toggle);
+  head.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ') {e.preventDefault();toggle();}});
+  return card;
 }
 function renderContactsUI(filterRole){
   const container=document.getElementById('contactsList'); const {roles,groups}=contactsCache; container.innerHTML='';
@@ -442,6 +459,7 @@ handleRoute();
 </script>
 </body>
 </html>
+
 
 
 
