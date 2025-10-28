@@ -6,15 +6,8 @@
 <title>KOF – Chaufförsportal</title>
 <style>
 :root{
-  --border:#e5e7eb;
-  --shadow:0 1px 3px rgba(0,0,0,.05);
-  --wrap: clamp(1000px, 92vw, 1400px); /* responsiv bredd */
-  --ink:#0f172a;
-  --muted:#475569;
-  --blue:#0284c7;
-  --blue-ink:#0369a1;
-  --blue-100:#e0f2fe;
-  --chip-bg:#f8fafc;
+  --border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.05);--wrap:1000px;
+  --ink:#0f172a;--muted:#475569;--blue:#0284c7;--blue-ink:#0369a1;--blue-100:#e0f2fe;--chip-bg:#f8fafc
 }
 *{box-sizing:border-box}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#f9fafb;color:var(--ink)}
@@ -143,17 +136,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 @keyframes flash{0%{box-shadow:0 0 0 0 rgba(2,132,199,.45)}40%{box-shadow:0 0 0 6px rgba(2,132,199,.15)}100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}}
 .highlight{animation:flash 1.3s ease-out 1}
 
-/* breda skärmar – gör nyheter 2 kolumner */
-@media (min-width:1280px){
-  #page-nyheter .news{
-    grid-template-columns:1fr 1fr;
-    gap:16px;
-  }
-}
-@media (min-width:1400px){
-  .news{max-width:1100px;}
-}
-
 /* Kontakter */
 .contacts-toolbar{display:flex;align-items:center;gap:10px;margin:8px 0 12px}
 .select{appearance:none;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;box-shadow:var(--shadow)}
@@ -225,16 +207,46 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 </div>
 
 <main>
-  <!-- HOME -->
+  <!-- HOME (utan välkomsttext) -->
   <section id="page-home" class="page" data-page>
     <h3 style="margin-top:0">📰 Senaste nytt</h3>
     <div id="latestNewsHome" class="news"></div>
   </section>
 
-  <!-- (resten av sektioner / script som i din nuvarande fil) -->
+  <!-- DAGAB -->
+  <section id="page-dagab" class="page" data-page hidden>
+    <div class="tools">
+      <div class="tools-left">
+        <h2>Dagens turer</h2>
+        <button id="btnRefresh" class="btn">Uppdatera</button>
+      </div>
+      <div class="tools-right"><span id="status"></span></div>
+    </div>
+    <div id="grid" class="grid"></div>
+  </section>
+
+  <!-- NYHETER -->
+  <section id="page-nyheter" class="page" data-page hidden>
+    <h2>Nyheter</h2>
+    <div id="newsList" class="news"></div>
+  </section>
+
+  <!-- KONTAKTER -->
+  <section id="page-kontakter" class="page" data-page hidden>
+    <div class="contacts-toolbar">
+      <h2 style="margin-right:auto">Kontakter</h2>
+      <label for="roleFilter" class="muted" style="font-size:13px">Filter:</label>
+      <select id="roleFilter" class="select" aria-label="Filtrera på roll"></select>
+    </div>
+    <div id="contactsList"></div>
+  </section>
 </main>
-</body>
-</html>
+
+<script type="module">
+/* === Routing === */
+function setActive(hash){
+  document.querySelectorAll('.
+
 
 
 
