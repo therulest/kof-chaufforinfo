@@ -21,14 +21,14 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .brand:hover .brand-logo{opacity:.9}
 @media(max-width:700px){.brand-logo{height:32px}}
 
-/* Desktop nav – pill style */
+/* Toppmeny */
 .nav{display:flex;gap:6px;background:var(--chip-bg);padding:6px;border:1px solid var(--border);border-radius:9999px;box-shadow:var(--shadow)}
 .nav a{--pad-x:14px;text-decoration:none;color:#334155;padding:8px var(--pad-x);border-radius:9999px;font-size:14px;font-weight:600;line-height:1;transition:background .15s,box-shadow .15s,color .15s,transform .04s}
 .nav a:hover{background:#eef2f7}.nav a:active{transform:translateY(1px)}
 .nav a.active{background:var(--blue-100);color:var(--blue-ink);box-shadow:inset 0 0 0 1px #bae6fd}
 .nav a:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}
 
-/* Mobile icon grid */
+/* Mobil-ikon-grid */
 .mobile-launcher{display:none}
 @media(max-width:700px){.nav{display:none}.mobile-launcher{display:block}}
 .mobile-launcher .wrap{max-width:var(--wrap);margin:12px auto 0;padding:0 16px}
@@ -38,25 +38,47 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .micon{width:48px;height:48px;border-radius:12px;background:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.08);font-size:24px}
 .ml-label{font-size:13px;color:#111827;font-weight:600}
 
-/* Page layout */
+/* Sidlayout */
 .page{max-width:var(--wrap);margin:16px auto;padding:0 16px 24px}
 .page h2{margin:0}
 
-/* Subnav (på Home + undersidor) */
-.subnav{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px}
-.subnav a{background:#fff;border:1px solid var(--border);border-radius:9999px;padding:8px 12px;font-size:14px;font-weight:700;text-decoration:none;color:#0f172a;box-shadow:var(--shadow);transition:background .15s,box-shadow .15s,transform .04s}
-.subnav a:hover{background:#f3f4f6}
-.subnav a:active{transform:translateY(1px)}
-.subnav a.active{background:var(--blue-100);border-color:#bae6fd;color:var(--blue-ink)}
+/* Region-grid (ersätter piller) */
+.region-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;margin:4px 0 18px;
+}
+.region-card{
+  display:flex;align-items:center;gap:12px;
+  background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 14px;
+  text-decoration:none;color:#0f172a;box-shadow:var(--shadow);
+  transition:box-shadow .15s, transform .04s, border-color .15s;
+}
+.region-card:hover{box-shadow:0 6px 16px rgba(2,8,23,.08);border-color:#dbe4f0}
+.region-card:active{transform:translateY(1px)}
+.region-badge{
+  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  font-weight:800;color:#0b1324;background:linear-gradient(135deg,#e0f2fe,#c7e2ff);
+  border:1px solid #cde6ff; box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+}
+.region-title{font-weight:800}
+.region-sub{font-size:12px;color:#64748b;margin-top:2px}
+.region-card .meta{display:flex;flex-direction:column}
 
-/* Dagab tools */
+/* Undermenyn på regionsidor: tunna flikar */
+.tabs{display:flex;gap:16px;border-bottom:1px solid #e8eef6;margin:0 0 14px}
+.tabs a{padding:10px 2px;text-decoration:none;color:#334155;font-weight:700;position:relative}
+.tabs a.active{color:#0369a1}
+.tabs a.active::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:3px;background:#7dd3fc;
+}
+
+/* Dagab */
 .tools{display:flex;align-items:center;gap:12px;justify-content:space-between;margin:8px 0 12px}
 .tools-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .tools-right{margin-left:auto;color:var(--muted);font-size:12px}
 .btn{appearance:none;border:1px solid #0273ad;background:var(--blue);color:#fff;font-weight:700;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:var(--shadow);transition:filter .15s,transform .04s}
 .btn:hover{filter:brightness(1.05)}.btn:active{transform:translateY(1px)}.btn:disabled{opacity:.6;cursor:progress}
-
-/* Dagab cards */
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-top:10px}
 .card{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:box-shadow .15s}
 .card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}.card-header{display:flex;align-items:center;gap:10px;padding:12px}
@@ -72,9 +94,11 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 /* Nyheter */
 .news{display:grid;grid-template-columns:1fr;gap:12px;max-width:720px;margin:0 auto}
 .news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:16px;cursor:pointer;transition:box-shadow .15s}
-.news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}.news .item h3{margin:0 0 6px}.news .meta{font-size:12px;color:#6b7280;margin-bottom:8px}
+.news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}.news .item h3{margin:0 0 6px}
+.news .meta{font-size:12px;color:#6b7280;margin-bottom:8px}
 .news .more{color:var(--blue);font-weight:600;margin-top:6px;user-select:none}
-.news .item.collapsed .more::after{content:" – klicka för att läsa mer"}.news .item.expanded .more::after{content:" – klicka för att visa mindre"}
+.news .item.collapsed .more::after{content:" – klicka för att läsa mer"}
+.news .item.expanded .more::after{content:" – klicka för att visa mindre"}
 @keyframes flash{0%{box-shadow:0 0 0 0 rgba(2,132,199,.45)}40%{box-shadow:0 0 0 6px rgba(2,132,199,.15)}100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}}
 .highlight{animation:flash 1.3s ease-out 1}
 .news-links{list-style:none;padding:0;margin:12px 0 0}.news-links li{margin:0 0 10px}
@@ -98,7 +122,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 </head>
 <body>
 
-<!-- TOP -->
 <header class="topbar" id="topbar">
   <div class="wrap">
     <a href="#/home" class="brand">
@@ -113,7 +136,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   </div>
 </header>
 
-<!-- MOBILMENY -->
 <div class="mobile-launcher" aria-label="Snabbmeny">
   <div class="wrap">
     <div class="ml-grid">
@@ -125,19 +147,36 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   </div>
 </div>
 
-<!-- SIDOR -->
 <main>
   <!-- HOME -->
   <section id="page-home" class="page" data-page>
-    <!-- Sekundär meny -->
-    <nav class="subnav" id="homeSubnav">
-      <a href="#/fjarr"       data-key="fjarr">Fjärr</a>
-      <a href="#/sundsvall"   data-key="sundsvall">Sundsvall</a>
-      <a href="#/ostersund"   data-key="ostersund">Östersund</a>
-      <a href="#/umea"        data-key="umea">Umeå</a>
-      <a href="#/lulea"       data-key="lulea">Luleå</a>
-      <a href="#/stab"        data-key="stab">Stab</a>
-    </nav>
+    <!-- Regiongrid -->
+    <div class="region-grid">
+      <a class="region-card" href="#/fjarr">
+        <div class="region-badge">FJ</div>
+        <div class="meta"><div class="region-title">Fjärr</div><div class="region-sub">Långlinjer & planering</div></div>
+      </a>
+      <a class="region-card" href="#/sundsvall">
+        <div class="region-badge">SU</div>
+        <div class="meta"><div class="region-title">Sundsvall</div><div class="region-sub">Terminal & lokala turer</div></div>
+      </a>
+      <a class="region-card" href="#/ostersund">
+        <div class="region-badge">ÖS</div>
+        <div class="meta"><div class="region-title">Östersund</div><div class="region-sub">Region Jämtland</div></div>
+      </a>
+      <a class="region-card" href="#/umea">
+        <div class="region-badge">UM</div>
+        <div class="meta"><div class="region-title">Umeå</div><div class="region-sub">Region Västerbotten</div></div>
+      </a>
+      <a class="region-card" href="#/lulea">
+        <div class="region-badge">LU</div>
+        <div class="meta"><div class="region-title">Luleå</div><div class="region-sub">Region Norrbotten</div></div>
+      </a>
+      <a class="region-card" href="#/stab">
+        <div class="region-badge">ST</div>
+        <div class="meta"><div class="region-title">Stab</div><div class="region-sub">HR, IT & admin</div></div>
+      </a>
+    </div>
 
     <h2>Välkommen till KOF-Nords Chaufförsportal</h2>
     <p>Här ser du de senaste uppdateringarna. Klicka för att läsa hela nyheten under <em>Nyheter</em>.</p>
@@ -174,63 +213,53 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
     <div id="contactsList"></div>
   </section>
 
-  <!-- UNDERSIDOR (tomma placeholders att fylla sen) -->
+  <!-- REGIONSIDOR (plats för innehåll) -->
   <section id="page-fjarr" class="page" data-page hidden>
-    <nav class="subnav">
-      <a href="#/fjarr" class="active">Fjärr</a>
-      <a href="#/sundsvall">Sundsvall</a>
-      <a href="#/ostersund">Östersund</a>
-      <a href="#/umea">Umeå</a>
-      <a href="#/lulea">Luleå</a>
-      <a href="#/stab">Stab</a>
+    <nav class="tabs">
+      <a href="#/fjarr" class="active">Fjärr</a><a href="#/sundsvall">Sundsvall</a><a href="#/ostersund">Östersund</a>
+      <a href="#/umea">Umeå</a><a href="#/lulea">Luleå</a><a href="#/stab">Stab</a>
     </nav>
-    <h2>Fjärr</h2>
-    <p class="muted">Här kan vi lägga innehåll för Fjärr (schema, resurser, länkar etc.).</p>
+    <h2>Fjärr</h2><p class="muted">Lägg fjärrspecifikt innehåll här.</p>
   </section>
 
   <section id="page-sundsvall" class="page" data-page hidden>
-    <nav class="subnav">
-      <a href="#/fjarr">Fjärr</a><a href="#/sundsvall" class="active">Sundsvall</a>
-      <a href="#/ostersund">Östersund</a><a href="#/umea">Umeå</a><a href="#/lulea">Luleå</a><a href="#/stab">Stab</a>
+    <nav class="tabs">
+      <a href="#/fjarr">Fjärr</a><a href="#/sundsvall" class="active">Sundsvall</a><a href="#/ostersund">Östersund</a>
+      <a href="#/umea">Umeå</a><a href="#/lulea">Luleå</a><a href="#/stab">Stab</a>
     </nav>
-    <h2>Sundsvall</h2>
-    <p class="muted">Innehåll för Sundsvall.</p>
+    <h2>Sundsvall</h2><p class="muted">Innehåll för Sundsvall.</p>
   </section>
 
   <section id="page-ostersund" class="page" data-page hidden>
-    <nav class="subnav">
-      <a href="#/fjarr">Fjärr</a><a href="#/sundsvall">Sundsvall</a>
-      <a href="#/ostersund" class="active">Östersund</a><a href="#/umea">Umeå</a><a href="#/lulea">Luleå</a><a href="#/stab">Stab</a>
+    <nav class="tabs">
+      <a href="#/fjarr">Fjärr</a><a href="#/sundsvall">Sundsvall</a><a href="#/ostersund" class="active">Östersund</a>
+      <a href="#/umea">Umeå</a><a href="#/lulea">Luleå</a><a href="#/stab">Stab</a>
     </nav>
-    <h2>Östersund</h2>
-    <p class="muted">Innehåll för Östersund.</p>
+    <h2>Östersund</h2><p class="muted">Innehåll för Östersund.</p>
   </section>
 
   <section id="page-umea" class="page" data-page hidden>
-    <nav class="subnav">
+    <nav class="tabs">
       <a href="#/fjarr">Fjärr</a><a href="#/sundsvall">Sundsvall</a><a href="#/ostersund">Östersund</a>
       <a href="#/umea" class="active">Umeå</a><a href="#/lulea">Luleå</a><a href="#/stab">Stab</a>
     </nav>
-    <h2>Umeå</h2>
-    <p class="muted">Innehåll för Umeå.</p>
+    <h2>Umeå</h2><p class="muted">Innehåll för Umeå.</p>
   </section>
 
   <section id="page-lulea" class="page" data-page hidden>
-    <nav class="subnav">
+    <nav class="tabs">
       <a href="#/fjarr">Fjärr</a><a href="#/sundsvall">Sundsvall</a><a href="#/ostersund">Östersund</a>
       <a href="#/umea">Umeå</a><a href="#/lulea" class="active">Luleå</a><a href="#/stab">Stab</a>
     </nav>
-    <h2>Luleå</h2>
-    <p class="muted">Innehåll för Luleå.</p>
+    <h2>Luleå</h2><p class="muted">Innehåll för Luleå.</p>
   </section>
 
   <section id="page-stab" class="page" data-page hidden>
-    <nav class="subnav">
+    <nav class="tabs">
       <a href="#/fjarr">Fjärr</a><a href="#/sundsvall">Sundsvall</a><a href="#/ostersund">Östersund</a>
       <a href="#/umea">Umeå</a><a href="#/lulea">Luleå</a><a href="#/stab" class="active">Stab</a>
     </nav>
-    <h2>Stab</h2>
-    <p class="muted">Innehåll för Stab.</p>
+    <h2>Stab</h2><p class="muted">Innehåll för Stab.</p>
   </section>
 </main>
 
@@ -242,30 +271,15 @@ function setActive(hash){
   if(link){link.classList.add('active');link.setAttribute('aria-current','page')}
 }
 function showPage(id){document.querySelectorAll('[data-page]').forEach(s=>s.hidden=true);document.getElementById(id).hidden=false}
-
 const REGION_ROUTES=['fjarr','sundsvall','ostersund','umea','lulea','stab'];
-
-function setSubnavActive(route){
-  const sub=document.getElementById('homeSubnav');
-  if(!sub) return;
-  sub.querySelectorAll('a').forEach(a=>a.classList.remove('active'));
-  const el=sub.querySelector(`a[data-key="${route}"]`);
-  if(el) el.classList.add('active');
-}
-
 function handleRoute(){
   const h=location.hash||'#/home'; const parts=h.split('/'); const route=parts[1]||'home'; const param=parts[2]||null;
   setActive(h);
   if(route==='dagab'){showPage('page-dagab'); ensureDagabReady()}
   else if(route==='nyheter'){showPage('page-nyheter'); renderNewsAll(param)}
   else if(route==='kontakter'){showPage('page-kontakter'); renderContacts()}
-  else if(REGION_ROUTES.includes(route)){
-    // visa respektive undersida
-    showPage('page-'+route);
-    setSubnavActive(route);
-  } else {
-    showPage('page-home'); renderLatestNewsLinks(); setSubnavActive(null);
-  }
+  else if(REGION_ROUTES.includes(route)){ showPage('page-'+route); }
+  else{ showPage('page-home'); renderLatestNewsLinks(); }
 }
 window.addEventListener('hashchange',handleRoute);
 
@@ -320,7 +334,7 @@ import {getFirestore,collection,getDocs,orderBy,limit,query} from "https://www.g
 const firebaseConfig={apiKey:"AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",authDomain:"kofnord-1e371.firebaseapp.com",projectId:"kofnord-1e371",storageBucket:"kofnord-1e371.appspot.com",messagingSenderId:"559491880457",appId:"1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"};
 const app=initializeApp(firebaseConfig); const db=getFirestore(app);
 
-/* ===== HOME – senaste nyheterna ===== */
+/* HOME – senaste nyheterna */
 let latestRendered=false;
 async function renderLatestNewsLinks(){
   if(latestRendered)return;
@@ -340,12 +354,11 @@ async function renderLatestNewsLinks(){
   }catch(e){list.innerHTML='<li style="color:#b00020">Kunde inte läsa nyheter.</li>'}
 }
 
-/* ===== NYHETER ===== */
+/* NYHETER */
 function truncateText(txt,n=200){const s=String(txt||"");return s.length<=n?s:s.slice(0,n).trimEnd()+"…"}
 let newsLoaded=false;
 async function renderNewsAll(targetId=null){
-  const box=document.getElementById('newsList');
-  if(!newsLoaded){box.innerHTML='<p class="muted">Laddar nyheter…</p>'}
+  const box=document.getElementById('newsList'); if(!newsLoaded){box.innerHTML='<p class="muted">Laddar nyheter…</p>'}
   try{
     if(!newsLoaded){
       const qy=query(collection(db,'news'),orderBy('date','desc')); const snap=await getDocs(qy);
@@ -354,8 +367,16 @@ async function renderNewsAll(targetId=null){
         const n=docSnap.data(); const full=(n.body||''); const shortText=truncateText(full,200);
         const div=document.createElement('div'); div.className='item collapsed'; div.id='news-'+docSnap.id;
         div.dataset.full=full; div.dataset.short=shortText;
-        div.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3><div class="meta">${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div><p class="body">${escapeHtml(shortText).replace(/\n/g,'<br>')}</p><div class="more">Läs mer</div>`;
-        div.addEventListener('click',()=>{const body=div.querySelector('.body');const expanded=div.classList.toggle('expanded');div.classList.toggle('collapsed',!expanded);body.innerHTML=expanded?escapeHtml(div.dataset.full).replace(/\n/g,'<br>'):escapeHtml(div.dataset.short).replace(/\n/g,'<br>')});
+        div.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3>
+          <div class="meta">${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div>
+          <p class="body">${escapeHtml(shortText).replace(/\n/g,'<br>')}</p>
+          <div class="more">Läs mer</div>`;
+        div.addEventListener('click',()=>{
+          const body=div.querySelector('.body');
+          const expanded=div.classList.toggle('expanded');
+          div.classList.toggle('collapsed',!expanded);
+          body.innerHTML=expanded?escapeHtml(div.dataset.full).replace(/\n/g,'<br>'):escapeHtml(div.dataset.short).replace(/\n/g,'<br>');
+        });
         box.append(div);
       });
       newsLoaded=true;
@@ -364,7 +385,7 @@ async function renderNewsAll(targetId=null){
   }catch(e){box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>'}
 }
 
-/* ===== KONTAKTER – grupper + filter (lokalsortering) ===== */
+/* KONTAKTER – grupper + filter (lokalsortering) */
 let contactsCache=null; const LS_FILTER_KEY="contacts_role_filter_v1";
 function roleFrom(c){return (c.role||'Övriga').trim()||'Övriga'}
 async function fetchContacts(){
@@ -405,11 +426,12 @@ async function renderContacts(){
   catch(e){console.error('Kontaktfel:',e); container.innerHTML='<div style="color:#b00020">Kunde inte läsa kontakter.</div>'}
 }
 
-/* ===== Start ===== */
+/* Start */
 handleRoute();
 </script>
 </body>
 </html>
+
 
 
 
