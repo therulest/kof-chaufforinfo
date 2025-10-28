@@ -39,9 +39,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   padding:8px;display:none;min-width:260px;
 }
 .dropdown.open .dropdown-menu{display:block}
-.dropdown-menu a{
-  display:flex;align-items:center;gap:10px;border-radius:10px;padding:10px 12px;color:#0f172a;text-decoration:none;
-}
+.dropdown-menu a{display:flex;align-items:center;gap:10px;border-radius:10px;padding:10px 12px;color:#0f172a;text-decoration:none}
 .dropdown-menu a:hover{background:#f1f5f9}
 .dm-badge{
   width:28px;height:28px;border-radius:8px;display:grid;place-items:center;
@@ -65,21 +63,13 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .page{max-width:var(--wrap);margin:16px auto;padding:0 16px 24px}
 .page h2{margin:0}
 
-/* (Region-grid finns kvar i CSS ifall du vill använda senare) */
-.region-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:4px 0 18px}
-.region-card{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 14px;text-decoration:none;color:#0f172a;box-shadow:var(--shadow);transition:box-shadow .15s, transform .04s, border-color .15s}
-.region-card:hover{box-shadow:0 6px 16px rgba(2,8,23,.08);border-color:#dbe4f0}
-.region-badge{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;color:#0b1324;background:linear-gradient(135deg,#e0f2fe,#c7e2ff);border:1px solid #cde6ff; box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
-.region-title{font-weight:800}.region-sub{font-size:12px;color:#64748b;margin-top:2px}
-.region-card .meta{display:flex;flex-direction:column}
-
 /* Flikar på regionsidor */
 .tabs{display:flex;gap:16px;border-bottom:1px solid #e8eef6;margin:0 0 14px}
 .tabs a{padding:10px 2px;text-decoration:none;color:#334155;font-weight:700;position:relative}
 .tabs a.active{color:#0369a1}
 .tabs a.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:3px;background:#7dd3fc}
 
-/* Dagab */
+/* Dagab cards */
 .tools{display:flex;align-items:center;gap:12px;justify-content:space-between;margin:8px 0 12px}
 .tools-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .tools-right{margin-left:auto;color:var(--muted);font-size:12px}
@@ -97,7 +87,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .details li.total{font-weight:700;margin-top:4px;margin-bottom:8px}.details li.note{margin-top:6px;color:#991b1b}
 .muted{color:#6b7280;font-size:13px}
 
-/* Nyheter */
+/* Nyheter (återanvänds både på home och nyheter-sidan) */
 .news{display:grid;grid-template-columns:1fr;gap:12px;max-width:720px;margin:0 auto}
 .news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:16px;cursor:pointer;transition:box-shadow .15s}
 .news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}.news .item h3{margin:0 0 6px}
@@ -107,11 +97,8 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .news .item.expanded .more::after{content:" – klicka för att visa mindre"}
 @keyframes flash{0%{box-shadow:0 0 0 0 rgba(2,132,199,.45)}40%{box-shadow:0 0 0 6px rgba(2,132,199,.15)}100%{box-shadow:0 1px 3px rgba(0,0,0,.05)}}
 .highlight{animation:flash 1.3s ease-out 1}
-.news-links{list-style:none;padding:0;margin:12px 0 0}.news-links li{margin:0 0 10px}
-.news-links a{display:block;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);text-decoration:none;color:#111;transition:box-shadow .15s}
-.news-links a:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}.news-links .title{font-weight:600}.news-links .meta{font-size:12px;color:#6b7280;margin-top:4px}
 
-/* === KONTAKTER (återställd & förbättrad) === */
+/* Kontakter */
 .contacts-toolbar{display:flex;align-items:center;gap:10px;margin:8px 0 12px}
 .select{appearance:none;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;box-shadow:var(--shadow)}
 .contacts-acc{display:grid;gap:10px}
@@ -141,14 +128,12 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
     <nav class="nav" aria-label="Huvudmeny">
       <a href="#/home" id="link-home">Home</a>
       <a href="#/dagab" id="link-dagab">Dagab</a>
-
-      <!-- Distrikt med dropdown (inkl. Nyheter) -->
       <div class="dropdown" id="dd-distrikt">
         <a href="#/distrikt" id="link-distrikt" aria-haspopup="true" aria-expanded="false">
           Distrikt <span class="chev">▾</span>
         </a>
         <div class="dropdown-menu" role="menu" aria-label="Distrikt">
-          <a href="#/nyheter" role="menuitem" id="dd-news"><span class="dm-badge">📰</span> Nyheter</a>
+          <a href="#/nyheter" role="menuitem"><span class="dm-badge">📰</span> Nyheter</a>
           <a href="#/fjarr" role="menuitem"><span class="dm-badge">FJ</span> Fjärr</a>
           <a href="#/sundsvall" role="menuitem"><span class="dm-badge">SU</span> Sundsvall</a>
           <a href="#/ostersund" role="menuitem"><span class="dm-badge">ÖS</span> Östersund</a>
@@ -157,13 +142,12 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
           <a href="#/stab" role="menuitem"><span class="dm-badge">ST</span> Stab</a>
         </div>
       </div>
-
       <a href="#/kontakter" id="link-kontakter">Kontakter</a>
     </nav>
   </div>
 </header>
 
-<!-- Mobil snabbmeny (nu även Nyheter) -->
+<!-- Mobil snabbmeny -->
 <div class="mobile-launcher" aria-label="Snabbmeny">
   <div class="wrap">
     <div class="ml-grid">
@@ -171,8 +155,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
       <a class="ml-item" href="#/nyheter"><span class="micon">📰</span><span class="ml-label">Nyheter</span></a>
       <a class="ml-item" href="#/dagab"><span class="micon">🚚</span><span class="ml-label">Dagab</span></a>
       <a class="ml-item" href="#/kontakter"><span class="micon">👥</span><span class="ml-label">Kontakter</span></a>
-
-      <!-- Distrikt badges -->
       <a class="ml-item" href="#/fjarr"><span class="micon badge">FJ</span><span class="ml-label">Fjärr</span></a>
       <a class="ml-item" href="#/sundsvall"><span class="micon badge">SU</span><span class="ml-label">Sundsvall</span></a>
       <a class="ml-item" href="#/ostersund"><span class="micon badge">ÖS</span><span class="ml-label">Östersund</span></a>
@@ -184,13 +166,14 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 </div>
 
 <main>
-  <!-- HOME (regionkorten borttagna) -->
+  <!-- HOME -->
   <section id="page-home" class="page" data-page>
     <h2>Välkommen till KOF-Nords Chaufförsportal</h2>
     <p>Här ser du de senaste uppdateringarna. Klicka för att läsa hela nyheten under <em>Nyheter</em>.</p>
 
     <h3 style="margin-top:18px">📰 Senaste nytt</h3>
-    <ul id="latestNewsLinks" class="news-links"></ul>
+    <!-- Bytt till kort som kan expandera -->
+    <div id="latestNewsHome" class="news"></div>
   </section>
 
   <!-- DAGAB -->
@@ -221,7 +204,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
     <div id="contactsList"></div>
   </section>
 
-  <!-- REGIONSIDOR -->
+  <!-- REGIONSIDOR (oförändrat) -->
   <section id="page-fjarr" class="page" data-page hidden>
     <nav class="tabs">
       <a href="#/fjarr" class="active">Fjärr</a><a href="#/sundsvall">Sundsvall</a><a href="#/ostersund">Östersund</a>
@@ -294,7 +277,7 @@ function handleRoute(){
   else if(route==='nyheter'){showPage('page-nyheter'); renderNewsAll(param)}
   else if(route==='kontakter'){showPage('page-kontakter'); renderContacts()}
   else if(REGION_ROUTES.includes(route)){ showPage('page-'+route); }
-  else{ showPage('page-home'); renderLatestNewsLinks(); }
+  else{ showPage('page-home'); renderLatestNewsHome(); }
 }
 window.addEventListener('hashchange',handleRoute);
 
@@ -357,28 +340,47 @@ import {getFirestore,collection,getDocs,orderBy,limit,query} from "https://www.g
 const firebaseConfig={apiKey:"AIzaSyDUPTHaLl4j_Wfp4kK62uBOQSotdl0QOjc",authDomain:"kofnord-1e371.firebaseapp.com",projectId:"kofnord-1e371",storageBucket:"kofnord-1e371.appspot.com",messagingSenderId:"559491880457",appId:"1:559491880457:web:b57bbf0bd1bb11ac3f0ad8"};
 const app=initializeApp(firebaseConfig); const db=getFirestore(app);
 
-/* HOME – senaste nyheterna */
+/* HOME – expanderbara nyheter */
+function truncateText(txt,n=200){const s=String(txt||"");return s.length<=n?s:s.slice(0,n).trimEnd()+"…"}
 let latestRendered=false;
-async function renderLatestNewsLinks(){
-  if(latestRendered)return;
-  const list=document.getElementById('latestNewsLinks');
-  list.innerHTML='<li class="muted">Laddar nyheter…</li>';
+async function renderLatestNewsHome(){
+  if(latestRendered) return;
+  const box=document.getElementById('latestNewsHome');
+  box.innerHTML='<p class="muted">Laddar nyheter…</p>';
   try{
-    const qy=query(collection(db,'news'),orderBy('date','desc'),limit(3)); const snap=await getDocs(qy);
-    list.innerHTML='';
-    snap.forEach(d=>{
-      const n=d.data(); const dstr=n.date?new Date(n.date).toLocaleDateString('sv-SE'):'';
-      const preview=(n.body||'').split('\n')[0];
-      const li=document.createElement('li');
-      li.innerHTML=`<a href="#/nyheter/${d.id}"><div class="title">${escapeHtml(n.title||'')}</div><div class="meta">${dstr}${preview?' • '+escapeHtml(preview):''}</div></a>`;
-      list.appendChild(li);
+    const qy=query(collection(db,'news'),orderBy('date','desc'),limit(3));
+    const snap=await getDocs(qy);
+    box.innerHTML='';
+    snap.forEach(doc=>{
+      const n=doc.data();
+      const full=String(n.body||'');
+      const short=truncateText(full,200);
+      const dstr=n.date?new Date(n.date).toLocaleDateString('sv-SE'):'';
+      const item=document.createElement('div');
+      item.className='item collapsed';
+      item.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3>
+        <div class="meta">${dstr}</div>
+        <p class="body">${escapeHtml(short).replace(/\n/g,'<br>')}</p>
+        <div class="more">Läs mer</div>`;
+      item.dataset.short=short; item.dataset.full=full;
+      item.addEventListener('click',()=>{
+        const body=item.querySelector('.body');
+        const expanded=item.classList.toggle('expanded');
+        item.classList.toggle('collapsed',!expanded);
+        body.innerHTML=expanded
+          ? escapeHtml(item.dataset.full).replace(/\n,g','<br>')
+          : escapeHtml(item.dataset.short).replace(/\n/g,'<br>');
+      });
+      box.append(item);
     });
     latestRendered=true;
-  }catch(e){list.innerHTML='<li style="color:#b00020">Kunde inte läsa nyheter.</li>'}
+  }catch(e){
+    console.error(e);
+    box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>';
+  }
 }
 
-/* NYHETER */
-function truncateText(txt,n=200){const s=String(txt||"");return s.length<=n?s:s.slice(0,n).trimEnd()+"…"}
+/* NYHETER-sidan (oförändrad) */
 let newsLoaded=false;
 async function renderNewsAll(targetId=null){
   const box=document.getElementById('newsList'); if(!newsLoaded){box.innerHTML='<p class="muted">Laddar nyheter…</p>'}
@@ -408,7 +410,7 @@ async function renderNewsAll(targetId=null){
   }catch(e){box.innerHTML='<p style="color:#b00020">Kunde inte läsa nyheter.</p>'}
 }
 
-/* KONTAKTER – grupper + filter + accordions */
+/* KONTAKTER */
 let contactsCache=null; const LS_FILTER_KEY="contacts_role_filter_v1";
 function roleFrom(c){return (c.role||'Övriga').trim()||'Övriga'}
 async function fetchContacts(){
@@ -459,6 +461,7 @@ handleRoute();
 </script>
 </body>
 </html>
+
 
 
 
