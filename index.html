@@ -59,11 +59,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   background:#f2f3f7;border:1px solid #e9e9ee;border-radius:18px;padding:14px;
   display:grid;grid-template-columns:repeat(4,1fr);gap:8px
 }
-/* Dölj alla ikoner från och med den 5:e när griden är kollapsad (mobilläge) */
-@media(max-width:700px){
-  .ml-grid.collapsed .ml-item:nth-child(n+5){display:none}
-}
-/* Toggle-knapp under ikon-griden (mobilläge) */
+@media(max-width:700px){ .ml-grid.collapsed .ml-item:nth-child(n+5){display:none} }
 .ml-toggle{display:none}
 @media(max-width:700px){
   .ml-toggle{display:flex;justify-content:center;margin-top:8px}
@@ -115,7 +111,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 .details li.note{margin-top:6px;color:#991b1b}
 .muted{color:#6b7280;font-size:13px}
 
-/* Nyheter (home + nyheter-sida) */
+/* Nyheter */
 .news{display:grid;grid-template-columns:1fr;gap:12px;width:100%;margin:0}
 .news .item{border:1px solid var(--border);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:16px;cursor:pointer;transition:box-shadow .15s}
 .news .item:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
@@ -147,6 +143,30 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 @media (prefers-reduced-motion: reduce){
   .chev,.nav a,.ml-item,.topbar,.dropdown .chev{transition:none}
 }
+
+/* ===== MODAL (Nyhets-popup) ===== */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(15,23,42,.55);
+  display:none;align-items:center;justify-content:center;z-index:1000;
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(2,8,23,.3);
+  width:min(720px,92vw);max-height:86vh;display:flex;flex-direction:column;border:1px solid var(--border)
+}
+.modal-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start}
+.modal-title{margin:0;font-size:18px;line-height:1.2}
+.modal-meta{font-size:12px;color:#64748b;margin-top:4px}
+.modal-body{padding:14px 16px;overflow:auto}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--border)}
+.modal-btn{
+  appearance:none;border:1px solid var(--border);background:#fff;border-radius:10px;
+  padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow)
+}
+.modal-btn.primary{background:var(--blue);border-color:#0273ad;color:#fff}
+.modal-btn:active{transform:translateY(1px)}
+/* Fokusmarkering inuti dialog */
+#newsModal [tabindex]:focus-visible, .modal-btn:focus-visible {outline:2px solid #93c5fd;outline-offset:2px}
 </style>
 </head>
 <body>
@@ -291,6 +311,29 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   </section>
 </main>
 
+<!-- ===== NYHETS-POPUP (modal) ===== -->
+<div id="newsModal" class="modal-backdrop" hidden aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="newsModalTitle" aria-describedby="newsModalBody">
+    <div class="modal-header">
+      <div style="flex:1 1 auto">
+        <h3 class="modal-title" id="newsModalTitle">Nyhet</h3>
+        <div class="modal-meta" id="newsModalDate"></div>
+      </div>
+      <!-- Fokusfälla start -->
+      <span tabindex="0" id="newsModalSentinelStart"></span>
+    </div>
+    <div class="modal-body" id="newsModalBody">
+      Laddar nyhet…
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" type="button" id="newsModalOpenInList" hidden>Öppna i listan</button>
+      <button class="modal-btn primary" type="button" id="newsModalClose">Jag har läst</button>
+    </div>
+    <!-- Fokusfälla slut -->
+    <span tabindex="0" id="newsModalSentinelEnd"></span>
+  </div>
+</div>
+
 <script type="module">
 /* ===== ROUTING ===== */
 function setActive(hash){
@@ -312,14 +355,14 @@ function showPage(id){
   document.getElementById(id).hidden=false
 }
 const REGION_ROUTES=['fjarr','sundsvall','ostersund','umea','lulea','stab'];
-function handleRoute(){
+async function handleRoute(){
   const h=location.hash||'#/home';
   const parts=h.split('/');
   const route=parts[1]||'home';
   const param=parts[2]||null;
   setActive(h);
   if(route==='dagab'){ showPage('page-dagab'); ensureDagabReady(); }
-  else if(route==='nyheter'){ showPage('page-nyheter'); renderNewsAll(param); }
+  else if(route==='nyheter'){ showPage('page-nyheter'); renderNewsAll(param); await showLatestNewsModalIfNeeded(); }
   else if(route==='kontakter'){ showPage('page-kontakter'); renderContacts(); }
   else if(REGION_ROUTES.includes(route)){ showPage('page-'+route); }
   else { showPage('page-home'); renderLatestNewsHome(); }
@@ -545,11 +588,111 @@ const mlGrid=document.getElementById('mlGrid');
 const mlBtn=document.getElementById('mlMoreBtn');
 if(mlGrid && mlBtn){
   mlBtn.addEventListener('click',()=>{
-    const collapsed=mlGrid.classList.toggle('collapsed'); // true=kollapsad, false=expanderad
+    const collapsed=mlGrid.classList.toggle('collapsed');
     const expanded=!collapsed;
     mlBtn.setAttribute('aria-expanded', String(expanded));
     mlBtn.textContent = expanded ? 'Visa färre ▴' : 'Visa fler ▾';
   });
+}
+
+/* ===== NYHETS-POPUP LOGIK ===== */
+const LS_NEWS_ACK_KEY="news_ack_latest_id_v1";
+const modalBackdrop=document.getElementById('newsModal');
+const modalTitleEl=document.getElementById('newsModalTitle');
+const modalDateEl=document.getElementById('newsModalDate');
+const modalBodyEl=document.getElementById('newsModalBody');
+const modalCloseBtn=document.getElementById('newsModalClose');
+const modalOpenInListBtn=document.getElementById('newsModalOpenInList');
+const modalSentinelStart=document.getElementById('newsModalSentinelStart');
+const modalSentinelEnd=document.getElementById('newsModalSentinelEnd');
+let modalPreviouslyFocused=null;
+let currentNewsId=null;
+
+function disablePageBehindModal(disabled){
+  document.body.style.overflow = disabled ? 'hidden' : '';
+  // Block all pointer events behind by keeping the backdrop on top; no extra handling needed
+}
+function focusTrap(e){
+  if(e.key!=='Tab') return;
+  const focusables = modalBackdrop.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+  const list = Array.from(focusables).filter(el=>!el.hasAttribute('disabled') && el.offsetParent!==null);
+  if(list.length===0) return;
+  const first=list[0], last=list[list.length-1];
+  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+}
+function openNewsModal({id,title,date,body}){
+  currentNewsId=id;
+  modalTitleEl.textContent = title || 'Nyhet';
+  modalDateEl.textContent = date ? new Date(date).toLocaleString('sv-SE') : '';
+  modalBodyEl.innerHTML = escapeHtml(String(body||'')).replace(/\n/g,'<br>');
+
+  modalPreviouslyFocused = document.activeElement;
+  modalBackdrop.hidden=false;
+  modalBackdrop.classList.add('show');
+  modalBackdrop.setAttribute('aria-hidden','false');
+  disablePageBehindModal(true);
+
+  // sätt fokus in i dialogen
+  modalCloseBtn.focus();
+  // Fokusfälla
+  modalBackdrop.addEventListener('keydown',focusTrap);
+}
+function closeNewsModal(){
+  // Spara att den här nyheten är bekräftad/läst
+  if(currentNewsId) localStorage.setItem(LS_NEWS_ACK_KEY,currentNewsId);
+  modalBackdrop.classList.remove('show');
+  modalBackdrop.hidden=true;
+  modalBackdrop.setAttribute('aria-hidden','true');
+  modalBackdrop.removeEventListener('keydown',focusTrap);
+  disablePageBehindModal(false);
+  // återställ fokus
+  if(modalPreviouslyFocused && typeof modalPreviouslyFocused.focus==='function'){
+    modalPreviouslyFocused.focus();
+  }
+}
+modalCloseBtn.addEventListener('click',closeNewsModal);
+// OBS: Vi stänger inte på Escape/klick utanför – användaren måste aktivt trycka på knappen
+// men för tillgänglighet kan vi erbjuda Escape som alternativ. Kommentera bort raden nedan
+// om du vill tvinga knapptryckning strikt.
+// modalBackdrop.addEventListener('keydown',(e)=>{ if(e.key==='Escape') e.preventDefault(); });
+
+async function showLatestNewsModalIfNeeded(){
+  try{
+    // Hämta senaste nyheten
+    const qy=query(collection(db,'news'),orderBy('date','desc'),limit(1));
+    const snap=await getDocs(qy);
+    if(snap.empty) return;
+    const doc=snap.docs[0];
+    const data=doc.data();
+    const latestId=doc.id;
+    const alreadyAck=localStorage.getItem(LS_NEWS_ACK_KEY)===latestId;
+
+    // Låt modal visas endast om den inte redan är bekräftad
+    if(!alreadyAck){
+      // Om listan redan är renderad kan vi erbjuda "Öppna i listan"-knapp
+      modalOpenInListBtn.hidden=false;
+      modalOpenInListBtn.onclick=()=>{
+        closeNewsModal();
+        // scrolla till kortet i listan
+        const target=document.getElementById('news-'+latestId);
+        if(target){
+          target.classList.add('highlight');
+          target.scrollIntoView({behavior:'smooth',block:'start'});
+          setTimeout(()=>target.classList.remove('highlight'),1500);
+        }
+      };
+      openNewsModal({
+        id: latestId,
+        title: data.title || 'Nyhet',
+        date: data.date || null,
+        body: data.body || ''
+      });
+    }
+  }catch(err){
+    console.error('Nyhetsmodal fel:',err);
+    // Vid fel – visa inget, blockera inte användaren
+  }
 }
 
 /* Start */
@@ -557,7 +700,6 @@ handleRoute();
 </script>
 </body>
 </html>
-
 
 
 
