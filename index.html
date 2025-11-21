@@ -144,7 +144,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
   .chev,.nav a,.ml-item,.topbar,.dropdown .chev{transition:none}
 }
 
-/* ===== MODAL (Nyhets-popup) ===== */
+/* ===== MODAL (Nyhets-popup + Bil-popup) ===== */
 .modal-backdrop{
   position:fixed;inset:0;background:rgba(15,23,42,.55);
   display:none;align-items:center;justify-content:center;z-index:1000;
@@ -165,8 +165,9 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
 }
 .modal-btn.primary{background:var(--blue);border-color:#0273ad;color:#fff}
 .modal-btn:active{transform:translateY(1px)}
-/* Fokusmarkering inuti dialog */
-#newsModal [tabindex]:focus-visible, .modal-btn:focus-visible {outline:2px solid #93c5fd;outline-offset:2px}
+#newsModal [tabindex]:focus-visible, 
+#carModal [tabindex]:focus-visible, 
+.modal-btn:focus-visible {outline:2px solid #93c5fd;outline-offset:2px}
 </style>
 </head>
 <body>
@@ -319,7 +320,6 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
         <h3 class="modal-title" id="newsModalTitle">Nyhet</h3>
         <div class="modal-meta" id="newsModalDate"></div>
       </div>
-      <!-- Fokusfälla start -->
       <span tabindex="0" id="newsModalSentinelStart"></span>
     </div>
     <div class="modal-body" id="newsModalBody">
@@ -329,8 +329,25 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin
       <button class="modal-btn" type="button" id="newsModalOpenInList" hidden>Öppna i listan</button>
       <button class="modal-btn primary" type="button" id="newsModalClose">Jag har läst</button>
     </div>
-    <!-- Fokusfälla slut -->
     <span tabindex="0" id="newsModalSentinelEnd"></span>
+  </div>
+</div>
+
+<!-- ===== BIL-POPUP (modal) ===== -->
+<div id="carModal" class="modal-backdrop" hidden aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="carModalTitle" aria-describedby="carModalBody">
+    <div class="modal-header">
+      <div style="flex:1 1 auto">
+        <h3 class="modal-title" id="carModalTitle">Bil</h3>
+        <div class="modal-meta" id="carModalMeta"></div>
+      </div>
+      <span tabindex="0" id="carModalSentinelStart"></span>
+    </div>
+    <div class="modal-body" id="carModalBody">Laddar tur…</div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" type="button" id="carModalClose">Stäng</button>
+    </div>
+    <span tabindex="0" id="carModalSentinelEnd"></span>
   </div>
 </div>
 
@@ -341,7 +358,7 @@ function setActive(hash){
     a.classList.remove('active'); a.removeAttribute('aria-current')
   });
   const clean=hash.split('/').slice(0,2).join('/');
-  const direct=document.querySelector(`.nav a[href="${clean}"]`);
+  const direct=document.querySelector(\`.nav a[href="\${clean}"]\`);
   if(direct){ direct.classList.add('active'); direct.setAttribute('aria-current','page'); }
   const route=(hash||'#/home').split('/')[1]||'home';
   const isRegion=REGION_ROUTES.includes(route) || route==='nyheter';
@@ -355,17 +372,40 @@ function showPage(id){
   document.getElementById(id).hidden=false
 }
 const REGION_ROUTES=['fjarr','sundsvall','ostersund','umea','lulea','stab'];
+
 async function handleRoute(){
   const h=location.hash||'#/home';
   const parts=h.split('/');
   const route=parts[1]||'home';
   const param=parts[2]||null;
+
   setActive(h);
-  if(route==='dagab'){ showPage('page-dagab'); ensureDagabReady(); }
-  else if(route==='nyheter'){ showPage('page-nyheter'); renderNewsAll(param); await showLatestNewsModalIfNeeded(); }
-  else if(route==='kontakter'){ showPage('page-kontakter'); renderContacts(); }
-  else if(REGION_ROUTES.includes(route)){ showPage('page-'+route); }
-  else { showPage('page-home'); renderLatestNewsHome(); }
+
+  if(route==='dagab'){
+    showPage('page-dagab');
+    ensureDagabReady({ filterId:null, openModal:false });
+  }
+  else if(route==='bil'){
+    // Visa bara en specifik bil och öppna popup direkt
+    showPage('page-dagab');
+    ensureDagabReady({ filterId:param, openModal:true });
+  }
+  else if(route==='nyheter'){
+    showPage('page-nyheter');
+    renderNewsAll(param);
+    await showLatestNewsModalIfNeeded();
+  }
+  else if(route==='kontakter'){
+    showPage('page-kontakter');
+    renderContacts();
+  }
+  else if(REGION_ROUTES.includes(route)){
+    showPage('page-'+route);
+  }
+  else {
+    showPage('page-home');
+    renderLatestNewsHome();
+  }
 }
 window.addEventListener('hashchange',handleRoute);
 
@@ -385,55 +425,127 @@ dd?.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeDropdown(); });
 /* ===== DAGAB ===== */
 const DATA_URL="https://therulest.github.io/kof-chaufforinfo/data.json";
 let dagabInitialized=false;
-function ensureDagabReady(){ if(!dagabInitialized){ dagabInitialized=true; attachRefresh(); loadDagab(); } }
-function attachRefresh(){ const b=document.getElementById('btnRefresh'); if(b) b.addEventListener('click',()=>loadDagab(true)); }
-async function loadDagab(manual=false){
-  const grid=document.getElementById('grid'), b=document.getElementById('btnRefresh'), s=document.getElementById('status');
+let pendingDagabOptions={ filterId:null, openModal:false };
+
+function ensureDagabReady(opts={filterId:null,openModal:false}){
+  pendingDagabOptions=opts;
+  if(!dagabInitialized){
+    dagabInitialized=true;
+    attachRefresh();
+  }
+  loadDagab({ manual:false, ...opts });
+}
+
+function attachRefresh(){
+  const b=document.getElementById('btnRefresh');
+  if(b) b.addEventListener('click',()=>loadDagab({manual:true, ...pendingDagabOptions}));
+}
+
+async function loadDagab({manual=false, filterId=null, openModal=false}={}){
+  const grid=document.getElementById('grid'),
+        b=document.getElementById('btnRefresh'),
+        s=document.getElementById('status');
+
   if(manual&&b){ b.disabled=true; b.textContent='Uppdaterar…'; }
   grid.innerHTML=manual?grid.innerHTML:'<p>Laddar…</p>';
+
   try{
     const res=await fetch(DATA_URL+'?v='+Date.now(),{cache:'no-store'});
     const data=await res.json();
-    buildCards(data);
+
+    const cars = normalizeCars(data.cars||[]);
+    const filtered = filterId ? filterCars(cars, filterId) : cars;
+
+    buildCards(filtered, filterId);
+
     const t=new Date(data.updated_at||Date.now());
     if(s) s.textContent='Senast uppdaterad: '+t.toLocaleString('sv-SE');
+
+    // Om vi är på #/bil/<id> och bara har 1 träff: öppna popup
+    if(openModal && filtered.length===1){
+      openCarModal(filtered[0]);
+    }
+
   }catch(e){
+    console.error(e);
     grid.innerHTML='<p style="color:#b00020">Fel vid hämtning.</p>';
   }finally{
     if(manual&&b){ b.disabled=false; b.textContent='Uppdatera'; }
   }
 }
-function buildCards(data){
-  const grid=document.getElementById('grid'); grid.innerHTML='';
-  (data.cars||[]).forEach((car,i)=>grid.append(buildCard(car,i,false)));
+
+/* Skapa ett stabilt id per bil */
+function normalizeCars(cars){
+  return cars.map((car,idx)=>{
+    const bestId = car.id ?? car.car_id ?? car.resurs ?? car.regnr ?? car.name ?? (idx+1);
+    return { ...car, __idx:idx, __id:String(bestId) };
+  });
 }
+
+/* Filtrera på id eller index */
+function filterCars(cars, filterId){
+  const fid=String(filterId).toLowerCase();
+  // 1) försök matcha __id
+  let out=cars.filter(c => String(c.__id).toLowerCase()===fid);
+  if(out.length) return out;
+  // 2) annars: tolka som 0-baserat index
+  const n=parseInt(fid,10);
+  if(Number.isFinite(n) && cars[n]) return [cars[n]];
+  return [];
+}
+
+function buildCards(cars, filterId=null){
+  const grid=document.getElementById('grid'); grid.innerHTML='';
+
+  if(filterId && cars.length===0){
+    grid.innerHTML = \`<p class="muted">Hittade ingen bil för länken: <strong>\${escapeHtml(filterId)}</strong></p>\`;
+    return;
+  }
+
+  cars.forEach((car,i)=>grid.append(buildCard(car,i,false)));
+}
+
 function buildCard(car,idx,expanded){
-  const card=document.createElement('div'); card.className='card'+(expanded?' expanded':'');
-  const lines=String(car.summary||'').split(/\r?\n/);
+  const card=document.createElement('div');
+  card.className='card'+(expanded?' expanded':'');
+  card.dataset.carId = car.__id;
+
+  const lines=String(car.summary||'').split(/\\r?\\n/);
   const head=lines.slice(0,6);
   const details=Array.isArray(car.details)&&car.details.length?car.details.map(String):lines.slice(6);
+
   const header=document.createElement('div'); header.className='card-header';
   const chev=document.createElement('span'); chev.className='chev'; chev.textContent='▶';
-  const pre=document.createElement('pre'); pre.className='summary'; pre.textContent=head.join('\n');
+  const pre=document.createElement('pre'); pre.className='summary'; pre.textContent=head.join('\\n');
   header.append(chev,pre); card.append(header);
+
   if(details.length){
     card.append(Object.assign(document.createElement('hr'),{className:'divider'}));
     const d=document.createElement('div'); d.className='details'; const ul=document.createElement('ul');
     for(let i=0;i<details.length;i++){
       const line=String(details[i]); const lower=line.toLowerCase().trim(); const li=document.createElement('li'); li.textContent=line;
       if(lower.startsWith('glöm')) li.classList.add('note');
-      if(/^(frys|kyl|kol|totalt)\s*:/i.test(line)){
-        if(/^totalt\s*:/i.test(line)) li.classList.add('total'); else li.classList.add('qty');
+      if(/^(frys|kyl|kol|totalt)\\s*:/i.test(line)){
+        if(/^totalt\\s*:/i.test(line)) li.classList.add('total'); else li.classList.add('qty');
       }
-      if(/(\d+)\s*(FRYS|KYL|KOL)/i.test(line)) li.classList.add('qty');
+      if(/(\\d+)\\s*(FRYS|KYL|KOL)/i.test(line)) li.classList.add('qty');
       ul.append(li);
     }
     d.append(ul); card.append(d);
   }
-  card.addEventListener('click',()=>card.classList.toggle('expanded'));
+
+  // Klick: expandera + öppna bil-popup
+  card.addEventListener('click',()=>{
+    card.classList.toggle('expanded');
+    openCarModal(car);
+  });
+
   return card;
 }
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))
+}
 
 /* ===== FIREBASE ===== */
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -459,18 +571,18 @@ async function renderLatestNewsHome(){
       const dstr=n.date?new Date(n.date).toLocaleDateString('sv-SE'):'';
       const item=document.createElement('div');
       item.className='item collapsed';
-      item.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3>
-        <div class="meta">${dstr}</div>
-        <p class="body">${escapeHtml(short).replace(/\n/g,'<br>')}</p>
-        <div class="more">Läs mer</div>`;
+      item.innerHTML=\`<h3>\${escapeHtml(n.title||'')}</h3>
+        <div class="meta">\${dstr}</div>
+        <p class="body">\${escapeHtml(short).replace(/\\n/g,'<br>')}</p>
+        <div class="more">Läs mer</div>\`;
       item.dataset.short=short; item.dataset.full=full;
       item.addEventListener('click',()=>{
         const body=item.querySelector('.body');
         const expanded=item.classList.toggle('expanded');
         item.classList.toggle('collapsed',!expanded);
         body.innerHTML = expanded
-          ? escapeHtml(item.dataset.full).replace(/\n/g,'<br>')
-          : escapeHtml(item.dataset.short).replace(/\n/g,'<br>');
+          ? escapeHtml(item.dataset.full).replace(/\\n/g,'<br>')
+          : escapeHtml(item.dataset.short).replace(/\\n/g,'<br>');
       });
       box.append(item);
     });
@@ -500,17 +612,17 @@ async function renderNewsAll(targetId=null){
         div.id='news-'+docSnap.id;
         div.dataset.full=full; 
         div.dataset.short=shortText;
-        div.innerHTML=`<h3>${escapeHtml(n.title||'')}</h3>
-          <div class="meta">${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div>
-          <p class="body">${escapeHtml(shortText).replace(/\n/g,'<br>')}</p>
-          <div class="more">Läs mer</div>`;
+        div.innerHTML=\`<h3>\${escapeHtml(n.title||'')}</h3>
+          <div class="meta">\${n.date?new Date(n.date).toLocaleDateString('sv-SE'):''}</div>
+          <p class="body">\${escapeHtml(shortText).replace(/\\n/g,'<br>')}</p>
+          <div class="more">Läs mer</div>\`;
         div.addEventListener('click',()=>{
           const body=div.querySelector('.body');
           const expanded=div.classList.toggle('expanded');
           div.classList.toggle('collapsed',!expanded);
           body.innerHTML=expanded
-            ? escapeHtml(div.dataset.full).replace(/\n/g,'<br>')
-            : escapeHtml(div.dataset.short).replace(/\n/g,'<br>');
+            ? escapeHtml(div.dataset.full).replace(/\\n/g,'<br>')
+            : escapeHtml(div.dataset.short).replace(/\\n/g,'<br>');
         });
         box.append(div);
       });
@@ -542,13 +654,13 @@ async function fetchContacts(){
 }
 function createContactCard(c){
   const card=document.createElement('div'); card.className='contact-card';
-  card.innerHTML=`<div class="contact-head" role="button" tabindex="0">
-    <span class="name">${escapeHtml(c.name||'')}</span><span class="chev">▶</span></div>
+  card.innerHTML=\`<div class="contact-head" role="button" tabindex="0">
+    <span class="name">\${escapeHtml(c.name||'')}</span><span class="chev">▶</span></div>
   <div class="contact-body">
-    ${c.role?`<div class="row"><strong>Roll:</strong> ${escapeHtml(c.role)}</div>`:''}
-    ${c.phone?`<div class="row"><strong>Telefon:</strong> <a href="tel:${String(c.phone).replace(/\s+/g,'')}">${escapeHtml(c.phone)}</a></div>`:''}
-    ${c.email?`<div class="row"><strong>E-post:</strong> <a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a></div>`:''}
-  </div>`;
+    \${c.role?\`<div class="row"><strong>Roll:</strong> \${escapeHtml(c.role)}</div>\`:''}
+    \${c.phone?\`<div class="row"><strong>Telefon:</strong> <a href="tel:\${String(c.phone).replace(/\\s+/g,'')}">\${escapeHtml(c.phone)}</a></div>\`:''}
+    \${c.email?\`<div class="row"><strong>E-post:</strong> <a href="mailto:\${escapeHtml(c.email)}">\${escapeHtml(c.email)}</a></div>\`:''}
+  </div>\`;
   const head=card.querySelector('.contact-head');
   const toggle=()=>card.classList.toggle('open');
   head.addEventListener('click',toggle);
@@ -560,7 +672,7 @@ function renderContactsUI(filterRole){
   const renderRoles=filterRole&&filterRole!=='ALL'?[filterRole]:roles;
   renderRoles.forEach(role=>{
     const people=groups.get(role)||[]; const sec=document.createElement('section'); sec.className='contact-group';
-    sec.innerHTML=`<h3>${escapeHtml(role)} <span class="contact-count">${people.length}</span></h3>`;
+    sec.innerHTML=\`<h3>\${escapeHtml(role)} <span class="contact-count">\${people.length}</span></h3>\`;
     const acc=document.createElement('div'); acc.className='contacts-acc'; people.forEach(p=>acc.append(createContactCard(p)));
     sec.append(acc); container.append(sec);
   });
@@ -603,63 +715,54 @@ const modalDateEl=document.getElementById('newsModalDate');
 const modalBodyEl=document.getElementById('newsModalBody');
 const modalCloseBtn=document.getElementById('newsModalClose');
 const modalOpenInListBtn=document.getElementById('newsModalOpenInList');
-const modalSentinelStart=document.getElementById('newsModalSentinelStart');
-const modalSentinelEnd=document.getElementById('newsModalSentinelEnd');
 let modalPreviouslyFocused=null;
 let currentNewsId=null;
 
 function disablePageBehindModal(disabled){
   document.body.style.overflow = disabled ? 'hidden' : '';
-  // Block all pointer events behind by keeping the backdrop on top; no extra handling needed
 }
-function focusTrap(e){
-  if(e.key!=='Tab') return;
-  const focusables = modalBackdrop.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
-  const list = Array.from(focusables).filter(el=>!el.hasAttribute('disabled') && el.offsetParent!==null);
-  if(list.length===0) return;
-  const first=list[0], last=list[list.length-1];
-  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
-  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+function focusTrapFactory(backdrop){
+  return function(e){
+    if(e.key!=='Tab') return;
+    const focusables = backdrop.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+    const list = Array.from(focusables).filter(el=>!el.hasAttribute('disabled') && el.offsetParent!==null);
+    if(list.length===0) return;
+    const first=list[0], last=list[list.length-1];
+    if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+  }
 }
+const newsTrap = focusTrapFactory(modalBackdrop);
+
 function openNewsModal({id,title,date,body}){
   currentNewsId=id;
   modalTitleEl.textContent = title || 'Nyhet';
   modalDateEl.textContent = date ? new Date(date).toLocaleString('sv-SE') : '';
-  modalBodyEl.innerHTML = escapeHtml(String(body||'')).replace(/\n/g,'<br>');
+  modalBodyEl.innerHTML = escapeHtml(String(body||'')).replace(/\\n/g,'<br>');
 
   modalPreviouslyFocused = document.activeElement;
   modalBackdrop.hidden=false;
   modalBackdrop.classList.add('show');
   modalBackdrop.setAttribute('aria-hidden','false');
   disablePageBehindModal(true);
-
-  // sätt fokus in i dialogen
   modalCloseBtn.focus();
-  // Fokusfälla
-  modalBackdrop.addEventListener('keydown',focusTrap);
+  modalBackdrop.addEventListener('keydown',newsTrap);
 }
 function closeNewsModal(){
-  // Spara att den här nyheten är bekräftad/läst
   if(currentNewsId) localStorage.setItem(LS_NEWS_ACK_KEY,currentNewsId);
   modalBackdrop.classList.remove('show');
   modalBackdrop.hidden=true;
   modalBackdrop.setAttribute('aria-hidden','true');
-  modalBackdrop.removeEventListener('keydown',focusTrap);
+  modalBackdrop.removeEventListener('keydown',newsTrap);
   disablePageBehindModal(false);
-  // återställ fokus
   if(modalPreviouslyFocused && typeof modalPreviouslyFocused.focus==='function'){
     modalPreviouslyFocused.focus();
   }
 }
 modalCloseBtn.addEventListener('click',closeNewsModal);
-// OBS: Vi stänger inte på Escape/klick utanför – användaren måste aktivt trycka på knappen
-// men för tillgänglighet kan vi erbjuda Escape som alternativ. Kommentera bort raden nedan
-// om du vill tvinga knapptryckning strikt.
-// modalBackdrop.addEventListener('keydown',(e)=>{ if(e.key==='Escape') e.preventDefault(); });
 
 async function showLatestNewsModalIfNeeded(){
   try{
-    // Hämta senaste nyheten
     const qy=query(collection(db,'news'),orderBy('date','desc'),limit(1));
     const snap=await getDocs(qy);
     if(snap.empty) return;
@@ -668,13 +771,10 @@ async function showLatestNewsModalIfNeeded(){
     const latestId=doc.id;
     const alreadyAck=localStorage.getItem(LS_NEWS_ACK_KEY)===latestId;
 
-    // Låt modal visas endast om den inte redan är bekräftad
     if(!alreadyAck){
-      // Om listan redan är renderad kan vi erbjuda "Öppna i listan"-knapp
       modalOpenInListBtn.hidden=false;
       modalOpenInListBtn.onclick=()=>{
         closeNewsModal();
-        // scrolla till kortet i listan
         const target=document.getElementById('news-'+latestId);
         if(target){
           target.classList.add('highlight');
@@ -691,9 +791,49 @@ async function showLatestNewsModalIfNeeded(){
     }
   }catch(err){
     console.error('Nyhetsmodal fel:',err);
-    // Vid fel – visa inget, blockera inte användaren
   }
 }
+
+/* ===== BIL-POPUP LOGIK ===== */
+const carBackdrop=document.getElementById('carModal');
+const carTitleEl=document.getElementById('carModalTitle');
+const carMetaEl=document.getElementById('carModalMeta');
+const carBodyEl=document.getElementById('carModalBody');
+const carCloseBtn=document.getElementById('carModalClose');
+let carPreviouslyFocused=null;
+const carTrap = focusTrapFactory(carBackdrop);
+
+function openCarModal(car){
+  if(!carBackdrop) return;
+  carTitleEl.textContent = `Bil ${car.__id}`;
+  carMetaEl.textContent = '';
+  const lines = String(car.summary||'').split(/\\r?\\n/).filter(Boolean);
+  const details = Array.isArray(car.details)&&car.details.length ? car.details : [];
+  const fullText = [
+    ...lines,
+    ...(details.length ? ['','---',''] : []),
+    ...details.map(String)
+  ].join('\\n');
+
+  carBodyEl.innerHTML = escapeHtml(fullText).replace(/\\n/g,'<br>');
+
+  carPreviouslyFocused=document.activeElement;
+  carBackdrop.hidden=false;
+  carBackdrop.classList.add('show');
+  carBackdrop.setAttribute('aria-hidden','false');
+  disablePageBehindModal(true);
+  carCloseBtn.focus();
+  carBackdrop.addEventListener('keydown',carTrap);
+}
+function closeCarModal(){
+  carBackdrop.classList.remove('show');
+  carBackdrop.hidden=true;
+  carBackdrop.setAttribute('aria-hidden','true');
+  carBackdrop.removeEventListener('keydown',carTrap);
+  disablePageBehindModal(false);
+  if(carPreviouslyFocused?.focus) carPreviouslyFocused.focus();
+}
+carCloseBtn?.addEventListener('click',closeCarModal);
 
 /* Start */
 handleRoute();
